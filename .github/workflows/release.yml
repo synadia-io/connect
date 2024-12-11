@@ -1,0 +1,39 @@
+# .github/workflows/release.yaml
+name: Release
+
+on:
+  release:
+    types: [created]
+
+permissions:
+  contents: write
+  packages: write
+
+env:
+  GOPRIVATE: github.com/synadia-io/*
+
+jobs:
+  binary:
+    name: Release Go Binary
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        goos: [linux, windows, darwin]
+        goarch: [amd64, arm64, arm]
+        exclude:
+          - goarch: arm64
+            goos: windows
+          - goarch: arm
+            goos: windows
+          - goarch: arm
+            goos: darwin
+    steps:
+      - uses: actions/checkout@v4
+      - uses: wangyoucao577/go-release-action@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          goos: ${{ matrix.goos }}
+          goarch: ${{ matrix.goarch }}
+          project_path: "./cmd/connect"
+          binary_name: "connect"
+          extra_files: README.md
