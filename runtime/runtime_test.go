@@ -18,7 +18,7 @@ var _ = Describe("Runtime", func() {
 		It("should parse the given configuration", func() {
 			cfg := `ZGVzY3JpcHRpb246IEEgc3VtbWFyeSBvZiB3aGF0IHRoaXMgY29ubmVjdG9yIGRvZXMKd29ya2xvYWQ6IHRlc3QKbWV0cmljczoKICAgIHBvcnQ6IDQxOTUKICAgIHBhdGg6IC9tZXRyaWNzCnN0ZXBzOgogICAgc291cmNlOgogICAgICAgIHR5cGU6IGdlbmVyYXRlCiAgICAgICAgY29uZmlnOgogICAgICAgICAgICBtYXBwaW5nOiB8CiAgICAgICAgICAgICAgICByb290ID0gIkhlbGxvIFdvcmxkIgogICAgY29uc3VtZXI6IG51bGwKICAgIHRyYW5zZm9ybWVyOiBudWxsCiAgICBwcm9kdWNlcjoKICAgICAgICBuYXRzX2NvbmZpZzoKICAgICAgICAgICAgdXJsOiBuYXRzOi8vZGVtby5uYXRzLmlvOjQyMjIKICAgICAgICAgICAgYXV0aGVuYWJsZWQ6IGZhbHNlCiAgICAgICAgICAgIGp3dDogIiIKICAgICAgICAgICAgc2VlZDogIiIKICAgICAgICAgICAgdXNlcm5hbWU6ICIiCiAgICAgICAgICAgIHBhc3N3b3JkOiAiIgogICAgICAgIHN1YmplY3Q6IGNvbm5lY3QudGVzdAogICAgICAgIGpldHN0cmVhbTogbnVsbAogICAgc2luazogbnVsbAo=`
 
-			rt := runtime.NewRuntime("SYSTEM", "deplId", "execId", slog.LevelDebug)
+			rt := runtime.NewRuntime("SYSTEM", "connId", "deplId", "execId", slog.LevelDebug)
 			err := rt.Launch(context.Background(), func(ctx context.Context, runtime *runtime.Runtime, cfg model.ConnectorConfig) error {
 				Expect(cfg.Description).To(Equal("A summary of what this connector does"))
 				Expect(cfg.Workload).To(Equal("test"))
@@ -62,7 +62,7 @@ steps:
 
 			cfg = []byte(base64.StdEncoding.EncodeToString(config))
 
-			rt := runtime.NewRuntime("SYSTEM", "deplId", "execId", slog.LevelDebug)
+			rt := runtime.NewRuntime("SYSTEM", "connId", "deplId", "execId", slog.LevelDebug)
 			err = rt.Launch(context.Background(), func(ctx context.Context, runtime *runtime.Runtime, cfg model.ConnectorConfig) error {
 				Expect(cfg.Description).To(Equal("cool stuff from the CLI"))
 				Expect(cfg.Workload).To(Equal("ghcr.io/synadia-io/connect-runtime-vanilla:latest"))
