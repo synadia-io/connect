@@ -1,4 +1,4 @@
-package client_test
+package test
 
 import (
 	"context"
@@ -9,10 +9,10 @@ import (
 	"time"
 )
 
-var _ = Describe("Undeploy a connector", func() {
+var _ = Describe("Deploy a connector", func() {
 	When("no connector exists with the given ID", func() {
 		It("should return an error", func() {
-			dr, err := cc.UndeployConnector("non-existent-id")
+			dr, err := cc.DeployConnector("non-existent-id")
 			Expect(err).To(HaveOccurred())
 			Expect(dr).To(BeNil())
 		})
@@ -33,6 +33,7 @@ var _ = Describe("Undeploy a connector", func() {
 				deployRequests = append(deployRequests, &req)
 
 				agntId, _ := agntXkey.PublicKey()
+
 				msgs <- model.InstanceEvent{
 					InstanceIdentity: req.InstanceIdentity,
 					AgentId:          agntId,
@@ -46,6 +47,14 @@ var _ = Describe("Undeploy a connector", func() {
 					Type:             model.RunningEventType,
 					Timestamp:        time.Now(),
 				}
+
+				msgs <- model.InstanceEvent{
+					InstanceIdentity: req.InstanceIdentity,
+					AgentId:          agntId,
+					Type:             model.StoppedEventType,
+					Timestamp:        time.Now(),
+					ExitCode:         0,
+				}
 			})
 		})
 
@@ -53,45 +62,13 @@ var _ = Describe("Undeploy a connector", func() {
 			capt.StopCaptureDeploy()
 		})
 
-		Context("and has not been deployed", func() {
-			It("should return an error", func() {
-				dr, err := cc.UndeployConnector("non-existent-id")
-				Expect(err).To(HaveOccurred())
-				Expect(dr).To(BeNil())
-			})
-		})
-
-		Context("and has been deployed", func() {
-			var did string
-
-			BeforeEach(func() {
-				dr, err := cc.DeployConnector(connector.Id)
-				Expect(err).ToNot(HaveOccurred())
-				Expect(dr).ToNot(BeNil())
-				Expect(dr.Error).To(Equal(""))
-				Expect(dr.InstanceErrors).To(BeEmpty())
-				Expect(dr.Targets).To(HaveLen(1))
-
-				did = dr.DeploymentId
-
-				// -- wait for the deploy to complete
-				Eventually(func() bool {
-					d, err := cc.GetDeployment(connector.Id, did)
-					if err != nil {
-						return false
-					}
-
-					return d.Status.Running > 0
-				}, 5*time.Second, 100*time.Millisecond).Should(BeTrue())
-			})
-			It("should undeploy the connector", func() {
-				ur, err := cc.UndeployConnector(connector.Id)
-				Expect(err).ToNot(HaveOccurred())
-				Expect(ur).ToNot(BeNil())
-				Expect(ur.DeploymentId).To(Equal(did))
-				Expect(ur.Error).To(Equal(""))
-				Expect(ur.InstanceErrors).To(BeEmpty())
-			})
+		It("should deploy the connector", func() {
+			dr, err := cc.DeployConnector(connector.Id)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(dr).ToNot(BeNil())
+			Expect(dr.Error).To(Equal(""))
+			Expect(dr.InstanceErrors).To(BeEmpty())
+			Expect(dr.Targets).To(HaveLen(1))
 		})
 	})
 })

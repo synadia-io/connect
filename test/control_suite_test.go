@@ -1,4 +1,4 @@
-package client_test
+package test
 
 import (
 	"context"
@@ -17,7 +17,6 @@ import (
 	"github.com/synadia-io/connect-node/storage"
 	cl "github.com/synadia-io/connect/client"
 	"github.com/synadia-io/connect/model"
-	"github.com/synadia-io/connect/test"
 	"testing"
 )
 
@@ -42,11 +41,11 @@ func TestControl(t *testing.T) {
 	RegisterFailHandler(Fail)
 
 	BeforeSuite(func() {
-		acc := test.Account("TEST_CONTROL_ACCOUNT")
+		acc := Account("TEST_CONTROL_ACCOUNT")
 		clientAccount = acc.Id
 
 		// -- start the nats server
-		srv = test.NewDecentralizedServer().
+		srv = NewDecentralizedServer().
 			WithAccount(acc).
 			Run()
 

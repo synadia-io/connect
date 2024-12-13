@@ -4,15 +4,14 @@
     SCP_URL: https://cloud.nas-test.synadia.io/api/core/beta
     ACCOUNT: 2lsqayf1NIFEvVwRdTXlAonrGbO
 
+  includes:
+    test: 'test/Taskfile.yml'
+
   tasks:
     clean:
       desc: Clean up the project
       cmds:
           - rm -rf target/*
-
-    test:
-      cmds:
-        - go run github.com/onsi/ginkgo/v2/ginkgo -r --compilers=4
 
     build:
       generates:
@@ -20,6 +19,10 @@
       cmds:
         - go mod tidy
         - go build -o target/connect cmd/connect/*.go
+
+    test:
+      cmds:
+        - task: test:run
 
     install:
       deps:

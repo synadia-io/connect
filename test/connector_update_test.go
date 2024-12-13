@@ -1,4 +1,4 @@
-package client_test
+package test
 
 import (
 	"github.com/google/uuid"

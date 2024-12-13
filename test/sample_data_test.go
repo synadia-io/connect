@@ -1,4 +1,4 @@
-package client_test
+package test
 
 import (
 	im "github.com/synadia-io/connect-node/model"
