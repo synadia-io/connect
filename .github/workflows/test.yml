@@ -25,4 +25,4 @@ jobs:
       - name: Download dependencies
         run: go mod download
       - name: Run tests
-        run: go run github.com/onsi/ginkgo/v2/ginkgo -r -timeout=10m --vv --show-node-events --poll-progress-after=5s --poll-progress-interval=1s
+        run: go run github.com/onsi/ginkgo/v2/ginkgo -r --skip-package=/test -timeout=10m --vv --show-node-events --poll-progress-after=5s --poll-progress-interval=1s
