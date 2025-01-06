@@ -2,6 +2,7 @@ package client
 
 import (
 	"encoding/json"
+
 	"github.com/synadia-io/connect/model"
 )
 
@@ -26,12 +27,12 @@ func (c *client) ListDeployments(filter DeploymentFilter, cursor DeploymentCurso
 	return c.RequestList(c.serviceSubject("DEPLOYMENT.LIST"), filter, func(b []byte, hasMore bool) error {
 		if b == nil {
 			return cursor(nil, hasMore)
-		} else {
-			var resp DeploymentInfo
-			if err := json.Unmarshal(b, &resp); err != nil {
-				return err
-			}
-			return cursor(&resp, hasMore)
 		}
+
+		var info DeploymentInfo
+		if err := json.Unmarshal(b, &info); err != nil {
+			return err
+		}
+		return cursor(&info, hasMore)
 	}, opts...)
 }
