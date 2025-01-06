@@ -3,6 +3,9 @@ package cli
 import (
 	"bytes"
 	"fmt"
+	"io"
+	"os"
+
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/choria-io/fisk"
 	"github.com/fatih/color"
@@ -11,8 +14,6 @@ import (
 	"github.com/synadia-io/connect/model"
 	terminal "golang.org/x/term"
 	"gopkg.in/yaml.v3"
-	"io"
-	"os"
 )
 
 func init() {
@@ -190,7 +191,7 @@ func (c *connectorCommand) updateConnector(pc *fisk.ParseContext) error {
 		os.Exit(1)
 	}
 
-	if _, err := controlClient().UpdateConnector(connector.Id, ccfg); err != nil {
+	if _, err := controlClient().PatchConnector(connector.Id, ccfg); err != nil {
 		color.Red("Could not update the connector: %s", err)
 		os.Exit(1)
 	}
