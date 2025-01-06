@@ -4,9 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"time"
+
 	"github.com/nats-io/nats.go"
 	"github.com/synadia-io/connect/model"
-	"time"
 )
 
 const HasMoreHeader = "Nats-Has-More"
@@ -38,6 +39,7 @@ type Client interface {
 	GetConnector(id string, opts ...Opt) (*model.Connector, error)
 	CreateConnector(id string, config model.ConnectorConfig, opts ...Opt) (*model.Connector, error)
 	UpdateConnector(id string, updates model.ConnectorConfig, opts ...Opt) (*model.Connector, error)
+	PatchConnector(id string, updates model.ConnectorConfig, opts ...Opt) (*model.Connector, error)
 	DeleteConnector(id string, opts ...Opt) (bool, error)
 
 	DeployConnector(id string, opts ...DeployOpt) (*ConnectorDeployResult, error)
