@@ -32,11 +32,7 @@ func (c *client) PatchConnector(id string, updates model.ConnectorConfig, opts .
 		return nil, err
 	}
 
-	updated, err := json.Marshal(model.ConnectorConfig{
-		Steps: &model.Steps{
-			Transformer: nil,
-		},
-	})
+	updated, err := json.Marshal(updates)
 	if err != nil {
 		return nil, err
 	}
