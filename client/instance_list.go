@@ -2,6 +2,7 @@ package client
 
 import (
 	"encoding/json"
+
 	"github.com/synadia-io/connect/model"
 )
 
@@ -22,15 +23,14 @@ type InstanceCursor func(item *InstanceInfo, hasMore bool) error
 
 func (c *client) ListInstances(filter InstanceFilter, cursor InstanceCursor, opts ...Opt) error {
 	return c.RequestList(c.serviceSubject("INSTANCE.LIST"), filter, func(b []byte, hasMore bool) error {
-		var info *InstanceInfo
-
-		if b != nil {
-			var resp InstanceInfo
-			if err := json.Unmarshal(b, &resp); err != nil {
-				return err
-			}
+		if b == nil {
+			return cursor(nil, hasMore)
 		}
 
-		return cursor(info, hasMore)
+		var info InstanceInfo
+		if err := json.Unmarshal(b, &info); err != nil {
+			return err
+		}
+		return cursor(&info, hasMore)
 	}, opts...)
 }
