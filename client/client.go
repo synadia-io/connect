@@ -82,7 +82,7 @@ type client struct {
 }
 
 func (c *client) serviceSubject(subject string) string {
-	return fmt.Sprintf("$CONNECT.%s.%s", c.account, subject)
+	return fmt.Sprintf("$CONSVC.%s.%s", c.account, subject)
 }
 
 func (c *client) Account() string {
