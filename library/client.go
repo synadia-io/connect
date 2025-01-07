@@ -3,9 +3,10 @@ package library
 import (
 	"encoding/json"
 	"fmt"
+	"time"
+
 	"github.com/nats-io/nats.go"
 	"github.com/synadia-io/connect/model"
-	"time"
 )
 
 const HasMoreHeader = "Nats-Has-More"
@@ -34,6 +35,8 @@ type Client interface {
 
 	ListComponents(filter ComponentFilter, cursor ComponentCursor, opts ...Opt) error
 	GetComponent(runtimeId string, versionId string, kind model.ComponentKind, name string, opts ...Opt) (*model.Component, error)
+
+	Close()
 }
 
 func NewClient(nc *nats.Conn, trace bool) Client {

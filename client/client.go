@@ -4,9 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"time"
+
 	"github.com/nats-io/nats.go"
 	"github.com/synadia-io/connect/model"
-	"time"
 )
 
 const HasMoreHeader = "Nats-Has-More"
@@ -54,6 +55,8 @@ type Client interface {
 	CaptureMetrics(filter CaptureFilter, cursor MetricsCursor) (*nats.Subscription, error)
 	CaptureEvents(filter CaptureFilter, cursor EventsCursor) (*nats.Subscription, error)
 	CaptureLogs(filter CaptureFilter, cursor LogCursor) (*nats.Subscription, error)
+
+	Close()
 }
 
 func NewClient(nc *nats.Conn, trace bool) (Client, error) {
