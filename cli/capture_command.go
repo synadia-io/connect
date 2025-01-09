@@ -141,6 +141,7 @@ func (c *captureCommand) captureMetrics(pc *fisk.ParseContext) error {
 		}
 	}
 
+	fmt.Println("Capturing metrics, press Ctrl+C to stop")
 	s, err := controlClient().CaptureMetrics(filter, func(item model.InstanceMetric) {
 		RenderMetric(item)
 	})
