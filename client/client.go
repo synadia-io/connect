@@ -56,6 +56,8 @@ type Client interface {
 	CaptureMetrics(filter CaptureFilter, cursor MetricsCursor) (*nats.Subscription, error)
 	CaptureEvents(filter CaptureFilter, cursor EventsCursor) (*nats.Subscription, error)
 	CaptureLogs(filter CaptureFilter, cursor LogCursor) (*nats.Subscription, error)
+
+	Close()
 }
 
 func NewClient(nc *nats.Conn, trace bool) (Client, error) {
