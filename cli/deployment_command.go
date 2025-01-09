@@ -39,18 +39,6 @@ func configureDeploymentCommand(parentCmd commandHost) {
 
 	purgeCmd := deploymentCmd.Command("purge", "Remove all stopped or failed deployments").Action(c.purgeDeployments)
 	purgeCmd.Arg("connector", "The connector to purge deployments for").StringVar(&c.connectorId)
-
-	logsCmd := deploymentCmd.Command("logs", "List current logs for a deployment").Action(c.getDeploymentLogs)
-	logsCmd.Arg("connector", "The connector to get logs for").Required().StringVar(&c.connectorId)
-	logsCmd.Arg("id", "The deployment id to get logs for").StringVar(&c.deploymentId)
-
-	eventsCmd := deploymentCmd.Command("events", "List current events for a deployment").Alias("e").Action(c.getDeploymentEvents)
-	eventsCmd.Arg("connector", "The connector to get events for").Required().StringVar(&c.connectorId)
-	eventsCmd.Arg("id", "The deployment id to get events for").StringVar(&c.deploymentId)
-
-	metricsCmd := deploymentCmd.Command("metrics", "List current metrics for a deployment").Alias("m").Action(c.getDeploymentMetrics)
-	metricsCmd.Arg("connector", "The connector to get metrics for").Required().StringVar(&c.connectorId)
-	metricsCmd.Arg("id", "The deployment id to get metrics for").StringVar(&c.deploymentId)
 }
 
 func (c *deploymentCommand) listDeployments(pc *fisk.ParseContext) error {
@@ -214,42 +202,6 @@ func (c *deploymentCommand) purgeDeployments(pc *fisk.ParseContext) error {
 	}
 
 	fmt.Println(w.Render())
-	return nil
-}
-
-func (c *deploymentCommand) getDeploymentLogs(pc *fisk.ParseContext) error {
-	logs, err := controlClient().GetLogs(c.connectorId, c.deploymentId, "")
-	if err != nil {
-		color.Red("Could not get logs for deployment %s: %s", c.deploymentId, err)
-		os.Exit(1)
-	}
-
-	printLogs(logs)
-
-	return nil
-}
-
-func (c *deploymentCommand) getDeploymentEvents(pc *fisk.ParseContext) error {
-	events, err := controlClient().GetEvents(c.connectorId, c.deploymentId, "")
-	if err != nil {
-		color.Red("Could not get events for deployment %s: %s", c.deploymentId, err)
-		os.Exit(1)
-	}
-
-	printEvents(events)
-
-	return nil
-}
-
-func (c *deploymentCommand) getDeploymentMetrics(pc *fisk.ParseContext) error {
-	metrics, err := controlClient().GetMetrics(c.connectorId, c.deploymentId, "")
-	if err != nil {
-		color.Red("Could not get metrics for deployment %s: %s", c.deploymentId, err)
-		os.Exit(1)
-	}
-
-	printMetrics(metrics)
-
 	return nil
 }
 
