@@ -14,7 +14,7 @@ type (
 	}
 )
 
-func (c *client) GetConnectorLogs(connectorId, deploymentId, instanceId string, opts ...Opt) ([]*model.InstanceLog, error) {
+func (c *client) GetLogs(connectorId, deploymentId, instanceId string, opts ...Opt) ([]*model.InstanceLog, error) {
 	req := getConnectorLogsRequest{
 		ConnectorId:  connectorId,
 		DeploymentId: deploymentId,

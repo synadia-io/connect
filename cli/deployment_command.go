@@ -218,7 +218,7 @@ func (c *deploymentCommand) purgeDeployments(pc *fisk.ParseContext) error {
 }
 
 func (c *deploymentCommand) getDeploymentLogs(pc *fisk.ParseContext) error {
-	logs, err := controlClient().GetConnectorLogs(c.connectorId, c.deploymentId, "")
+	logs, err := controlClient().GetLogs(c.connectorId, c.deploymentId, "")
 	if err != nil {
 		color.Red("Could not get logs for deployment %s: %s", c.deploymentId, err)
 		os.Exit(1)
@@ -230,7 +230,7 @@ func (c *deploymentCommand) getDeploymentLogs(pc *fisk.ParseContext) error {
 }
 
 func (c *deploymentCommand) getDeploymentEvents(pc *fisk.ParseContext) error {
-	events, err := controlClient().GetConnectorEvents(c.connectorId, c.deploymentId, "")
+	events, err := controlClient().GetEvents(c.connectorId, c.deploymentId, "")
 	if err != nil {
 		color.Red("Could not get events for deployment %s: %s", c.deploymentId, err)
 		os.Exit(1)
@@ -242,7 +242,7 @@ func (c *deploymentCommand) getDeploymentEvents(pc *fisk.ParseContext) error {
 }
 
 func (c *deploymentCommand) getDeploymentMetrics(pc *fisk.ParseContext) error {
-	metrics, err := controlClient().GetConnectorMetrics(c.connectorId, c.deploymentId, "")
+	metrics, err := controlClient().GetMetrics(c.connectorId, c.deploymentId, "")
 	if err != nil {
 		color.Red("Could not get metrics for deployment %s: %s", c.deploymentId, err)
 		os.Exit(1)

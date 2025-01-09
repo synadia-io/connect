@@ -321,7 +321,7 @@ func (c *connectorCommand) undeployConnector(pc *fisk.ParseContext) error {
 }
 
 func (c *connectorCommand) getConnectorLogs(pc *fisk.ParseContext) error {
-	logs, err := controlClient().GetConnectorLogs(c.id, "", "")
+	logs, err := controlClient().GetLogs(c.id, "", "")
 	if err != nil {
 		color.Red("Could not get logs for connector %s: %s", c.id, err)
 		os.Exit(1)
@@ -333,7 +333,7 @@ func (c *connectorCommand) getConnectorLogs(pc *fisk.ParseContext) error {
 }
 
 func (c *connectorCommand) getConnectorEvents(pc *fisk.ParseContext) error {
-	events, err := controlClient().GetConnectorEvents(c.id, "", "")
+	events, err := controlClient().GetEvents(c.id, "", "")
 	if err != nil {
 		color.Red("Could not get events for connector %s: %s", c.id, err)
 		os.Exit(1)
@@ -345,7 +345,7 @@ func (c *connectorCommand) getConnectorEvents(pc *fisk.ParseContext) error {
 }
 
 func (c *connectorCommand) getConnectorMetrics(pc *fisk.ParseContext) error {
-	metrics, err := controlClient().GetConnectorMetrics(c.id, "", "")
+	metrics, err := controlClient().GetMetrics(c.id, "", "")
 	if err != nil {
 		color.Red("Could not get metrics for connector %s: %s", c.id, err)
 		os.Exit(1)

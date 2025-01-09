@@ -14,7 +14,7 @@ type (
 	}
 )
 
-func (c *client) GetConnectorMetrics(connectorId, deploymentId, instanceId string, opts ...Opt) ([]*model.InstanceMetric, error) {
+func (c *client) GetMetrics(connectorId, deploymentId, instanceId string, opts ...Opt) ([]*model.InstanceMetric, error) {
 	req := getConnectorMetricsRequest{
 		ConnectorId:  connectorId,
 		DeploymentId: deploymentId,

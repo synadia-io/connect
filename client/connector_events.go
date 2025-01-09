@@ -14,7 +14,7 @@ type (
 	}
 )
 
-func (c *client) GetConnectorEvents(connectorId, deploymentId, instanceId string, opts ...Opt) ([]*model.InstanceEvent, error) {
+func (c *client) GetEvents(connectorId, deploymentId, instanceId string, opts ...Opt) ([]*model.InstanceEvent, error) {
 	req := getConnectorEventsRequest{
 		ConnectorId:  connectorId,
 		DeploymentId: deploymentId,

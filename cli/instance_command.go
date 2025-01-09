@@ -39,7 +39,7 @@ func configureInstanceCommand(parentCmd commandHost) {
 }
 
 func (c *instanceCommand) getInstanceLogs(pc *fisk.ParseContext) error {
-	logs, err := controlClient().GetConnectorLogs(c.connectorId, c.deploymentId, c.instanceId)
+	logs, err := controlClient().GetLogs(c.connectorId, c.deploymentId, c.instanceId)
 	if err != nil {
 		color.Red("Could not get logs for instance %s: %s", c.instanceId, err)
 		os.Exit(1)
@@ -51,7 +51,7 @@ func (c *instanceCommand) getInstanceLogs(pc *fisk.ParseContext) error {
 }
 
 func (c *instanceCommand) getInstanceEvents(pc *fisk.ParseContext) error {
-	events, err := controlClient().GetConnectorEvents(c.connectorId, c.deploymentId, c.instanceId)
+	events, err := controlClient().GetEvents(c.connectorId, c.deploymentId, c.instanceId)
 	if err != nil {
 		color.Red("Could not get events for instance %s: %s", c.instanceId, err)
 		os.Exit(1)
@@ -63,7 +63,7 @@ func (c *instanceCommand) getInstanceEvents(pc *fisk.ParseContext) error {
 }
 
 func (c *instanceCommand) getInstanceMetrics(pc *fisk.ParseContext) error {
-	metrics, err := controlClient().GetConnectorMetrics(c.connectorId, c.deploymentId, c.instanceId)
+	metrics, err := controlClient().GetMetrics(c.connectorId, c.deploymentId, c.instanceId)
 	if err != nil {
 		color.Red("Could not get metrics for instance %s: %s", c.instanceId, err)
 		os.Exit(1)
