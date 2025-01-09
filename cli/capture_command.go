@@ -2,14 +2,15 @@ package cli
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/choria-io/fisk"
 	"github.com/synadia-io/connect/client"
 	"github.com/synadia-io/connect/model"
-	"os"
 )
 
 func init() {
-	registerCommand("capture", 3, configureCaptureCommand)
+	registerCommand("capture", 4, configureCaptureCommand)
 }
 
 type captureCommand struct {

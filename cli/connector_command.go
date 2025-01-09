@@ -69,6 +69,15 @@ func configureConnectorCommand(parentCmd commandHost) {
 	undeploy := connectorCmd.Command("undeploy", "Undeploy a connector").Action(c.undeployConnector)
 	undeploy.Arg("id", "The id of the connector to undeploy").Required().StringVar(&c.id)
 	undeploy.Flag("force", "Force undeployment").UnNegatableBoolVar(&c.force)
+
+	logsCmd := connectorCmd.Command("logs", "List current logs for a connector").Alias("l").Action(c.getConnectorLogs)
+	logsCmd.Arg("id", "The id of the connector to get logs for").Required().StringVar(&c.id)
+
+	eventsCmd := connectorCmd.Command("events", "List current events for a connector").Alias("e").Action(c.getConnectorEvents)
+	eventsCmd.Arg("id", "The id of the connector to get events for").Required().StringVar(&c.id)
+
+	metricsCmd := connectorCmd.Command("metrics", "List current metrics for a connector").Alias("m").Action(c.getConnectorMetrics)
+	metricsCmd.Arg("id", "The id of the connector to get metrics for").Required().StringVar(&c.id)
 }
 
 func (c *connectorCommand) listConnectors(pc *fisk.ParseContext) error {
@@ -307,6 +316,42 @@ func (c *connectorCommand) undeployConnector(pc *fisk.ParseContext) error {
 	}
 
 	fmt.Printf("Undeployed %s\n", color.GreenString(c.id))
+
+	return nil
+}
+
+func (c *connectorCommand) getConnectorLogs(pc *fisk.ParseContext) error {
+	logs, err := controlClient().GetConnectorLogs(c.id, "", "")
+	if err != nil {
+		color.Red("Could not get logs for connector %s: %s", c.id, err)
+		os.Exit(1)
+	}
+
+	printLogs(logs)
+
+	return nil
+}
+
+func (c *connectorCommand) getConnectorEvents(pc *fisk.ParseContext) error {
+	events, err := controlClient().GetConnectorEvents(c.id, "", "")
+	if err != nil {
+		color.Red("Could not get events for connector %s: %s", c.id, err)
+		os.Exit(1)
+	}
+
+	printEvents(events)
+
+	return nil
+}
+
+func (c *connectorCommand) getConnectorMetrics(pc *fisk.ParseContext) error {
+	metrics, err := controlClient().GetConnectorMetrics(c.id, "", "")
+	if err != nil {
+		color.Red("Could not get metrics for connector %s: %s", c.id, err)
+		os.Exit(1)
+	}
+
+	printMetrics(metrics)
 
 	return nil
 }
