@@ -1,0 +1,168 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "https://github.com/synadia-io/connect-runtime-wombat/blob/main/schemas.json",
+  "title": "Connect Component",
+  "description": "Connect component in the connect library",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "model_version",
+    "name",
+    "label",
+    "kind",
+    "status",
+    "description"
+  ],
+  "definitions": {
+    "componentKind": {
+      "enum": [
+        "scanner",
+        "source",
+        "sink"
+      ]
+    },
+    "componentStatus": {
+      "enum": [
+        "stable",
+        "preview",
+        "experimental",
+        "deprecated"
+      ]
+    },
+    "fieldKind": {
+      "enum": [
+        "scalar",
+        "map",
+        "list"
+      ]
+    },
+    "fieldType": {
+      "enum": [
+        "bool",
+        "int",
+        "object",
+        "scanner",
+        "string",
+        "expression",
+        "condition"
+      ]
+    },
+    "field": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "name",
+        "label",
+        "type"
+      ],
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/definitions/fieldKind"
+        },
+        "type": {
+          "$ref": "#/definitions/fieldType"
+        },
+        "description": {
+          "type": "string"
+        },
+        "secret": {
+          "type": "boolean"
+        },
+        "default": {},
+        "optional": {
+          "type": "boolean"
+        },
+        "examples": {
+          "type": "array"
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/field"
+          }
+        },
+        "constraints": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/constraint"
+          }
+        },
+        "render_hint": {
+          "type": "string"
+        }
+      }
+    },
+    "constraint": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "regex": {
+          "type": "string"
+        },
+        "range": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "lt": {
+              "type": "number"
+            },
+            "lte": {
+              "type": "number"
+            },
+            "gt": {
+              "type": "number"
+            },
+            "gte": {
+              "type": "number"
+            }
+          }
+        },
+        "enum": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "preset": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "properties": {
+    "model_version": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "label": {
+      "type": "string"
+    },
+    "kind": {
+      "$ref": "#/definitions/componentKind"
+    },
+    "status": {
+      "$ref": "#/definitions/componentStatus"
+    },
+    "description": {
+      "type": "string"
+    },
+    "fields": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/field"
+      }
+    }
+  }
+}
