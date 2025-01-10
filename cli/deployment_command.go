@@ -3,14 +3,15 @@ package cli
 import (
 	"bufio"
 	"fmt"
+	"os"
+	"strings"
+
 	"github.com/choria-io/fisk"
 	"github.com/fatih/color"
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/synadia-io/connect/cli/render"
 	"github.com/synadia-io/connect/client"
 	"github.com/synadia-io/connect/model"
-	"os"
-	"strings"
 )
 
 func init() {
@@ -38,7 +39,6 @@ func configureDeploymentCommand(parentCmd commandHost) {
 
 	purgeCmd := deploymentCmd.Command("purge", "Remove all stopped or failed deployments").Action(c.purgeDeployments)
 	purgeCmd.Arg("connector", "The connector to purge deployments for").StringVar(&c.connectorId)
-
 }
 
 func (c *deploymentCommand) listDeployments(pc *fisk.ParseContext) error {

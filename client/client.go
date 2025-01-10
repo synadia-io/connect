@@ -46,6 +46,10 @@ type Client interface {
 	RedeployConnector(id string, opts ...RedeployOpt) (*ConnectorRedeployResult, error)
 	UndeployConnector(id string, opts ...UndeployOpt) (*ConnectorUndeployResult, error)
 
+	GetLogs(connectorId, deploymentId, instanceId string, opts ...Opt) ([]*model.InstanceLog, error)
+	GetEvents(connectorId, deploymentId, instanceId string, opts ...Opt) ([]*model.InstanceEvent, error)
+	GetMetrics(connectorId, deploymentId, instanceId string, opts ...Opt) ([]*model.InstanceMetric, error)
+
 	ListDeployments(filter DeploymentFilter, cursor DeploymentCursor, opts ...Opt) error
 	GetDeployment(connectorId string, deploymentId string, opts ...Opt) (*model.Deployment, error)
 	PurgeDeployments(filter DeploymentFilter, cursor DeploymentPurgeCursor, opts ...Opt) error

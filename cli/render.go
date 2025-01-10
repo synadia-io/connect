@@ -3,11 +3,12 @@ package cli
 import (
 	"encoding/json"
 	"fmt"
+	"os"
+	"strings"
+
 	"github.com/synadia-io/connect/cli/render"
 	"github.com/synadia-io/connect/client"
 	"github.com/synadia-io/connect/model"
-	"os"
-	"strings"
 
 	"github.com/fatih/color"
 	"github.com/jedib0t/go-pretty/v6/table"
@@ -120,5 +121,5 @@ func RenderLog(item model.InstanceLog) {
 
 func RenderMetric(item model.InstanceMetric) {
 	// TODO: in the future we might want to do something fancier here
-	fmt.Println(item.Data)
+	fmt.Printf("%s\n", item.Data)
 }
