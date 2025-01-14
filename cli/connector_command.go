@@ -22,6 +22,7 @@ func init() {
 
 type connectorCommand struct {
 	listFilterKinds []string
+	runtime         string
 	id              string
 	format          string
 	declaration     string
@@ -53,6 +54,7 @@ func configureConnectorCommand(parentCmd commandHost) {
 	createCmd.Arg("id", "The id of the connector to create").Required().StringVar(&c.id)
 	createCmd.Arg("declaration", "The connector declaration").Default("!nil!").StringVar(&c.declaration)
 	createCmd.Flag("interactive", "Create/update the connector using your editor").Short('i').BoolVar(&c.interactive)
+	createCmd.Flag("runtime", "The runtime id").Default("vanilla").StringVar(&c.runtime)
 
 	editCmd := connectorCmd.Command("edit", "Edit a connector").Action(c.updateConnector)
 	editCmd.Arg("id", "The id of the connector to edit").Required().StringVar(&c.id)
@@ -359,6 +361,15 @@ func (c *connectorCommand) interactiveCreate(id string) {
 		color.Red(err.Error())
 		os.Exit(1)
 	}
+
+	// -- get the runtime details from the library
+	v, err := libraryClient().GetLatestVersion(c.runtime)
+	if err != nil {
+		color.Red("Could not get the latest version of the runtime: %s", err)
+		os.Exit(1)
+	}
+	cfg.Workload = v.Workload.Location
+	cfg.Metrics = v.Workload.Metrics
 
 	ccfg, _ := c.interactiveEdit(model.Connector{
 		ConnectorConfig: *cfg,
