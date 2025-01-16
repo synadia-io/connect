@@ -3,6 +3,7 @@ package cli
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/choria-io/fisk"
 	"github.com/fatih/color"
@@ -75,15 +76,24 @@ func (c *instanceCommand) describeInstance(pc *fisk.ParseContext) error {
 		os.Exit(1)
 	}
 
+	now := time.Now()
+	loc := now.Location()
+
 	cols := render.New("")
 	cols.AddRow("Id", instance.InstanceId)
 	cols.AddRow("DeploymentId", instance.DeploymentId)
 	cols.AddRow("ConnectorId", instance.ConnectorId)
 
 	cols.AddSectionTitle("Timeline")
-	cols.AddRow("Scheduled At", instance.ScheduledAt)
-	cols.AddRow("Started At", instance.StartedAt)
-	cols.AddRow("Finished At", instance.FinishedAt)
+	if instance.ScheduledAt != nil {
+		cols.AddRow("Scheduled At", instance.ScheduledAt.In(loc))
+	}
+	if instance.StartedAt != nil {
+		cols.AddRow("Started At", instance.StartedAt.In(loc))
+	}
+	if instance.FinishedAt != nil {
+		cols.AddRow("Finished At", instance.FinishedAt.In(loc))
+	}
 
 	return cols.Frender(os.Stdout)
 }
