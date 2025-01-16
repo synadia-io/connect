@@ -82,8 +82,8 @@ func (c *instanceCommand) describeInstance(pc *fisk.ParseContext) error {
 
 	cols.AddSectionTitle("Timeline")
 	cols.AddRow("Scheduled At", instance.ScheduledAt)
-	cols.AddRow("Start At", instance.StartedAt)
-	cols.AddRow("Finish At", instance.FinishedAt)
+	cols.AddRow("Started At", instance.StartedAt)
+	cols.AddRow("Finished At", instance.FinishedAt)
 
 	return cols.Frender(os.Stdout)
 }
