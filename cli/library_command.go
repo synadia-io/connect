@@ -40,13 +40,13 @@ func configureLibraryCommand(parentCmd commandHost) {
 	runtimeCmd.Arg("id", "The id of the runtime to describe").Required().StringVar(&c.runtime)
 
 	searchCmd := componentCmd.Command("search", "Search for components").Action(c.search)
-	searchCmd.Flag("runtime", "The runtime id").Default("vanilla").StringVar(&c.runtime)
+	searchCmd.Flag("runtime", "The runtime id").Required().StringVar(&c.runtime)
 	searchCmd.Flag("rev", "The version id or 'latest' to get the latest version").Default("latest").StringVar(&c.version)
 	searchCmd.Flag("kind", "The kind of the component to search for").EnumVar(&c.kind, kindOpts...)
 	searchCmd.Flag("status", "The status of the component to search for").EnumVar(&c.status, string(model.ComponentStatusActive), string(model.ComponentStatusPreview), string(model.ComponentStatusExperimental), string(model.ComponentStatusDeprecated))
 
 	infoCmd := componentCmd.Command("show", "Show information about a component").Alias("get").Action(c.info)
-	infoCmd.Flag("runtime", "The runtime id").Default("vanilla").StringVar(&c.runtime)
+	infoCmd.Flag("runtime", "The runtime id").Required().StringVar(&c.runtime)
 	infoCmd.Flag("rev", "The version id or 'latest' to get the latest version").Default("latest").StringVar(&c.version)
 	infoCmd.Arg("kind", "The kind of the component").EnumVar(&c.kind, kindOpts...)
 	infoCmd.Arg("name", "The name of the component").StringVar(&c.component)
