@@ -22,6 +22,7 @@ func init() {
 
 type connectorCommand struct {
 	listFilterKinds []string
+	runtime         string
 	id              string
 	format          string
 	declaration     string
@@ -53,6 +54,7 @@ func configureConnectorCommand(parentCmd commandHost) {
 	createCmd.Arg("id", "The id of the connector to create").Required().StringVar(&c.id)
 	createCmd.Arg("declaration", "The connector declaration").Default("!nil!").StringVar(&c.declaration)
 	createCmd.Flag("interactive", "Create/update the connector using your editor").Short('i').BoolVar(&c.interactive)
+	createCmd.Flag("runtime", "The runtime id").Default("wombat").StringVar(&c.runtime)
 
 	editCmd := connectorCmd.Command("edit", "Edit a connector").Action(c.updateConnector)
 	editCmd.Arg("id", "The id of the connector to edit").Required().StringVar(&c.id)
@@ -374,7 +376,7 @@ func (c *connectorCommand) interactiveCreate(id string) {
 }
 
 func (c *connectorCommand) selectConnectorTemplate() (*model.ConnectorConfig, error) {
-	version, err := libraryClient().GetLatestVersion("vanilla")
+	version, err := libraryClient().GetLatestVersion(c.runtime)
 	if err != nil {
 		return nil, fmt.Errorf("could not get the latest vanilla version: %s", err)
 	}
