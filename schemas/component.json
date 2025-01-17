@@ -163,6 +163,10 @@
       "items": {
         "$ref": "#/definitions/field"
       }
+    },
+    "icon": {
+      "type": "string",
+      "format": "uri-reference"
     }
   }
 }
