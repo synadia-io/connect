@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema",
-  "$id": "https://github.com/synadia-io/connect-runtime-wombat/blob/main/schemas.json",
-  "title": "Connect Component",
-  "description": "Connect component in the connect library",
+  "$id": "https://github.com/synadia-io/connect/blob/main/schemas/component.json",
+  "title": "Synadia Connect Component",
+  "description": "Synadia Connect component in the connect library",
   "type": "object",
   "additionalProperties": false,
   "required": [

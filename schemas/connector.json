@@ -1,0 +1,278 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "https://github.com/synadia-io/connect/blob/main/schemas/connector.json",
+  "title": "Synadia Connector",
+  "description": "Synadia Connector",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id"
+  ],
+  "definitions": {
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "port": {
+          "type": "integer"
+        },
+        "path": {
+          "type": "string"
+        }
+      }
+    },
+    "steps": {
+      "type": "object",
+      "additionalProperties": false,
+      "dependentRequired": {
+        "source": "producer",
+        "consumer": "sink"
+      },
+      "properties": {
+        "source": {
+          "$ref": "#/definitions/source"
+        },
+        "consumer": {
+          "$ref": "#/definitions/consumer"
+        },
+        "transformer": {
+          "$ref": "#/definitions/transformer"
+        },
+        "producer": {
+          "$ref": "#/definitions/producer"
+        },
+        "sink": {
+          "$ref": "#/definitions/sink"
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "config"
+      ],
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "config": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "sink": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "config"
+      ],
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "config": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "consumer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "nats_config",
+        "subject"
+      ],
+      "properties": {
+        "nats_config": {
+          "$ref": "#/definitions/natsConfig"
+        },
+        "subject": {
+          "type": "string"
+        },
+        "queue": {
+          "type": "string"
+        },
+        "jetstream": {
+          "$ref": "#/definitions/consumerJetStreamOptions"
+        }
+      }
+    },
+    "producer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "nats_config",
+        "subject"
+      ],
+      "properties": {
+        "nats_config": {
+          "$ref": "#/definitions/natsConfig"
+        },
+        "subject": {
+          "type": "string"
+        },
+        "threads": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "jetstream": {
+          "$ref": "#/definitions/producerJetStreamOptions"
+        }
+      }
+    },
+    "natsConfig": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "url"
+      ],
+      "properties": {
+        "url": {
+          "type": "string"
+        },
+        "authEnabled": {
+          "type": "boolean"
+        },
+        "jwt": {
+          "type": "string"
+        },
+        "seed": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        }
+      }
+    },
+    "consumerJetStreamOptions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "deliverPolicy": {
+          "type": "string"
+        },
+        "maxAckPending": {
+          "type": "integer"
+        },
+        "maxAckWait": {
+          "type": "string"
+        },
+        "durable": {
+          "type": "string"
+        },
+        "bind": {
+          "type": "boolean"
+        }
+      }
+    },
+    "producerJetStreamOptions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "msgId": {
+          "type": "string"
+        },
+        "ackWait": {
+          "type": "string"
+        },
+        "batching": {
+          "$ref": "#/definitions/batchPolicy"
+        }
+      }
+    },
+    "batchPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "count": {
+          "type": "integer"
+        },
+        "byteSize": {
+          "type": "integer"
+        }
+      }
+    },
+    "transformer": {
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": {
+        "composite": {
+          "$ref": "#/definitions/compositeTransformer"
+        },
+        "service": {
+          "$ref": "#/definitions/serviceTransformer"
+        },
+        "mapping": {
+          "$ref": "#/definitions/mappingTransformer"
+        }
+      }
+    },
+    "compositeTransformer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sequential"],
+      "properties": {
+        "sequential": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/transformer"
+          }
+        }
+      }
+    },
+    "serviceTransformer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "endpoint",
+        "nats_config"
+      ],
+      "properties": {
+        "endpoint": {
+          "type": "string"
+        },
+        "nats_config": {
+          "$ref": "#/definitions/natsConfig"
+        },
+        "timeout": {
+          "type": "string"
+        }
+      }
+    },
+    "mappingTransformer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sourecode"],
+      "properties": {
+        "sourecode": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "workload": {
+      "type": "string"
+    },
+    "metrics": {
+      "$ref": "#/definitions/metrics"
+    },
+    "steps": {
+      "$ref": "#/definitions/steps"
+    }
+  }
+}

@@ -3,7 +3,7 @@ package model
 import "github.com/nats-io/nats.go"
 
 type NatsConfig struct {
-	Url         string `json:"url,omitempty"`
+	Url         string `json:"url,omitempty" yaml:"url"`
 	AuthEnabled bool   `json:"auth_enabled,omitempty" yaml:"authEnabled,omitempty"`
 	Jwt         string `json:"jwt,omitempty" yaml:"jwt,omitempty"`
 	Seed        string `json:"seed,omitempty" yaml:"seed,omitempty"`
