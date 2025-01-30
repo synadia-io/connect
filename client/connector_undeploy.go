@@ -1,6 +1,10 @@
 package client
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"fmt"
+	"time"
+)
 
 type (
 	undeployConnectorRequest struct {
@@ -46,7 +50,13 @@ func (c *client) UndeployConnector(connectorId string, opts ...UndeployOpt) (*Co
 		opt(&req)
 	}
 
-	b, err := c.Request(c.serviceSubject("CONNECTOR.UNDEPLOY"), req)
+	// timeout
+	timeout, err := time.ParseDuration(req.Timeout)
+	if err != nil {
+		return nil, fmt.Errorf("invalid timeout: %w", err)
+	}
+
+	b, err := c.Request(c.serviceSubject("CONNECTOR.UNDEPLOY"), req, WithTimeout(timeout))
 	if err != nil {
 		return nil, err
 	}

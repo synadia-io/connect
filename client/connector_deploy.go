@@ -2,7 +2,9 @@ package client
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/synadia-io/connect/model"
+	"time"
 )
 
 type (
@@ -78,7 +80,13 @@ func (c *client) DeployConnector(id string, opts ...DeployOpt) (*ConnectorDeploy
 		opt(&req)
 	}
 
-	b, err := c.Request(c.serviceSubject("CONNECTOR.DEPLOY"), req)
+	// timeout
+	timeout, err := time.ParseDuration(req.Timeout)
+	if err != nil {
+		return nil, fmt.Errorf("invalid timeout: %w", err)
+	}
+
+	b, err := c.Request(c.serviceSubject("CONNECTOR.DEPLOY"), req, WithTimeout(timeout))
 	if err != nil {
 		return nil, err
 	}

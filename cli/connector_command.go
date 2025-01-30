@@ -205,7 +205,7 @@ func (c *connectorCommand) updateConnector(pc *fisk.ParseContext) error {
 func (c *connectorCommand) deployConnector(pc *fisk.ParseContext) error {
 	o := []client.DeployOpt{
 		client.WithDeployReplicas(c.replicas),
-		client.WithDeployTimeout(opts().Timeout.String()),
+		client.WithDeployTimeout("1m"), // using 1minute here to make sure there is enough time to pull the image
 		client.WithPull(c.pull),
 	}
 
@@ -229,6 +229,7 @@ func (c *connectorCommand) deployConnector(pc *fisk.ParseContext) error {
 		for k, v := range depl.InstanceErrors {
 			fmt.Printf("- %s: %s\n", k, v)
 		}
+		return nil
 	}
 
 	fmt.Printf("Deployed connector %s as %s\n", color.GreenString(c.id), color.GreenString(depl.DeploymentId))
@@ -239,7 +240,7 @@ func (c *connectorCommand) deployConnector(pc *fisk.ParseContext) error {
 func (c *connectorCommand) redeployConnector(pc *fisk.ParseContext) error {
 	o := []client.RedeployOpt{
 		client.WithRedeployReplicas(c.replicas),
-		client.WithRedeployTimeout(opts().Timeout.String()),
+		client.WithRedeployTimeout("1m"),
 	}
 
 	if c.placementTags != nil {
@@ -262,6 +263,7 @@ func (c *connectorCommand) redeployConnector(pc *fisk.ParseContext) error {
 		for k, v := range depl.Undeploy.InstanceErrors {
 			fmt.Printf("- %s: %s\n", k, v)
 		}
+		return nil
 	}
 
 	if depl.Deploy.Error != "" {
@@ -274,6 +276,7 @@ func (c *connectorCommand) redeployConnector(pc *fisk.ParseContext) error {
 		for k, v := range depl.Deploy.InstanceErrors {
 			fmt.Printf("- %s: %s\n", k, v)
 		}
+		return nil
 	}
 
 	fmt.Printf("Redeployed %s as %s\n", color.GreenString(c.id), color.GreenString(depl.DeploymentId))
@@ -283,7 +286,7 @@ func (c *connectorCommand) redeployConnector(pc *fisk.ParseContext) error {
 
 func (c *connectorCommand) undeployConnector(pc *fisk.ParseContext) error {
 	o := []client.UndeployOpt{
-		client.WithUndeployTimeout(opts().Timeout.String()),
+		client.WithUndeployTimeout("1m"),
 	}
 
 	if c.force {
