@@ -30,13 +30,16 @@ type connectorCommand struct {
 	placementTags   []string
 	replicas        int
 	pull            bool
+	envVars         map[string]string
 
 	deploymentId string
 	force        bool
 }
 
 func configureConnectorCommand(parentCmd commandHost) {
-	c := &connectorCommand{}
+	c := &connectorCommand{
+		envVars: make(map[string]string),
+	}
 
 	connectorCmd := parentCmd.Command("connector", "Manage connectors").Alias("c")
 
@@ -64,6 +67,7 @@ func configureConnectorCommand(parentCmd commandHost) {
 	deployCmd.Flag("tag", "Placement tags").Short('t').StringsVar(&c.placementTags)
 	deployCmd.Flag("replicas", "Number of connector instances").Short('r').Default("1").IntVar(&c.replicas)
 	deployCmd.Flag("pull", "Indicate whether the image should be pulled").Default("true").BoolVar(&c.pull)
+	deployCmd.Flag("env", "Environment vars to be passed during deployment").Short('e').StringMapVar(&c.envVars)
 
 	redeployCmd := connectorCmd.Command("redeploy", "Redeploy a connector").Action(c.redeployConnector)
 	redeployCmd.Arg("id", "The id of the connector to redeploy").Required().StringVar(&c.id)
@@ -211,6 +215,10 @@ func (c *connectorCommand) deployConnector(pc *fisk.ParseContext) error {
 
 	if c.placementTags != nil {
 		o = append(o, client.WithDeployPlacementTags(c.placementTags))
+	}
+
+	if c.envVars != nil {
+		o = append(o, client.WithDeployEnvVars(c.envVars))
 	}
 
 	depl, err := controlClient().DeployConnector(c.id, o...)

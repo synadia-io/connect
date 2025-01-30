@@ -19,6 +19,7 @@ type captureCommand struct {
 	deploymentId string
 	instanceId   string
 	history      bool
+	detailed     bool
 }
 
 func configureCaptureCommand(parentCmd commandHost) {
@@ -29,12 +30,14 @@ func configureCaptureCommand(parentCmd commandHost) {
 	logsCmd.Arg("did", "The deployment id of instances for which to show the logs").StringVar(&c.deploymentId)
 	logsCmd.Arg("id", "The instance id of an instance for which to show the logs").StringVar(&c.instanceId)
 	logsCmd.Flag("history", "Show instance logs history").UnNegatableBoolVar(&c.history)
+	logsCmd.Flag("detailed", "Show detailed logs").UnNegatableBoolVar(&c.detailed)
 
 	eventsCmd := parentCmd.Command("events", "Show instance events").Alias("evt").Action(c.captureEvents)
 	eventsCmd.Arg("cid", "The connector id of instances for which to show the events").StringVar(&c.connectorId)
 	eventsCmd.Arg("did", "The deployment id of instances for which to show the events").StringVar(&c.deploymentId)
 	eventsCmd.Arg("id", "The instance id of an instance for which to show the events").StringVar(&c.instanceId)
 	eventsCmd.Flag("history", "Show instance events history").UnNegatableBoolVar(&c.history)
+	eventsCmd.Flag("detailed", "Show detailed events").UnNegatableBoolVar(&c.detailed)
 
 	metricsCmd := parentCmd.Command("metrics", "Show instance metrics").Alias("evt").Action(c.captureMetrics)
 	metricsCmd.Arg("cid", "The connector id of instances for which to show the metrics").StringVar(&c.connectorId)
@@ -58,14 +61,14 @@ func (c *captureCommand) captureLogs(pc *fisk.ParseContext) error {
 			color.Red("Could not get log history")
 		} else {
 			for _, log := range logs {
-				RenderLog(*log)
+				RenderLog(*log, c.detailed)
 			}
 		}
 	}
 
 	fmt.Println("Capturing logs, press Ctrl+C to stop")
 	s, err := client.CaptureLogs(filter, func(item model.InstanceLog) {
-		RenderLog(item)
+		RenderLog(item, c.detailed)
 	})
 	if err != nil {
 		return err
@@ -97,14 +100,14 @@ func (c *captureCommand) captureEvents(pc *fisk.ParseContext) error {
 			color.Red("Could not get event history")
 		} else {
 			for _, event := range events {
-				RenderEvent(*event)
+				RenderEvent(*event, c.detailed)
 			}
 		}
 	}
 
 	fmt.Println("Capturing events, press Ctrl+C to stop")
 	s, err := client.CaptureEvents(filter, func(item model.InstanceEvent) {
-		RenderEvent(item)
+		RenderEvent(item, c.detailed)
 	})
 	if err != nil {
 		return err
