@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "io.synadia.connect.v1.spec.connector.steps",
+  "title": "StepsSpec",
+  "type": "object",
+  "properties": {
+    "source": {
+      "$ref": "connector-steps-source-model.schema.json"
+    },
+    "consumer": {
+      "$ref": "connector-steps-consumer-model.schema.json"
+    },
+    "transformer": {
+      "$ref": "connector-steps-transformer-model.schema.json"
+    },
+    "producer": {
+      "$ref": "connector-steps-producer-model.schema.json"
+    },
+    "sink": {
+      "$ref": "connector-steps-sink-model.schema.json"
+    }
+  }
+}

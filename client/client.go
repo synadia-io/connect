@@ -1,192 +1,76 @@
 package client
 
 import (
-	"bytes"
-	"encoding/json"
-	"fmt"
-	"time"
+    "time"
 
-	"github.com/nats-io/nats.go"
-	"github.com/synadia-io/connect/model"
+    "github.com/nats-io/nats.go"
+    "github.com/synadia-io/connect/model"
 )
 
-const HasMoreHeader = "Nats-Has-More"
-
-type ResponseHandler func(resp []byte, hasMore bool) error
-
-type RequestOpts struct {
-	Timeout time.Duration
-}
-
-func DefaultRequestOpts() *RequestOpts {
-	return &RequestOpts{
-		Timeout: 5 * time.Second,
-	}
-}
-
-type Opt func(opts *RequestOpts)
-
-func WithTimeout(timeout time.Duration) Opt {
-	return func(opts *RequestOpts) {
-		opts.Timeout = timeout
-	}
-}
-
 type Client interface {
-	Account() string
+    Account() string
 
-	ListConnectors(filter ConnectorFilter, cursor ConnectorCursor, opts ...Opt) error
-	GetConnector(id string, opts ...Opt) (*model.Connector, error)
-	CreateConnector(id string, config model.ConnectorConfig, opts ...Opt) (*model.Connector, error)
-	UpdateConnector(id string, updates model.ConnectorConfig, opts ...Opt) (*model.Connector, error)
-	PatchConnector(id string, updates model.ConnectorConfig, opts ...Opt) (*model.Connector, error)
-	DeleteConnector(id string, opts ...Opt) (bool, error)
+    ConnectorClient
+    LibraryClient
 
-	DeployConnector(id string, opts ...DeployOpt) (*ConnectorDeployResult, error)
-	RedeployConnector(id string, opts ...RedeployOpt) (*ConnectorRedeployResult, error)
-	UndeployConnector(id string, opts ...UndeployOpt) (*ConnectorUndeployResult, error)
+    Close()
+}
 
-	GetLogs(connectorId, deploymentId, instanceId string, opts ...Opt) ([]*model.InstanceLog, error)
-	GetEvents(connectorId, deploymentId, instanceId string, opts ...Opt) ([]*model.InstanceEvent, error)
-	GetMetrics(connectorId, deploymentId, instanceId string, opts ...Opt) ([]*model.InstanceMetric, error)
+type ConnectorClient interface {
+    ListConnectors(timeout time.Duration) ([]model.ConnectorSummary, error)
+    GetConnector(id string, timeout time.Duration) (*model.Connector, error)
+    GetConnectorStatus(id string, timeout time.Duration) (*model.ConnectorStatus, error)
+    CreateConnector(id, description, image string, metrics *model.Metrics, steps model.Steps, timeout time.Duration) (*model.Connector, error)
+    PatchConnector(id string, patch string, timeout time.Duration) (*model.Connector, error)
+    DeleteConnector(id string, timeout time.Duration) error
 
-	ListDeployments(filter DeploymentFilter, cursor DeploymentCursor, opts ...Opt) error
-	GetDeployment(connectorId string, deploymentId string, opts ...Opt) (*model.Deployment, error)
-	PurgeDeployments(filter DeploymentFilter, cursor DeploymentPurgeCursor, opts ...Opt) error
+    ListConnectorInstances(id string, timeout time.Duration) ([]model.Instance, error)
+    StartConnector(id string, startOpts *model.ConnectorStartOptions, timeout time.Duration) ([]model.Instance, error)
+    StartAdHocConnector(id, description, image string, metrics *model.Metrics, steps model.Steps, startOpts *model.ConnectorStartOptions, timeout time.Duration) ([]model.Instance, error)
+    StopConnector(id string, timeout time.Duration) ([]model.Instance, error)
+}
 
-	ListInstances(filter InstanceFilter, cursor InstanceCursor, opts ...Opt) error
-	GetInstance(connectorId string, deploymentId string, instanceId string, opts ...Opt) (*model.Instance, error)
+type LibraryClient interface {
+    ListRuntimes(timeout time.Duration) ([]model.RuntimeSummary, error)
+    GetRuntime(id string, timeout time.Duration) (*model.Runtime, error)
 
-	CaptureMetrics(filter CaptureFilter, cursor MetricsCursor) (*nats.Subscription, error)
-	CaptureEvents(filter CaptureFilter, cursor EventsCursor) (*nats.Subscription, error)
-	CaptureLogs(filter CaptureFilter, cursor LogCursor) (*nats.Subscription, error)
-
-	Close()
+    SearchComponents(filter *model.ComponentSearchFilter, timeout time.Duration) ([]model.ComponentSummary, error)
+    GetComponent(runtimeId string, kind model.ComponentKind, id string, timeout time.Duration) (*model.Component, error)
 }
 
 func NewClient(nc *nats.Conn, trace bool) (Client, error) {
-	ui, err := getUserInfo(nc)
-	if err != nil {
-		return nil, err
-	}
+    t, err := NewTransport(nc, trace)
+    if err != nil {
+        return nil, err
+    }
 
-	return NewClientForAccount(nc, ui.Account, trace), nil
+    return &client{
+        t:               t,
+        connectorClient: connectorClient{t: t},
+        libraryClient:   libraryClient{t: t},
+    }, nil
 }
 
 func NewClientForAccount(nc *nats.Conn, account string, trace bool) Client {
-	return &client{
-		nc:      nc,
-		account: account,
-		trace:   trace,
-	}
+    t := NewTransportForAccount(nc, account, trace)
+
+    return &client{
+        t:               t,
+        connectorClient: connectorClient{t: t},
+        libraryClient:   libraryClient{t: t},
+    }
 }
 
 type client struct {
-	nc      *nats.Conn
-	trace   bool
-	account string
-}
-
-func (c *client) serviceSubject(subject string) string {
-	return fmt.Sprintf("$CONSVC.%s.%s", c.account, subject)
+    t *Transport
+    connectorClient
+    libraryClient
 }
 
 func (c *client) Account() string {
-	return c.account
-}
-
-func (c *client) Request(subject string, payload any, opts ...Opt) ([]byte, error) {
-	options := DefaultRequestOpts()
-	for _, opt := range opts {
-		opt(options)
-	}
-
-	// -- encode the Request
-	req, err := json.Marshal(payload)
-	if err != nil {
-		return nil, fmt.Errorf("unable to marshal Request: %v", err)
-	}
-
-	if c.trace {
-		fmt.Println(">>> ", subject, " [", string(req), "]")
-	}
-
-	resp, err := c.nc.Request(subject, req, options.Timeout)
-	if err != nil {
-		return nil, fmt.Errorf("unable to get response: %v", err)
-	}
-
-	serviceErr := resp.Header.Get("Nats-Service-Error")
-	serviceErrCode := resp.Header.Get("Nats-Service-Error-Code")
-	if serviceErr != "" {
-		return nil, fmt.Errorf("%s (%s)", serviceErr, serviceErrCode)
-	}
-
-	return resp.Data, nil
-}
-
-func (c *client) RequestList(subject string, payload any, h ResponseHandler, opts ...Opt) error {
-	options := DefaultRequestOpts()
-	for _, opt := range opts {
-		opt(options)
-	}
-
-	inb := nats.NewInbox()
-	if c.trace {
-		fmt.Println("??? ", inb)
-	}
-
-	sub, err := c.nc.SubscribeSync(inb)
-	if err != nil {
-		return err
-	}
-
-	// -- encode the Request
-	req, err := json.Marshal(payload)
-	if err != nil {
-		return fmt.Errorf("unable to marshal Request: %v", err)
-	}
-
-	if c.trace {
-		fmt.Println(">>> ", subject, " [", string(req), "]")
-	}
-
-	if err := c.nc.PublishRequest(subject, inb, req); err != nil {
-		return fmt.Errorf("unable to publish Request: %v", err)
-	}
-	if err := c.nc.Flush(); err != nil {
-		return fmt.Errorf("unable to flush: %v", err)
-	}
-
-	for {
-		msg, err := sub.NextMsg(options.Timeout)
-		if err != nil {
-			return fmt.Errorf("unable to get response: %v", err)
-		}
-
-		serviceErr := msg.Header.Get("Nats-Service-Error")
-		serviceErrCode := msg.Header.Get("Nats-Service-Error-Code")
-		if serviceErr != "" {
-			return fmt.Errorf("%s (%s)", serviceErr, serviceErrCode)
-		}
-
-		hasMore := msg.Header.Get(HasMoreHeader) == "true"
-		data := msg.Data
-		if bytes.Equal(data, []byte("null")) {
-			data = nil
-		}
-		if err := h(data, hasMore); err != nil {
-			return err
-		}
-
-		if !hasMore {
-			break
-		}
-	}
-
-	return nil
+    return c.t.Account()
 }
 
 func (c *client) Close() {
-	c.nc.Close()
+    c.t.Close()
 }

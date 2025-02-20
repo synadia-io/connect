@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "io.synadia.connect.v1.spec.metrics",
+  "title": "MetricsSpec",
+  "description": "Information on how to collect metrics. If not set, no metrics will be collected",
+  "type": "object",
+  "properties": {
+    "port": {
+      "type": "integer",
+      "description": "The port to collect metrics from"
+    },
+    "path": {
+      "type": "string",
+      "description": "The path to collect metrics from"
+    }
+  }
+}
