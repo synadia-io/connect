@@ -4,14 +4,81 @@
     SCP_URL: https://cloud.nas-test.synadia.io/api/core/beta
     ACCOUNT: 2lsqayf1NIFEvVwRdTXlAonrGbO
 
-  includes:
-    test: 'test/Taskfile.yml'
-
   tasks:
     clean:
       desc: Clean up the project
       cmds:
           - rm -rf target/*
+
+    models:deps:
+      cmds:
+        - go install github.com/atombender/go-jsonschema@84c8d2b98bf0373873df8a353b122530a7110c70
+
+    models:generate:
+      desc: Generate models from local schema
+      deps:
+        - models:deps
+      requires:
+        vars:
+          - CONNECT_NODE_LOCATION
+      cmds:
+        - go-jsonschema --struct-name-from-title
+          --package model
+          --schema-output=io.synadia.connect.v1.library=model/library.go
+          --schema-output=io.synadia.connect.v1.model.metrics=model/connector_models.go
+          --schema-output=io.synadia.connect.v1.model.nats_config=model/connector_models.go
+          --schema-output=io.synadia.connect.v1.model.connector=model/connector_models.go
+          --schema-output=io.synadia.connect.v1.model.connector.start.options=model/connector_models.go
+          --schema-output=io.synadia.connect.v1.model.connector.summary=model/connector_models.go
+          --schema-output=io.synadia.connect.v1.model.connector.instance=model/connector_models.go
+          --schema-output=io.synadia.connect.v1.model.connector.status=model/connector_models.go
+          --schema-output=io.synadia.connect.v1.model.connector.steps=model/connector_models.go
+          --schema-output=io.synadia.connect.v1.model.connector.steps.consumer=model/connector_models.go
+          --schema-output=io.synadia.connect.v1.model.connector.steps.producer=model/connector_models.go
+          --schema-output=io.synadia.connect.v1.model.connector.steps.source=model/connector_models.go
+          --schema-output=io.synadia.connect.v1.model.connector.steps.sink=model/connector_models.go
+          --schema-output=io.synadia.connect.v1.model.connector.steps.transformer=model/connector_models.go
+          --schema-output=io.synadia.connect.v1.model.connector.steps.transformer.composite=model/connector_models.go
+          --schema-output=io.synadia.connect.v1.model.connector.steps.transformer.mapping=model/connector_models.go
+          --schema-output=io.synadia.connect.v1.model.connector.steps.transformer.service=model/connector_models.go
+          --schema-output=io.synadia.connect.v1.control.connector.create.request=model/connector_create.go
+          --schema-output=io.synadia.connect.v1.control.connector.create.response=model/connector_create.go
+          --schema-output=io.synadia.connect.v1.control.connector.delete.request=model/connector_delete.go
+          --schema-output=io.synadia.connect.v1.control.connector.delete.response=model/connector_delete.go
+          --schema-output=io.synadia.connect.v1.control.connector.get.request=model/connector_get.go
+          --schema-output=io.synadia.connect.v1.control.connector.get.response=model/connector_get.go
+          --schema-output=io.synadia.connect.v1.control.connector.list.request=model/connector_list.go
+          --schema-output=io.synadia.connect.v1.control.connector.list.response=model/connector_list.go
+          --schema-output=io.synadia.connect.v1.control.connector.patch.request=model/connector_patch.go
+          --schema-output=io.synadia.connect.v1.control.connector.patch.response=model/connector_patch.go
+          --schema-output=io.synadia.connect.v1.control.connector.instances.request=model/connector_instances.go
+          --schema-output=io.synadia.connect.v1.control.connector.instances.response=model/connector_instances.go
+          --schema-output=io.synadia.connect.v1.control.connector.start.request=model/connector_start.go
+          --schema-output=io.synadia.connect.v1.control.connector.start.response=model/connector_start.go
+          --schema-output=io.synadia.connect.v1.control.connector.status.request=model/connector_status.go
+          --schema-output=io.synadia.connect.v1.control.connector.status.response=model/connector_status.go
+          --schema-output=io.synadia.connect.v1.control.connector.stop.request=model/connector_stop.go
+          --schema-output=io.synadia.connect.v1.control.connector.stop.response=model/connector_stop.go
+          {{.CONNECT_NODE_LOCATION}}/model/schemas/*.schema.json
+
+        - go-jsonschema --struct-name-from-title
+          --package model
+          --schema-output=io.synadia.connect.v1.library.spec=model/crawler.go
+          {{.CONNECT_NODE_LOCATION}}/crawler/v1/*.schema.json
+
+        - go-jsonschema --struct-name-from-title
+          --package spec
+          --schema-output=io.synadia.connect.v1.spec=spec/spec.go
+          --schema-output=io.synadia.connect.v1.spec.connector=spec/connector.go
+          --schema-output=io.synadia.connect.v1.spec.connector.steps=spec/connector.go
+          --schema-output=io.synadia.connect.v1.spec.connector.steps.consumer=spec/connector.go
+          --schema-output=io.synadia.connect.v1.spec.connector.steps.producer=spec/connector.go
+          --schema-output=io.synadia.connect.v1.spec.connector.steps.transformer=spec/connector.go
+          --schema-output=io.synadia.connect.v1.spec.connector.steps.source=spec/connector.go
+          --schema-output=io.synadia.connect.v1.spec.connector.steps.sink=spec/connector.go
+          --schema-output=io.synadia.connect.v1.spec.metrics=spec/common.go
+          --schema-output=io.synadia.connect.v1.spec.nats_config=spec/common.go
+          spec/schemas/*.schema.json
 
     build:
       generates:
@@ -22,7 +89,7 @@
 
     test:
       cmds:
-        - task: test:run
+        - go run github.com/onsi/ginkgo/v2/ginkgo -r -cover --coverpkg=github.com/synadia-io/connect/... --compilers=4
 
     install:
       deps:

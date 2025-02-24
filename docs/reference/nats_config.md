@@ -17,6 +17,4 @@ seed: "..."
 | `auth_enabled` | boolean | false   | Whether to enable authentication.         |
 | `jwt`          | string  |         | The JWT token to use for authentication.  |
 | `seed`         | string  |         | The seed to use for authentication.       |
-| `username`     | string  |         | The username to use for authentication.   |
-| `password`     | string  |         | The password to use for authentication.   |
 ```

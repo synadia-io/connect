@@ -21,7 +21,7 @@ also be used to generate messages at a specific moment in time, configured throu
 
 To create a new inlet, run the following command:
 ```shell
-connect connector create -i hello
+connect connector create hello
 ```
 The `-i` in this case tells the create command we want to interactively create the connector. We will be asked which
 type of connector we want to create. Select `inlet` and press enter. The CLI will generate a template inlet definition
@@ -31,10 +31,7 @@ and open your default editor.
 To makes things easier, we already have a template for you to use. Edit the template to look like this:
 ```yaml
 description: "A simple hello world inlet"
-workload: ghcr.io/synadia-io/connect-runtime-vanilla:latest
-metrics:
-  port: 4195
-  path: /metrics
+runtime_id: wombat
 steps:
   source:
     type: nats
@@ -49,8 +46,7 @@ steps:
 
 Let's run through the different fields in this file:
 - `description`: A short description of what the connector does
-- `workload`: The workload being used to run the connector. A workload or runtime provides the sources and sinks you can use in your connectors. In this case, we are using the `connect-runtime-vanilla` workload which provides the `nats` source.
-- `metrics`: The port and path where the workload/runtime exposes connector metrics 
+- `runtime_id`: The id of the runtime providing the building blocks for the connector 
 - `steps`: The steps that make up the connector. In this case, we have two steps: `source` and `producer`
 - `source.type`: The type of source. Take a look at the `connect component search` command to see the available sources.
 - `source.config`: The configuration for the source. This depends on the type of source being used.
@@ -59,10 +55,10 @@ Let's run through the different fields in this file:
 
 Save the inlet and exit the editor. You can run `connect connectors list` (or `connect c ls`) to see the newly created inlet.
 
-### Deploy the inlet
-You can now deploy the connector to an agent by running the following command:
+### Start the inlet
+You can now deploy the connector by running the following command:
 ```shell
-connect connector deploy hello
+connect connector start hello
 ```
 
 You should now see messages being sent to the `testing.hello.*` subject on the NATS server:
@@ -70,10 +66,6 @@ You should now see messages being sent to the `testing.hello.*` subject on the N
 nats -s "nats://demo.nats.io:4222" sub 'testing.hello.>'
 ```
 
-A single connector can be deployed multiple times resulting in multiple deployments. Each deployment will have a unique
-identifier and its own set of instances. You can see the deployments of a connector by running `connect deployment ls`.
-
 ### Cleaning up
-To stop the connector, you will need to undeploy it using the `connect connector undeploy hello` command. This will 
-stop the connector and remove the deployment. You can then delete the connector using the `connect connector delete hello`
-command.
+Use `connect connector stop hello` to stop the connector. You can then delete the connector using the 
+`connect connector delete hello` command.

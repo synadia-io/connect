@@ -20,13 +20,11 @@ steps:
   
   producer:
     subject: ""
-    nats_config:
+    nats:
       url: ""
       auth_enabled: false
       jwt: ""
       seed: ""
-      username: ""
-      password: ""
 ```
 
 ### Outlet
@@ -39,8 +37,6 @@ steps:
       auth_enabled: false
       jwt: ""
       seed: ""
-      username: ""
-      password: ""
       
   transformer: {}
   

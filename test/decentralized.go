@@ -22,7 +22,7 @@ type DecentralizedServer struct {
 }
 
 func NewDecentralizedServer() *DecentralizedServer {
-	tmpDir, err := os.MkdirTemp("", "connect-test")
+	tmpDir, err := os.MkdirTemp("", "vent-test")
 	Expect(err).ToNot(HaveOccurred())
 
 	// Operator

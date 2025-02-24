@@ -13,8 +13,8 @@ service:
 The example above shows how to use the `service` transformer to call a NATS service at the subject `services.my-service`.
 
 ## Fields
-| Field         | Type                            | Default | Required | Description                                |
-|---------------|---------------------------------|---------|----------|--------------------------------------------|
-| `endpoint`    | string                          |         | yes      | The subject of the service to call.        |
-| `nats_config` | [NatsConfig](../nats_config.md) |         | yes      | The configuration for the NATS connection. |
-| `timeout`     | string                          | "5s"    | no       | The maximum time to wait for a response.   |
+| Field      | Type                            | Default | Required | Description                                |
+|------------|---------------------------------|---------|----------|--------------------------------------------|
+| `endpoint` | string                          |         | yes      | The subject of the service to call.        |
+| `nats`     | [NatsConfig](../nats_config.md) |         | yes      | The configuration for the NATS connection. |
+| `timeout`  | string                          | "5s"    | no       | The maximum time to wait for a response.   |

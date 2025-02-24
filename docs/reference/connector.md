@@ -13,15 +13,13 @@ A Connector is defined in a YAML file and can be created using the `connect crea
 ## Example
 ```yaml
 description: ""
-workload: ghcr.io/synadia-io/connect-runtime-vanilla:latest
-metrics: {}
+runtime_id: wombat
 steps: {}
 ```
 
 ## Fields
-| Field         | Type                    | Default | Required | Description                                                           |
-|---------------|-------------------------|---------|----------|-----------------------------------------------------------------------|
-| `description` | string                  |         | no       | A description of the inlet to provide more context to users.          |
-| `workload`    | string                  |         | yes      | A reference to the runtime workload to use when running the connector |
-| `metrics`     | [Metrics](./metrics.md) |         | no       | The metrics configuration for the inlet.                              |
-| `steps`       | [Steps](./steps.md)     |         | yes      | The steps describing the work the connector wil perform.              |
+| Field         | Type                    | Default | Required | Description                                                        |
+|---------------|-------------------------|---------|----------|--------------------------------------------------------------------|
+| `description` | string                  |         | no       | A description of the inlet to provide more context to users.       |
+| `runtime_id`  | string                  |         | yes      | A reference to the runtime providing the connector building blocks |
+| `steps`       | [Steps](./steps.md)     |         | yes      | The steps describing the work the connector wil perform.           |
