@@ -246,7 +246,10 @@ func (j *ComponentGetRequest) UnmarshalJSON(value []byte) error {
 
 type ComponentGetResponse struct {
 	// Component corresponds to the JSON schema field "component".
-	Component Component `json:"component" yaml:"component" mapstructure:"component"`
+	Component *Component `json:"component,omitempty" yaml:"component,omitempty" mapstructure:"component,omitempty"`
+
+	// Whether the component was found
+	Found bool `json:"found" yaml:"found" mapstructure:"found"`
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
@@ -255,8 +258,8 @@ func (j *ComponentGetResponse) UnmarshalJSON(value []byte) error {
 	if err := json.Unmarshal(value, &raw); err != nil {
 		return err
 	}
-	if _, ok := raw["component"]; raw != nil && !ok {
-		return fmt.Errorf("field component in ComponentGetResponse: required")
+	if _, ok := raw["found"]; raw != nil && !ok {
+		return fmt.Errorf("field found in ComponentGetResponse: required")
 	}
 	type Plain ComponentGetResponse
 	var plain Plain
@@ -515,8 +518,11 @@ func (j *RuntimeGetRequest) UnmarshalJSON(value []byte) error {
 }
 
 type RuntimeGetResponse struct {
+	// Whether the runtime was found
+	Found bool `json:"found" yaml:"found" mapstructure:"found"`
+
 	// Runtime corresponds to the JSON schema field "runtime".
-	Runtime Runtime `json:"runtime" yaml:"runtime" mapstructure:"runtime"`
+	Runtime *Runtime `json:"runtime,omitempty" yaml:"runtime,omitempty" mapstructure:"runtime,omitempty"`
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
@@ -525,8 +531,8 @@ func (j *RuntimeGetResponse) UnmarshalJSON(value []byte) error {
 	if err := json.Unmarshal(value, &raw); err != nil {
 		return err
 	}
-	if _, ok := raw["runtime"]; raw != nil && !ok {
-		return fmt.Errorf("field runtime in RuntimeGetResponse: required")
+	if _, ok := raw["found"]; raw != nil && !ok {
+		return fmt.Errorf("field found in RuntimeGetResponse: required")
 	}
 	type Plain RuntimeGetResponse
 	var plain Plain
@@ -550,7 +556,25 @@ type RuntimeMetrics struct {
 	Path *string `json:"path,omitempty" yaml:"path,omitempty" mapstructure:"path,omitempty"`
 
 	// The port number where metrics can be retrieved
-	Port *int `json:"port,omitempty" yaml:"port,omitempty" mapstructure:"port,omitempty"`
+	Port int `json:"port" yaml:"port" mapstructure:"port"`
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (j *RuntimeMetrics) UnmarshalJSON(value []byte) error {
+	var raw map[string]interface{}
+	if err := json.Unmarshal(value, &raw); err != nil {
+		return err
+	}
+	if _, ok := raw["port"]; raw != nil && !ok {
+		return fmt.Errorf("field port in RuntimeMetrics: required")
+	}
+	type Plain RuntimeMetrics
+	var plain Plain
+	if err := json.Unmarshal(value, &plain); err != nil {
+		return err
+	}
+	*j = RuntimeMetrics(plain)
+	return nil
 }
 
 type RuntimeSummary struct {

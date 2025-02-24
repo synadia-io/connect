@@ -45,7 +45,7 @@ func (c *connectorClient) GetConnector(name string, timeout time.Duration) (*mod
         return nil, nil
     }
 
-    return &resp.Connector, nil
+    return resp.Connector, nil
 }
 
 func (c *connectorClient) GetConnectorStatus(name string, timeout time.Duration) (*model.ConnectorStatus, error) {
@@ -66,12 +66,11 @@ func (c *connectorClient) GetConnectorStatus(name string, timeout time.Duration)
     return &resp.Status, nil
 }
 
-func (c *connectorClient) CreateConnector(id, description, image string, metrics *model.Metrics, steps model.Steps, timeout time.Duration) (*model.Connector, error) {
+func (c *connectorClient) CreateConnector(id, description, runtimeId string, steps model.Steps, timeout time.Duration) (*model.Connector, error) {
     req := model.ConnectorCreateRequest{
         Id:          id,
         Description: description,
-        Image:       image,
-        Metrics:     metrics,
+        RuntimeId:   runtimeId,
         Steps:       steps,
     }
 
@@ -147,30 +146,7 @@ func (c *connectorClient) StartConnector(id string, startOpts *model.ConnectorSt
     var resp model.ConnectorStartResponse
     hasResponded, err := c.t.RequestJson(c.subject("START"), req, &resp, WithTimeout(timeout))
     if err != nil {
-        return nil, fmt.Errorf("unable to start connector: %v", err)
-    }
-
-    if !hasResponded {
-        return nil, nil
-    }
-
-    return resp.Instances, nil
-}
-
-func (c *connectorClient) StartAdHocConnector(id, description, image string, metrics *model.Metrics, steps model.Steps, startOpts *model.ConnectorStartOptions, timeout time.Duration) ([]model.Instance, error) {
-    req := model.ConnectorStartRequest{
-        ConnectorId: id,
-        Description: description,
-        Image:       image,
-        Metrics:     metrics,
-        Steps:       steps,
-        Options:     startOpts,
-    }
-
-    var resp model.ConnectorStartResponse
-    hasResponded, err := c.t.RequestJson(c.subject("START"), req, &resp, WithTimeout(timeout))
-    if err != nil {
-        return nil, fmt.Errorf("unable to start ad-hoc connector: %v", err)
+        return nil, err
     }
 
     if !hasResponded {

@@ -315,7 +315,25 @@ type MetricsSpec struct {
 	Path *string `json:"path,omitempty" yaml:"path,omitempty" mapstructure:"path,omitempty"`
 
 	// The port number where metrics can be retrieved
-	Port *int `json:"port,omitempty" yaml:"port,omitempty" mapstructure:"port,omitempty"`
+	Port int `json:"port" yaml:"port" mapstructure:"port"`
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (j *MetricsSpec) UnmarshalJSON(value []byte) error {
+	var raw map[string]interface{}
+	if err := json.Unmarshal(value, &raw); err != nil {
+		return err
+	}
+	if _, ok := raw["port"]; raw != nil && !ok {
+		return fmt.Errorf("field port in MetricsSpec: required")
+	}
+	type Plain MetricsSpec
+	var plain Plain
+	if err := json.Unmarshal(value, &plain); err != nil {
+		return err
+	}
+	*j = MetricsSpec(plain)
+	return nil
 }
 
 type RangeSpec struct {

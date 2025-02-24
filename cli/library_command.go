@@ -33,18 +33,18 @@ func ConfigureLibraryCommand(parentCmd commandHost, opts *Options) {
     kindOpts := []string{string(model.ComponentKindSource), string(model.ComponentKindSink), string(model.ComponentKindScanner)}
     statusOpts := []string{string(model.ComponentStatusStable), string(model.ComponentStatusPreview), string(model.ComponentStatusExperimental), string(model.ComponentStatusDeprecated)}
 
-    componentCmd.Command("runtimes", "List the available runtimes").Alias("ls").Action(c.listRuntimes)
+    componentCmd.Command("runtimes", "List the available runtimes").Action(c.listRuntimes)
 
     runtimeCmd := componentCmd.Command("runtime", "Show information about a runtime").Action(c.getRuntime)
     runtimeCmd.Arg("id", "The id of the runtime to describe").Required().StringVar(&c.runtime)
 
-    searchCmd := componentCmd.Command("list", "list components").Action(c.search)
+    searchCmd := componentCmd.Command("list", "list components").Alias("ls").Action(c.search)
     searchCmd.Flag("runtime", "The runtime id").StringVar(&c.runtime)
     searchCmd.Flag("kind", "The kind of components").EnumVar(&c.kind, kindOpts...)
     searchCmd.Flag("status", "The status of the components").EnumVar(&c.status, statusOpts...)
 
     infoCmd := componentCmd.Command("get", "Get component information").Alias("show").Action(c.info)
-    infoCmd.Flag("runtime", "The runtime id").Required().StringVar(&c.runtime)
+    infoCmd.Arg("runtime", "The runtime id").StringVar(&c.runtime)
     infoCmd.Arg("kind", "The kind of component").EnumVar(&c.kind, kindOpts...)
     infoCmd.Arg("name", "The name of the component").StringVar(&c.component)
 }
@@ -65,7 +65,11 @@ func (c *libraryCommand) listRuntimes(pc *fisk.ParseContext) error {
     }
 
     for _, runtime := range runtimes {
-        w.AppendRow(table.Row{runtime.Id, runtime.Label, runtime.Description, runtime.Author})
+        desc := ""
+        if runtime.Description != nil {
+            desc = *runtime.Description
+        }
+        w.AppendRow(table.Row{runtime.Id, runtime.Label, desc, runtime.Author})
     }
 
     result := w.Render()

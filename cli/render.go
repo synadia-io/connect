@@ -32,17 +32,7 @@ func renderConnector(c model.Connector) string {
     tbl.SetTitle(fmt.Sprintf("Connector: %s", c.ConnectorId))
     tbl.AppendRow(table.Row{"Description", text.WrapSoft(c.Description, 50)})
 
-    tbl.AppendRow(table.Row{"Image", c.Image})
-
-    metrics := color.RedString("Disabled")
-    if c.Metrics != nil && c.Metrics.Port != nil {
-        metrics = fmt.Sprintf("%d", c.Metrics.Port)
-
-        if c.Metrics.Path != nil {
-            metrics = fmt.Sprintf("%s%s", metrics, *c.Metrics.Path)
-        }
-    }
-    tbl.AppendRow(table.Row{"Metrics", metrics})
+    tbl.AppendRow(table.Row{"Runtime", c.RuntimeId})
 
     b, err := yaml.Marshal(c.Steps)
     fisk.FatalIfError(err, "failed to render steps")
@@ -65,8 +55,14 @@ func renderRuntime(rt model.Runtime) string {
         tbl.AppendRow(table.Row{"Description", text.WrapSoft(*rt.Description, 50)})
     }
     tbl.AppendRow(table.Row{"Author Name", rt.Author.Name})
-    tbl.AppendRow(table.Row{"Author Email", rt.Author.Email})
-    tbl.AppendRow(table.Row{"Author URL", rt.Author.Url})
+
+    if rt.Author.Email != nil {
+        tbl.AppendRow(table.Row{"Author Email", *rt.Author.Email})
+    }
+
+    if rt.Author.Url != nil {
+        tbl.AppendRow(table.Row{"Author URL", *rt.Author.Url})
+    }
     tbl.AppendRow(table.Row{"Image", rt.Image})
     metrics := rt.Metrics != nil
     tbl.AppendRow(table.Row{"Metrics", renderBoolean(&metrics)})

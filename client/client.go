@@ -20,13 +20,12 @@ type ConnectorClient interface {
     ListConnectors(timeout time.Duration) ([]model.ConnectorSummary, error)
     GetConnector(id string, timeout time.Duration) (*model.Connector, error)
     GetConnectorStatus(id string, timeout time.Duration) (*model.ConnectorStatus, error)
-    CreateConnector(id, description, image string, metrics *model.Metrics, steps model.Steps, timeout time.Duration) (*model.Connector, error)
+    CreateConnector(id, description, runtimeId string, steps model.Steps, timeout time.Duration) (*model.Connector, error)
     PatchConnector(id string, patch string, timeout time.Duration) (*model.Connector, error)
     DeleteConnector(id string, timeout time.Duration) error
 
     ListConnectorInstances(id string, timeout time.Duration) ([]model.Instance, error)
     StartConnector(id string, startOpts *model.ConnectorStartOptions, timeout time.Duration) ([]model.Instance, error)
-    StartAdHocConnector(id, description, image string, metrics *model.Metrics, steps model.Steps, startOpts *model.ConnectorStartOptions, timeout time.Duration) ([]model.Instance, error)
     StopConnector(id string, timeout time.Duration) ([]model.Instance, error)
 }
 

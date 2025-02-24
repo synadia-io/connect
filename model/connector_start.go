@@ -9,20 +9,8 @@ type ConnectorStartRequest struct {
 	// The id of the connector
 	ConnectorId string `json:"connector_id" yaml:"connector_id" mapstructure:"connector_id"`
 
-	// A description of the connector
-	Description string `json:"description" yaml:"description" mapstructure:"description"`
-
-	// The image to run
-	Image string `json:"image" yaml:"image" mapstructure:"image"`
-
-	// Metrics corresponds to the JSON schema field "metrics".
-	Metrics *Metrics `json:"metrics,omitempty" yaml:"metrics,omitempty" mapstructure:"metrics,omitempty"`
-
 	// Options corresponds to the JSON schema field "options".
 	Options *ConnectorStartOptions `json:"options,omitempty" yaml:"options,omitempty" mapstructure:"options,omitempty"`
-
-	// Steps corresponds to the JSON schema field "steps".
-	Steps Steps `json:"steps" yaml:"steps" mapstructure:"steps"`
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
@@ -33,15 +21,6 @@ func (j *ConnectorStartRequest) UnmarshalJSON(value []byte) error {
 	}
 	if _, ok := raw["connector_id"]; raw != nil && !ok {
 		return fmt.Errorf("field connector_id in ConnectorStartRequest: required")
-	}
-	if _, ok := raw["description"]; raw != nil && !ok {
-		return fmt.Errorf("field description in ConnectorStartRequest: required")
-	}
-	if _, ok := raw["image"]; raw != nil && !ok {
-		return fmt.Errorf("field image in ConnectorStartRequest: required")
-	}
-	if _, ok := raw["steps"]; raw != nil && !ok {
-		return fmt.Errorf("field steps in ConnectorStartRequest: required")
 	}
 	type Plain ConnectorStartRequest
 	var plain Plain

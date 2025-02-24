@@ -6,7 +6,7 @@ import "encoding/json"
 import "fmt"
 
 type ConnectorStatusRequest struct {
-	// The id of the connector to get status for
+	// The id of the connector to get the status for
 	ConnectorId string `json:"connector_id" yaml:"connector_id" mapstructure:"connector_id"`
 }
 

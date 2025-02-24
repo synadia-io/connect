@@ -9,11 +9,8 @@ type ConnectorSpec struct {
 	// A description of the connector
 	Description string `json:"description" yaml:"description" mapstructure:"description"`
 
-	// The image to run
-	Image string `json:"image" yaml:"image" mapstructure:"image"`
-
-	// Metrics corresponds to the JSON schema field "metrics".
-	Metrics *MetricsSpec `json:"metrics,omitempty" yaml:"metrics,omitempty" mapstructure:"metrics,omitempty"`
+	// Id of the runtime to use for this connector
+	RuntimeId string `json:"runtime_id" yaml:"runtime_id" mapstructure:"runtime_id"`
 
 	// Steps corresponds to the JSON schema field "steps".
 	Steps StepsSpec `json:"steps" yaml:"steps" mapstructure:"steps"`
@@ -28,8 +25,8 @@ func (j *ConnectorSpec) UnmarshalJSON(value []byte) error {
 	if _, ok := raw["description"]; raw != nil && !ok {
 		return fmt.Errorf("field description in ConnectorSpec: required")
 	}
-	if _, ok := raw["image"]; raw != nil && !ok {
-		return fmt.Errorf("field image in ConnectorSpec: required")
+	if _, ok := raw["runtime_id"]; raw != nil && !ok {
+		return fmt.Errorf("field runtime_id in ConnectorSpec: required")
 	}
 	if _, ok := raw["steps"]; raw != nil && !ok {
 		return fmt.Errorf("field steps in ConnectorSpec: required")

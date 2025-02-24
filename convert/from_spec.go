@@ -5,17 +5,6 @@ import (
     "github.com/synadia-io/connect/spec"
 )
 
-func MetricsFromSpec(sp *spec.MetricsSpec) *model.Metrics {
-    if sp == nil {
-        return nil
-    }
-
-    return &model.Metrics{
-        Path: sp.Path,
-        Port: sp.Port,
-    }
-}
-
 func ConvertStepsFromSpec(sp spec.StepsSpec) model.Steps {
     result := model.Steps{}
 

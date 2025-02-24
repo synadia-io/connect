@@ -12,11 +12,6 @@ import (
     "github.com/synadia-io/connect/client"
 )
 
-const (
-    ModeLight = "light"
-    ModeFull  = "full"
-)
-
 var DefaultOptions *Options
 
 func RegisterFlags(app *fisk.Application, version string, opts *Options) {
@@ -67,14 +62,6 @@ type ServiceInfo struct {
 
 func (si ServiceInfo) String() string {
     return fmt.Sprintf("%s %s", si.Name, si.Version)
-}
-
-func (si ServiceInfo) Mode() string {
-    if si.Metadata == nil {
-        return "unknown"
-    }
-
-    return si.Metadata["synadia-io/mode"]
 }
 
 type AppContext struct {

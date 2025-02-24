@@ -5,15 +5,6 @@ package spec
 import "encoding/json"
 import "fmt"
 
-// Information on how to collect metrics. If not set, no metrics will be collected
-type MetricsSpec struct {
-	// The path to collect metrics from
-	Path *string `json:"path,omitempty" yaml:"path,omitempty" mapstructure:"path,omitempty"`
-
-	// The port to collect metrics from
-	Port *int `json:"port,omitempty" yaml:"port,omitempty" mapstructure:"port,omitempty"`
-}
-
 type NatsConfigSpec struct {
 	// Whether authentication is enabled
 	AuthEnabled bool `json:"auth_enabled,omitempty" yaml:"auth_enabled,omitempty" mapstructure:"auth_enabled,omitempty"`

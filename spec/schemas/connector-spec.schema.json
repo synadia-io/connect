@@ -8,16 +8,13 @@
       "type": "string",
       "description": "A description of the connector"
     },
-    "image": {
+    "runtime_id": {
       "type": "string",
-      "description": "The image to run"
-    },
-    "metrics": {
-      "$ref": "./metrics-model.schema.json"
+      "description": "Id of the runtime to use for this connector"
     },
     "steps": {
       "$ref": "connector-steps-model.schema.json"
     }
   },
-  "required": ["description", "image", "steps"]
+  "required": ["description", "runtime_id", "steps"]
 }

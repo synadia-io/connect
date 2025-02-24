@@ -50,7 +50,7 @@ func (c *libraryClient) GetRuntime(id string, timeout time.Duration) (*model.Run
         return nil, nil
     }
 
-    return &resp.Runtime, nil
+    return resp.Runtime, nil
 }
 
 func (c *libraryClient) SearchComponents(filter *model.ComponentSearchFilter, timeout time.Duration) ([]model.ComponentSummary, error) {
@@ -59,7 +59,7 @@ func (c *libraryClient) SearchComponents(filter *model.ComponentSearchFilter, ti
     }
 
     var resp model.ComponentSearchResponse
-    gotResponse, err := c.t.RequestJson(c.subject(components, "SEARCH"), req, &resp, WithTimeout(timeout))
+    gotResponse, err := c.t.RequestJson(c.subject(components, "LIST"), req, &resp, WithTimeout(timeout))
     if err != nil {
         return nil, fmt.Errorf("unable to search components: %v", err)
     }
@@ -88,5 +88,5 @@ func (c *libraryClient) GetComponent(runtimeId string, kind model.ComponentKind,
         return nil, nil
     }
 
-    return &resp.Component, nil
+    return resp.Component, nil
 }

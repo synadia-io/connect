@@ -38,9 +38,6 @@ func (j *ConnectorPatchRequest) UnmarshalJSON(value []byte) error {
 type ConnectorPatchResponse struct {
 	// The updated connector
 	Connector Connector `json:"connector" yaml:"connector" mapstructure:"connector"`
-
-	// The revision of the connector
-	Revision int `json:"revision" yaml:"revision" mapstructure:"revision"`
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
@@ -51,9 +48,6 @@ func (j *ConnectorPatchResponse) UnmarshalJSON(value []byte) error {
 	}
 	if _, ok := raw["connector"]; raw != nil && !ok {
 		return fmt.Errorf("field connector in ConnectorPatchResponse: required")
-	}
-	if _, ok := raw["revision"]; raw != nil && !ok {
-		return fmt.Errorf("field revision in ConnectorPatchResponse: required")
 	}
 	type Plain ConnectorPatchResponse
 	var plain Plain

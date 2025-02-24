@@ -12,11 +12,8 @@ type ConnectorCreateRequest struct {
 	// The id of the connector to create
 	Id string `json:"id" yaml:"id" mapstructure:"id"`
 
-	// The image to run
-	Image string `json:"image" yaml:"image" mapstructure:"image"`
-
-	// Metrics corresponds to the JSON schema field "metrics".
-	Metrics *Metrics `json:"metrics,omitempty" yaml:"metrics,omitempty" mapstructure:"metrics,omitempty"`
+	// The connector runtime
+	RuntimeId string `json:"runtime_id" yaml:"runtime_id" mapstructure:"runtime_id"`
 
 	// Steps corresponds to the JSON schema field "steps".
 	Steps Steps `json:"steps" yaml:"steps" mapstructure:"steps"`
@@ -34,8 +31,8 @@ func (j *ConnectorCreateRequest) UnmarshalJSON(value []byte) error {
 	if _, ok := raw["id"]; raw != nil && !ok {
 		return fmt.Errorf("field id in ConnectorCreateRequest: required")
 	}
-	if _, ok := raw["image"]; raw != nil && !ok {
-		return fmt.Errorf("field image in ConnectorCreateRequest: required")
+	if _, ok := raw["runtime_id"]; raw != nil && !ok {
+		return fmt.Errorf("field runtime_id in ConnectorCreateRequest: required")
 	}
 	if _, ok := raw["steps"]; raw != nil && !ok {
 		return fmt.Errorf("field steps in ConnectorCreateRequest: required")
@@ -52,9 +49,6 @@ func (j *ConnectorCreateRequest) UnmarshalJSON(value []byte) error {
 type ConnectorCreateResponse struct {
 	// The created connector
 	Connector Connector `json:"connector" yaml:"connector" mapstructure:"connector"`
-
-	// the revision
-	Revision int `json:"revision" yaml:"revision" mapstructure:"revision"`
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
@@ -65,9 +59,6 @@ func (j *ConnectorCreateResponse) UnmarshalJSON(value []byte) error {
 	}
 	if _, ok := raw["connector"]; raw != nil && !ok {
 		return fmt.Errorf("field connector in ConnectorCreateResponse: required")
-	}
-	if _, ok := raw["revision"]; raw != nil && !ok {
-		return fmt.Errorf("field revision in ConnectorCreateResponse: required")
 	}
 	type Plain ConnectorCreateResponse
 	var plain Plain

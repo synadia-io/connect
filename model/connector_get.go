@@ -30,10 +30,10 @@ func (j *ConnectorGetRequest) UnmarshalJSON(value []byte) error {
 
 type ConnectorGetResponse struct {
 	// The connector
-	Connector Connector `json:"connector" yaml:"connector" mapstructure:"connector"`
+	Connector *Connector `json:"connector,omitempty" yaml:"connector,omitempty" mapstructure:"connector,omitempty"`
 
-	// The revision of the connector
-	Revision int `json:"revision" yaml:"revision" mapstructure:"revision"`
+	// Whether the connector was found
+	Found bool `json:"found" yaml:"found" mapstructure:"found"`
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
@@ -42,11 +42,8 @@ func (j *ConnectorGetResponse) UnmarshalJSON(value []byte) error {
 	if err := json.Unmarshal(value, &raw); err != nil {
 		return err
 	}
-	if _, ok := raw["connector"]; raw != nil && !ok {
-		return fmt.Errorf("field connector in ConnectorGetResponse: required")
-	}
-	if _, ok := raw["revision"]; raw != nil && !ok {
-		return fmt.Errorf("field revision in ConnectorGetResponse: required")
+	if _, ok := raw["found"]; raw != nil && !ok {
+		return fmt.Errorf("field found in ConnectorGetResponse: required")
 	}
 	type Plain ConnectorGetResponse
 	var plain Plain

@@ -37,11 +37,8 @@ type Connector struct {
 	// A description of the connector
 	Description string `json:"description" yaml:"description" mapstructure:"description"`
 
-	// The image to run
-	Image string `json:"image" yaml:"image" mapstructure:"image"`
-
-	// Metrics corresponds to the JSON schema field "metrics".
-	Metrics *Metrics `json:"metrics,omitempty" yaml:"metrics,omitempty" mapstructure:"metrics,omitempty"`
+	// The id of the connector's runtime
+	RuntimeId string `json:"runtime_id" yaml:"runtime_id" mapstructure:"runtime_id"`
 
 	// Steps corresponds to the JSON schema field "steps".
 	Steps Steps `json:"steps" yaml:"steps" mapstructure:"steps"`
@@ -172,14 +169,11 @@ type ConnectorSummary struct {
 	// A description of the connector
 	Description string `json:"description" yaml:"description" mapstructure:"description"`
 
-	// The image to run
-	Image string `json:"image" yaml:"image" mapstructure:"image"`
-
 	// Instances corresponds to the JSON schema field "instances".
 	Instances ConnectorSummaryInstances `json:"instances" yaml:"instances" mapstructure:"instances"`
 
-	// Whether metrics are enabled
-	MetricsEnabled bool `json:"metrics_enabled" yaml:"metrics_enabled" mapstructure:"metrics_enabled"`
+	// The id of the connector's runtime
+	RuntimeId string `json:"runtime_id" yaml:"runtime_id" mapstructure:"runtime_id"`
 }
 
 type ConnectorSummaryInstances struct {
@@ -229,19 +223,16 @@ func (j *ConnectorSummary) UnmarshalJSON(value []byte) error {
 	if _, ok := raw["description"]; raw != nil && !ok {
 		return fmt.Errorf("field description in ConnectorSummary: required")
 	}
-	if _, ok := raw["image"]; raw != nil && !ok {
-		return fmt.Errorf("field image in ConnectorSummary: required")
-	}
 	if _, ok := raw["instances"]; raw != nil && !ok {
 		return fmt.Errorf("field instances in ConnectorSummary: required")
+	}
+	if _, ok := raw["runtime_id"]; raw != nil && !ok {
+		return fmt.Errorf("field runtime_id in ConnectorSummary: required")
 	}
 	type Plain ConnectorSummary
 	var plain Plain
 	if err := json.Unmarshal(value, &plain); err != nil {
 		return err
-	}
-	if v, ok := raw["metrics_enabled"]; !ok || v == nil {
-		plain.MetricsEnabled = false
 	}
 	*j = ConnectorSummary(plain)
 	return nil
@@ -259,8 +250,8 @@ func (j *Connector) UnmarshalJSON(value []byte) error {
 	if _, ok := raw["description"]; raw != nil && !ok {
 		return fmt.Errorf("field description in Connector: required")
 	}
-	if _, ok := raw["image"]; raw != nil && !ok {
-		return fmt.Errorf("field image in Connector: required")
+	if _, ok := raw["runtime_id"]; raw != nil && !ok {
+		return fmt.Errorf("field runtime_id in Connector: required")
 	}
 	if _, ok := raw["steps"]; raw != nil && !ok {
 		return fmt.Errorf("field steps in Connector: required")
@@ -434,7 +425,25 @@ type Metrics struct {
 	Path *string `json:"path,omitempty" yaml:"path,omitempty" mapstructure:"path,omitempty"`
 
 	// The port to collect metrics from
-	Port *int `json:"port,omitempty" yaml:"port,omitempty" mapstructure:"port,omitempty"`
+	Port int `json:"port" yaml:"port" mapstructure:"port"`
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (j *Metrics) UnmarshalJSON(value []byte) error {
+	var raw map[string]interface{}
+	if err := json.Unmarshal(value, &raw); err != nil {
+		return err
+	}
+	if _, ok := raw["port"]; raw != nil && !ok {
+		return fmt.Errorf("field port in Metrics: required")
+	}
+	type Plain Metrics
+	var plain Plain
+	if err := json.Unmarshal(value, &plain); err != nil {
+		return err
+	}
+	*j = Metrics(plain)
+	return nil
 }
 
 type NatsConfig struct {

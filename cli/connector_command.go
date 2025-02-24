@@ -23,7 +23,7 @@ import (
 type connectorCommand struct {
     opts *Options
 
-    file          *os.File
+    file          string
     fileSetByUser bool
 
     pull                  bool
@@ -61,7 +61,7 @@ func ConfigureConnectorCommand(parentCmd commandHost, opts *Options) {
 
     saveCmd := connectorCmd.Command("save", "Add or modify a connector").Alias("add").Action(c.saveConnector)
     saveCmd.Arg("id", "The id of the connector to create or modify").Required().StringVar(&c.id)
-    saveCmd.Flag("file", "use the connector definition from the given file").Short('f').IsSetByUser(&c.fileSetByUser).Default("./ConnectFile").FileVar(&c.file)
+    saveCmd.Flag("file", "use the connector definition from the given file").Short('f').IsSetByUser(&c.fileSetByUser).Default("./ConnectFile").StringVar(&c.file)
     saveCmd.Flag("runtime", "The runtime id").Default("wombat").StringVar(&c.runtime)
 
     deleteCmd := connectorCmd.Command("delete", "delete a connector").Alias("rm").Action(c.removeConnector)
@@ -72,7 +72,6 @@ func ConfigureConnectorCommand(parentCmd commandHost, opts *Options) {
 
     startCmd := connectorCmd.Command("start", "Deploy a connector").Action(c.startConnector)
     startCmd.Arg("id", "The id of the connector to deploy").Required().StringVar(&c.id)
-    startCmd.Flag("file", "The connector configuration file").Short('f').IsSetByUser(&c.fileSetByUser).FileVar(&c.file)
     startCmd.Flag("pull", "Whether to pull the image").Default("false").UnNegatableBoolVar(&c.pull)
     startCmd.Flag("pull-username", "Username for the pull").IsSetByUser(&c.pullUsernameSetByUser).StringVar(&c.pullUsername)
     startCmd.Flag("pull-password", "Password for the pull").IsSetByUser(&c.pullPasswordSetByUser).StringVar(&c.pullPassword)
@@ -105,13 +104,13 @@ func (c *connectorCommand) listConnectors(pc *fisk.ParseContext) error {
     tbl.SetColumnConfigs([]table.ColumnConfig{
         {Number: 1, Name: "Name"},
         {Number: 2, Name: "Description"},
-        {Number: 3, Name: "Metrics", Align: text.AlignCenter},
-        {Number: 5, Name: color.YellowString("~"), WidthMin: 3, WidthMax: 5, Align: text.AlignCenter, AlignHeader: text.AlignCenter},
-        {Number: 6, Name: color.GreenString("\u25B6"), WidthMin: 3, WidthMax: 5, Align: text.AlignCenter, AlignHeader: text.AlignCenter},
-        {Number: 7, Name: color.RedString("\u25FC"), WidthMin: 3, WidthMax: 5, Align: text.AlignCenter, AlignHeader: text.AlignCenter},
+        {Number: 3, Name: "Runtime"},
+        {Number: 4, Name: color.YellowString("~"), WidthMin: 3, WidthMax: 5, Align: text.AlignCenter, AlignHeader: text.AlignCenter},
+        {Number: 5, Name: color.GreenString("\u25B6"), WidthMin: 3, WidthMax: 5, Align: text.AlignCenter, AlignHeader: text.AlignCenter},
+        {Number: 6, Name: color.RedString("\u25FC"), WidthMin: 3, WidthMax: 5, Align: text.AlignCenter, AlignHeader: text.AlignCenter},
     })
 
-    tbl.AppendHeader(table.Row{"Name", "Description", "Metrics", color.YellowString("~"), color.GreenString("\u25B6"), color.RedString("\u25FC")}, table.RowConfig{AutoMerge: true})
+    tbl.AppendHeader(table.Row{"Name", "Description", "Runtime", color.YellowString("~"), color.GreenString("\u25B6"), color.RedString("\u25FC")}, table.RowConfig{AutoMerge: true})
 
     for _, c := range resp {
         pending := ""
@@ -132,7 +131,7 @@ func (c *connectorCommand) listConnectors(pc *fisk.ParseContext) error {
         tbl.AppendRow(table.Row{
             c.ConnectorId,
             text.WrapSoft(c.Description, 50),
-            renderBoolean(&c.MetricsEnabled),
+            c.RuntimeId,
             pending,
             running,
             stopped,
@@ -148,12 +147,6 @@ func (c *connectorCommand) getConnector(pc *fisk.ParseContext) error {
     appCtx, err := LoadOptions(c.opts)
     fisk.FatalIfError(err, "failed to load options")
     defer appCtx.Close()
-
-    // -- return if in light mode
-    if appCtx.Service.Mode() == ModeLight {
-        fmt.Println("Light mode does not support retrieving connectors")
-        return nil
-    }
 
     resp, err := appCtx.Client.GetConnector(c.id, c.opts.Timeout)
     fisk.FatalIfError(err, "failed to list instances for %s", c.id)
@@ -172,12 +165,6 @@ func (c *connectorCommand) removeConnector(pc *fisk.ParseContext) error {
     appCtx, err := LoadOptions(c.opts)
     fisk.FatalIfError(err, "failed to load options")
     defer appCtx.Close()
-
-    // -- return if in light mode
-    if appCtx.Service.Mode() == ModeLight {
-        fmt.Println("Light mode does not support deleting connectors")
-        return nil
-    }
 
     err = appCtx.Client.DeleteConnector(c.id, c.opts.Timeout)
     if err != nil {
@@ -274,22 +261,8 @@ func (c *connectorCommand) startConnector(pc *fisk.ParseContext) error {
         }
     }
 
-    var instances []model.Instance
-    if appCtx.Service.Mode() == ModeLight {
-        if !c.fileSetByUser {
-            return fmt.Errorf("light mode requires a connector spec file to be set to start a connector")
-        }
-
-        csp, _, err := fromFile(nil, c.file)
-        fisk.FatalIfError(err, "could not load connector spec from file: %v", err)
-
-        instances, err = appCtx.Client.StartAdHocConnector(c.id, csp.Description, csp.Image, convert.MetricsFromSpec(csp.Metrics),
-            convert.ConvertStepsFromSpec(csp.Steps), opts, c.opts.Timeout)
-    } else {
-        instances, err = appCtx.Client.StartConnector(c.id, opts, c.opts.Timeout)
-    }
-
-    fisk.FatalIfError(err, "failed to start connector %s: %v", c.id, err)
+    instances, err := appCtx.Client.StartConnector(c.id, opts, c.opts.Timeout)
+    fisk.FatalIfError(err, "start")
 
     fmt.Printf("Connector %s instances started: \n", c.id)
     for _, i := range instances {
@@ -331,14 +304,8 @@ func (c *connectorCommand) saveConnector(pc *fisk.ParseContext) error {
     if exists {
         sp = spec.ConnectorSpec{
             Description: conn.Description,
-            Image:       conn.Image,
+            RuntimeId:   conn.RuntimeId,
             Steps:       convert.ConvertStepsToSpec(conn.Steps),
-        }
-        if conn.Metrics != nil {
-            sp.Metrics = &spec.MetricsSpec{
-                Port: conn.Metrics.Port,
-                Path: conn.Metrics.Path,
-            }
         }
     } else {
         if !c.fileSetByUser {
@@ -365,8 +332,7 @@ func (c *connectorCommand) saveConnector(pc *fisk.ParseContext) error {
 
     var connector *model.Connector
     if !exists {
-        connector, err = appCtx.Client.CreateConnector(c.id, result.Description, result.Image,
-            convert.MetricsFromSpec(result.Metrics), convert.ConvertStepsFromSpec(result.Steps), c.opts.Timeout)
+        connector, err = appCtx.Client.CreateConnector(c.id, result.Description, result.RuntimeId, convert.ConvertStepsFromSpec(result.Steps), c.opts.Timeout)
         if err != nil {
             color.Red("Could not save connector: %s", err)
             os.Exit(1)
@@ -394,25 +360,25 @@ func (c *connectorCommand) saveConnector(pc *fisk.ParseContext) error {
     return nil
 }
 
-func fromFile(existing *spec.ConnectorSpec, file *os.File) (*spec.ConnectorSpec, bool, error) {
+func fromFile(existing *spec.ConnectorSpec, file string) (*spec.ConnectorSpec, bool, error) {
     // -- check if the file exists
-    if _, err := os.Stat(file.Name()); os.IsNotExist(err) {
-        return nil, false, fmt.Errorf("ConnectFile %q not found", file.Name())
+    if _, err := os.Stat(file); os.IsNotExist(err) {
+        return nil, false, fmt.Errorf("ConnectFile %q not found", file)
     }
 
     // -- open the file
-    f, err := os.Open(file.Name())
-    fisk.FatalIfError(err, "failed to open ConnectFile %q: %v", file.Name(), err)
+    f, err := os.Open(file)
+    fisk.FatalIfError(err, "failed to open ConnectFile %q: %v", file, err)
     defer f.Close()
 
     // -- read the file
     var sp spec.Spec
     if err := yaml.NewDecoder(f).Decode(&sp); err != nil {
-        return nil, false, fmt.Errorf("failed to decode ConnectFile %q: %w", file.Name(), err)
+        return nil, false, fmt.Errorf("failed to decode ConnectFile %q: %w", file, err)
     }
 
     if sp.Type != spec.SpecTypeConnector {
-        return nil, false, fmt.Errorf("file %q is not a connector spec file", file.Name())
+        return nil, false, fmt.Errorf("file %q is not a connector spec file", file)
     }
 
     var csp spec.ConnectorSpec
@@ -480,14 +446,7 @@ func (c *connectorCommand) selectConnectorTemplate(cl client.Client) (*spec.Conn
 
     sp := spec.ConnectorSpec{
         Description: "A summary of what this connector does",
-        Image:       rt.Image,
-    }
-
-    if rt.Metrics != nil {
-        sp.Metrics = &spec.MetricsSpec{
-            Port: rt.Metrics.Port,
-            Path: rt.Metrics.Path,
-        }
+        RuntimeId:   rt.Id,
     }
 
     templates := []struct {
