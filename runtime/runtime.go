@@ -8,52 +8,36 @@ import (
     "gopkg.in/yaml.v3"
     "log/slog"
     "os"
+    "strings"
 )
 
-const AccountEnvVar = "CONNECT_ACCOUNT"
-const ConnectorIdEnvVar = "CONNECT_CONNECTOR_ID"
-const InstanceIdEnvVar = "CONNECT_INSTANCE_ID"
+const LogLevelEnvVar = "CONNECT_LOG_LEVEL"
 
 func FromEnv() (*Runtime, error) {
-    account := os.Getenv(AccountEnvVar)
-    if account == "" {
-        return nil, fmt.Errorf("%s environment variable not found", AccountEnvVar)
+    logLevel := slog.LevelDebug
+    switch strings.ToLower(os.Getenv(LogLevelEnvVar)) {
+    case "debug":
+        logLevel = slog.LevelDebug
+    case "info":
+        logLevel = slog.LevelInfo
+    case "warn":
+        logLevel = slog.LevelWarn
+    case "error":
+        logLevel = slog.LevelError
     }
 
-    connectorId := os.Getenv(ConnectorIdEnvVar)
-    if connectorId == "" {
-        return nil, fmt.Errorf("%s environment variable not found", ConnectorIdEnvVar)
-    }
-
-    instanceId := os.Getenv(InstanceIdEnvVar)
-    if instanceId == "" {
-        return nil, fmt.Errorf("%s environment variable not found", InstanceIdEnvVar)
-    }
-
-    return NewRuntime(account, connectorId, instanceId, slog.LevelDebug), nil
+    return NewRuntime(logLevel), nil
 }
 
-func NewRuntime(account string, connectorId string, instanceId string, logLevel slog.Level) *Runtime {
+func NewRuntime(logLevel slog.Level) *Runtime {
     return &Runtime{
-        Account:     account,
-        ConnectorId: connectorId,
-        InstanceId:  instanceId,
-        LogLevel:    logLevel,
+        LogLevel: logLevel,
     }
 }
 
 type Workload func(ctx context.Context, runtime *Runtime, steps model.Steps) error
 
 type Runtime struct {
-    // Account is the account for which this connector is running
-    Account string
-
-    // ConnectorId is the connector id
-    ConnectorId string
-
-    // InstanceId identifies this instance of the connector
-    InstanceId string
-
     // LogLevel is the log level for the runtime
     LogLevel slog.Level
 
