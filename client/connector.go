@@ -125,7 +125,7 @@ func (c *connectorClient) ListConnectorInstances(id string, timeout time.Duratio
     }
 
     var resp model.ConnectorInstancesResponse
-    gotResponse, err := c.t.RequestJson(c.subject("INSTANCES.LIST"), req, &resp, WithTimeout(timeout))
+    gotResponse, err := c.t.RequestJson(c.subject("INSTANCES"), req, &resp, WithTimeout(timeout))
     if err != nil {
         return nil, fmt.Errorf("unable to list connector instances: %v", err)
     }
