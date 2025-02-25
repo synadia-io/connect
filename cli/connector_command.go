@@ -59,7 +59,7 @@ func ConfigureConnectorCommand(parentCmd commandHost, opts *Options) {
     getCmd := connectorCmd.Command("get", "get a connector").Alias("show").Action(c.getConnector)
     getCmd.Arg("connector", "the name of the connector").Required().StringVar(&c.id)
 
-    saveCmd := connectorCmd.Command("save", "Add or modify a connector").Alias("add").Action(c.saveConnector)
+    saveCmd := connectorCmd.Command("edit", "Add or modify a connector").Alias("create").Action(c.saveConnector)
     saveCmd.Arg("id", "The id of the connector to create or modify").Required().StringVar(&c.id)
     saveCmd.Flag("file", "use the connector definition from the given file").Short('f').IsSetByUser(&c.fileSetByUser).Default("./ConnectFile").StringVar(&c.file)
     saveCmd.Flag("runtime", "The runtime id").Default("wombat").StringVar(&c.runtime)
