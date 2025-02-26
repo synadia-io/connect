@@ -1,0 +1,50 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "io.synadia.connect.v1.spec.connector.steps.producer",
+  "title": "ProducerStepSpec",
+  "description": "The producer writing messages to NATS",
+  "type": "object",
+  "properties": {
+    "nats": {
+      "$ref": "./nats-config-model.schema.json"
+    },
+    "subject": {
+      "type": "string",
+      "description": "The subject to write messages to"
+    },
+    "threads": {
+      "type": "integer",
+      "description": "The number of threads used to write messages.",
+      "default": 1
+    },
+    "jetstream": {
+      "type": "object",
+      "description": "The JetStream configuration",
+      "properties": {
+        "msg_id": {
+          "type": "string",
+          "description": "The message id to allow stream message deduplication"
+        },
+        "ack_wait": {
+          "type": "string",
+          "description": "The ack wait time"
+        },
+        "batching": {
+          "type": "object",
+          "description": "The Batching Policy",
+          "properties": {
+            "count": {
+              "type": "integer",
+              "description": "The number of messages to batch"
+            },
+            "byte_size": {
+              "type": "integer",
+              "description": "The size of the batch"
+            }
+          }
+        }
+      }
+    }
+  },
+  "required": ["nats", "subject"]
+}

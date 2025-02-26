@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "io.synadia.connect.v1.spec.nats_config",
+  "title": "NatsConfigSpec",
+  "type": "object",
+  "properties": {
+    "url": {
+      "type": "string",
+      "description": "The url of the nats server to connect to"
+    },
+    "auth_enabled": {
+      "type": "boolean",
+      "description": "Whether authentication is enabled",
+      "default": false
+    },
+    "jwt": {
+      "type": "string",
+      "description": "The JWT token used during authentication. Only applicable if auth_enabled is true"
+    },
+    "seed": {
+      "type": "string",
+      "description": "The seed used during authentication. Only applicable if auth_enabled is true"
+    }
+  },
+  "required": ["url"]
+}
