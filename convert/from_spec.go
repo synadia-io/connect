@@ -37,7 +37,7 @@ func ConvertStepsFromSpec(sp spec.StepsSpec) model.Steps {
         if sp.Consumer.Kv != nil {
             result.Consumer.Kv = &model.ConsumerStepKv{
                 Bucket: sp.Consumer.Kv.Bucket,
-                Prefix: sp.Consumer.Kv.Prefix,
+                Key:    sp.Consumer.Kv.Key,
             }
         }
     }

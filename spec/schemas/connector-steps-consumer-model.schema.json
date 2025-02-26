@@ -46,9 +46,10 @@
           "type": "string",
           "description": "The bucket to use when reading from the KV store"
         },
-        "prefix": {
+        "key": {
           "type": "string",
-          "description": "The prefix to use when reading from the KV store"
+          "description": "The key to use when reading from the KV store",
+          "default": ">"
         }
       },
       "required": ["bucket"]

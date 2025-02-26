@@ -312,8 +312,8 @@ type ConsumerStepKv struct {
 	// The bucket to use when reading from the KV store
 	Bucket string `json:"bucket" yaml:"bucket" mapstructure:"bucket"`
 
-	// The prefix to use when reading from the KV store
-	Prefix *string `json:"prefix,omitempty" yaml:"prefix,omitempty" mapstructure:"prefix,omitempty"`
+	// The key to use when reading from the KV store
+	Key string `json:"key,omitempty" yaml:"key,omitempty" mapstructure:"key,omitempty"`
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
@@ -329,6 +329,9 @@ func (j *ConsumerStepKv) UnmarshalJSON(value []byte) error {
 	var plain Plain
 	if err := json.Unmarshal(value, &plain); err != nil {
 		return err
+	}
+	if v, ok := raw["key"]; !ok || v == nil {
+		plain.Key = ">"
 	}
 	*j = ConsumerStepKv(plain)
 	return nil
