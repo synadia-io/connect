@@ -29,8 +29,7 @@ func ConvertStepsFromSpec(sp spec.StepsSpec) model.Steps {
 
         if sp.Consumer.Stream != nil {
             result.Consumer.Stream = &model.ConsumerStepStream{
-                Filter: sp.Consumer.Stream.Filter,
-                Stream: sp.Consumer.Stream.Stream,
+                Subject: sp.Consumer.Stream.Subject,
             }
         }
 

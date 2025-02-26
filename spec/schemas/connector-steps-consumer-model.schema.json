@@ -27,16 +27,12 @@
       "type": "object",
       "description": "The configuration for reading from JetStream streams",
       "properties": {
-        "stream": {
+        "subject": {
           "type": "string",
-          "description": "The stream to read messages from"
-        },
-        "filter": {
-          "type": "string",
-          "description": "The subject filter to apply to the messages"
+          "description": "The subject to consume from"
         }
       },
-      "required": ["stream"]
+      "required": ["subject"]
     },
     "kv": {
       "type": "object",

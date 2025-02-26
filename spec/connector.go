@@ -114,11 +114,8 @@ func (j *ConsumerStepSpecKv) UnmarshalJSON(value []byte) error {
 
 // The configuration for reading from JetStream streams
 type ConsumerStepSpecStream struct {
-	// The subject filter to apply to the messages
-	Filter *string `json:"filter,omitempty" yaml:"filter,omitempty" mapstructure:"filter,omitempty"`
-
-	// The stream to read messages from
-	Stream string `json:"stream" yaml:"stream" mapstructure:"stream"`
+	// The subject to consume from
+	Subject string `json:"subject" yaml:"subject" mapstructure:"subject"`
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
@@ -127,8 +124,8 @@ func (j *ConsumerStepSpecStream) UnmarshalJSON(value []byte) error {
 	if err := json.Unmarshal(value, &raw); err != nil {
 		return err
 	}
-	if _, ok := raw["stream"]; raw != nil && !ok {
-		return fmt.Errorf("field stream in ConsumerStepSpecStream: required")
+	if _, ok := raw["subject"]; raw != nil && !ok {
+		return fmt.Errorf("field subject in ConsumerStepSpecStream: required")
 	}
 	type Plain ConsumerStepSpecStream
 	var plain Plain
