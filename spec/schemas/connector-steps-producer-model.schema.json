@@ -8,43 +8,47 @@
     "nats": {
       "$ref": "./nats-config-model.schema.json"
     },
-    "subject": {
-      "type": "string",
-      "description": "The subject to write messages to"
-    },
     "threads": {
       "type": "integer",
       "description": "The number of threads used to write messages.",
       "default": 1
     },
-    "jetstream": {
+    "core": {
       "type": "object",
-      "description": "The JetStream configuration",
+      "description": "The configuration for writing to Core NATS subjects",
       "properties": {
-        "msg_id": {
+        "subject": {
           "type": "string",
-          "description": "The message id to allow stream message deduplication"
-        },
-        "ack_wait": {
+          "description": "The subject to send data to"
+        }
+      },
+      "required": ["subject"]
+    },
+    "stream": {
+      "type": "object",
+      "description": "The configuration for writing to JetStream streams",
+      "properties": {
+        "subject": {
           "type": "string",
-          "description": "The ack wait time"
-        },
-        "batching": {
-          "type": "object",
-          "description": "The Batching Policy",
-          "properties": {
-            "count": {
-              "type": "integer",
-              "description": "The number of messages to batch"
-            },
-            "byte_size": {
-              "type": "integer",
-              "description": "The size of the batch"
-            }
-          }
+          "description": "The subject to send data to"
         }
       }
+    },
+    "kv": {
+      "type": "object",
+      "description": "The configuration for writing to the NATS KV store",
+      "properties": {
+        "bucket": {
+          "type": "string",
+          "description": "The bucket to use when writing to the KV store"
+        },
+        "key": {
+          "type": "string",
+          "description": "The key to use when writing to the KV store"
+        }
+      },
+      "required": ["bucket", "key"]
     }
   },
-  "required": ["nats", "subject"]
+  "required": ["nats"]
 }

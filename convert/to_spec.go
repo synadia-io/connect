@@ -12,8 +12,6 @@ func ConvertStepsToSpec(steps model.Steps) spec.StepsSpec {
         ncfg := steps.Consumer.Nats
 
         result.Consumer = &spec.ConsumerStepSpec{
-            Subject: steps.Consumer.Subject,
-            Queue:   steps.Consumer.Queue,
             Nats: spec.NatsConfigSpec{
                 Url:         ncfg.Url,
                 AuthEnabled: ncfg.AuthEnabled,
@@ -22,14 +20,24 @@ func ConvertStepsToSpec(steps model.Steps) spec.StepsSpec {
             },
         }
 
-        if steps.Consumer.Jetstream != nil {
-            js := steps.Consumer.Jetstream
-            result.Consumer.Jetstream = &spec.ConsumerStepSpecJetstream{
-                Bind:          js.Bind,
-                DeliverPolicy: js.DeliverPolicy,
-                Durable:       js.Durable,
-                MaxAckPending: js.MaxAckPending,
-                MaxAckWait:    js.MaxAckWait,
+        if steps.Consumer.Core != nil {
+            result.Consumer.Core = &spec.ConsumerStepSpecCore{
+                Queue:   steps.Consumer.Core.Queue,
+                Subject: steps.Consumer.Core.Subject,
+            }
+        }
+
+        if steps.Consumer.Stream != nil {
+            result.Consumer.Stream = &spec.ConsumerStepSpecStream{
+                Filter: steps.Consumer.Stream.Filter,
+                Stream: steps.Consumer.Stream.Stream,
+            }
+        }
+
+        if steps.Consumer.Kv != nil {
+            result.Consumer.Kv = &spec.ConsumerStepSpecKv{
+                Bucket: steps.Consumer.Kv.Bucket,
+                Prefix: steps.Consumer.Kv.Prefix,
             }
         }
     }
@@ -38,7 +46,6 @@ func ConvertStepsToSpec(steps model.Steps) spec.StepsSpec {
         ncfg := steps.Producer.Nats
 
         result.Producer = &spec.ProducerStepSpec{
-            Subject: steps.Producer.Subject,
             Nats: spec.NatsConfigSpec{
                 Url:         ncfg.Url,
                 AuthEnabled: ncfg.AuthEnabled,
@@ -47,18 +54,22 @@ func ConvertStepsToSpec(steps model.Steps) spec.StepsSpec {
             },
         }
 
-        if steps.Producer.Jetstream != nil {
-            js := steps.Producer.Jetstream
-            result.Producer.Jetstream = &spec.ProducerStepSpecJetstream{
-                MsgId:   js.MsgId,
-                AckWait: js.AckWait,
+        if steps.Producer.Core != nil {
+            result.Producer.Core = &spec.ProducerStepSpecCore{
+                Subject: steps.Producer.Core.Subject,
             }
+        }
 
-            if steps.Producer.Jetstream.Batching != nil {
-                result.Producer.Jetstream.Batching = &spec.ProducerStepSpecJetstreamBatching{
-                    Count:    js.Batching.Count,
-                    ByteSize: js.Batching.ByteSize,
-                }
+        if steps.Producer.Stream != nil {
+            result.Producer.Stream = &spec.ProducerStepSpecStream{
+                Subject: steps.Producer.Stream.Subject,
+            }
+        }
+
+        if steps.Producer.Kv != nil {
+            result.Producer.Kv = &spec.ProducerStepSpecKv{
+                Bucket: steps.Producer.Kv.Bucket,
+                Key:    steps.Producer.Kv.Key,
             }
         }
     }

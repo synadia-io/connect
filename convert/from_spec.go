@@ -12,8 +12,6 @@ func ConvertStepsFromSpec(sp spec.StepsSpec) model.Steps {
         ncfg := sp.Consumer.Nats
 
         result.Consumer = &model.ConsumerStep{
-            Subject: sp.Consumer.Subject,
-            Queue:   sp.Consumer.Queue,
             Nats: model.NatsConfig{
                 Url:         ncfg.Url,
                 AuthEnabled: ncfg.AuthEnabled,
@@ -22,14 +20,24 @@ func ConvertStepsFromSpec(sp spec.StepsSpec) model.Steps {
             },
         }
 
-        if sp.Consumer.Jetstream != nil {
-            js := sp.Consumer.Jetstream
-            result.Consumer.Jetstream = &model.ConsumerStepJetstream{
-                Bind:          js.Bind,
-                DeliverPolicy: js.DeliverPolicy,
-                Durable:       js.Durable,
-                MaxAckPending: js.MaxAckPending,
-                MaxAckWait:    js.MaxAckWait,
+        if sp.Consumer.Core != nil {
+            result.Consumer.Core = &model.ConsumerStepCore{
+                Queue:   sp.Consumer.Core.Queue,
+                Subject: sp.Consumer.Core.Subject,
+            }
+        }
+
+        if sp.Consumer.Stream != nil {
+            result.Consumer.Stream = &model.ConsumerStepStream{
+                Filter: sp.Consumer.Stream.Filter,
+                Stream: sp.Consumer.Stream.Stream,
+            }
+        }
+
+        if sp.Consumer.Kv != nil {
+            result.Consumer.Kv = &model.ConsumerStepKv{
+                Bucket: sp.Consumer.Kv.Bucket,
+                Prefix: sp.Consumer.Kv.Prefix,
             }
         }
     }
@@ -38,7 +46,6 @@ func ConvertStepsFromSpec(sp spec.StepsSpec) model.Steps {
         ncfg := sp.Producer.Nats
 
         result.Producer = &model.ProducerStep{
-            Subject: sp.Producer.Subject,
             Nats: model.NatsConfig{
                 Url:         ncfg.Url,
                 AuthEnabled: ncfg.AuthEnabled,
@@ -47,18 +54,22 @@ func ConvertStepsFromSpec(sp spec.StepsSpec) model.Steps {
             },
         }
 
-        if sp.Producer.Jetstream != nil {
-            js := sp.Producer.Jetstream
-            result.Producer.Jetstream = &model.ProducerStepJetstream{
-                MsgId:   js.MsgId,
-                AckWait: js.AckWait,
+        if sp.Producer.Core != nil {
+            result.Producer.Core = &model.ProducerStepCore{
+                Subject: sp.Producer.Core.Subject,
             }
+        }
 
-            if js.Batching != nil {
-                result.Producer.Jetstream.Batching = &model.ProducerStepJetstreamBatching{
-                    Count:    js.Batching.Count,
-                    ByteSize: js.Batching.ByteSize,
-                }
+        if sp.Producer.Stream != nil {
+            result.Producer.Stream = &model.ProducerStepStream{
+                Subject: sp.Producer.Stream.Subject,
+            }
+        }
+
+        if sp.Producer.Kv != nil {
+            result.Producer.Kv = &model.ProducerStepKv{
+                Bucket: sp.Producer.Kv.Bucket,
+                Key:    sp.Producer.Kv.Key,
             }
         }
     }

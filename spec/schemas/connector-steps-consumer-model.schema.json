@@ -8,40 +8,51 @@
     "nats": {
       "$ref": "./nats-config-model.schema.json"
     },
-    "subject": {
-      "type": "string",
-      "description": "The subject to read messages from"
-    },
-    "queue": {
-      "type": "string",
-      "description": "The queue this connector should join"
-    },
-    "jetstream": {
+    "core": {
       "type": "object",
-      "description": "The JetStream configuration",
+      "description": "The configuration for reading from Core NATS subjects",
       "properties": {
-        "deliver_policy": {
+        "subject": {
           "type": "string",
-          "description": "The JetStream deliver policy"
+          "description": "The subject to read messages from"
         },
-        "max_ack_pending": {
-          "type": "integer",
-          "description": "The maximum number of acks pending"
-        },
-        "max_ack_wait": {
+        "queue": {
           "type": "string",
-          "description": "The maximum ack wait time"
-        },
-        "durable": {
-          "type": "string",
-          "description": "The durable name"
-        },
-        "bind": {
-          "type": "boolean",
-          "description": "Whether to bind to the durable"
+          "description": "The queue this connector should join"
         }
-      }
+      },
+      "required": ["subject"]
+    },
+    "stream": {
+      "type": "object",
+      "description": "The configuration for reading from JetStream streams",
+      "properties": {
+        "stream": {
+          "type": "string",
+          "description": "The stream to read messages from"
+        },
+        "filter": {
+          "type": "string",
+          "description": "The subject filter to apply to the messages"
+        }
+      },
+      "required": ["stream"]
+    },
+    "kv": {
+      "type": "object",
+      "description": "The configuration for reading from the NATS KV store",
+      "properties": {
+        "bucket": {
+          "type": "string",
+          "description": "The bucket to use when reading from the KV store"
+        },
+        "prefix": {
+          "type": "string",
+          "description": "The prefix to use when reading from the KV store"
+        }
+      },
+      "required": ["bucket"]
     }
   },
-  "required": ["nats", "subject"]
+  "required": ["nats"]
 }
