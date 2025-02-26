@@ -229,7 +229,25 @@ func (j *ProducerStepSpecKv) UnmarshalJSON(value []byte) error {
 // The configuration for writing to JetStream streams
 type ProducerStepSpecStream struct {
 	// The subject to send data to
-	Subject *string `json:"subject,omitempty" yaml:"subject,omitempty" mapstructure:"subject,omitempty"`
+	Subject string `json:"subject" yaml:"subject" mapstructure:"subject"`
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (j *ProducerStepSpecStream) UnmarshalJSON(value []byte) error {
+	var raw map[string]interface{}
+	if err := json.Unmarshal(value, &raw); err != nil {
+		return err
+	}
+	if _, ok := raw["subject"]; raw != nil && !ok {
+		return fmt.Errorf("field subject in ProducerStepSpecStream: required")
+	}
+	type Plain ProducerStepSpecStream
+	var plain Plain
+	if err := json.Unmarshal(value, &plain); err != nil {
+		return err
+	}
+	*j = ProducerStepSpecStream(plain)
+	return nil
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
