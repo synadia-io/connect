@@ -32,7 +32,8 @@
           "type": "string",
           "description": "The subject to send data to"
         }
-      }
+      },
+      "required": ["subject"]
     },
     "kv": {
       "type": "object",
