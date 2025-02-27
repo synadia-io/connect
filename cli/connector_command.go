@@ -42,6 +42,8 @@ type connectorCommand struct {
     description string
     image       string
 
+    targetId string
+
     runtime     string
     interactive bool
 }
@@ -63,6 +65,10 @@ func ConfigureConnectorCommand(parentCmd commandHost, opts *Options) {
     saveCmd.Arg("id", "The id of the connector to create or modify").Required().StringVar(&c.id)
     saveCmd.Flag("file", "use the connector definition from the given file").Short('f').IsSetByUser(&c.fileSetByUser).Default("./ConnectFile").StringVar(&c.file)
     saveCmd.Flag("runtime", "The runtime id").Default("wombat").StringVar(&c.runtime)
+
+    copyCmd := connectorCmd.Command("copy", "Copy a connector").Action(c.copyConnector)
+    copyCmd.Arg("id", "The id of the connector to copy").Required().StringVar(&c.id)
+    copyCmd.Arg("target-id", "The id of the new connector").Required().StringVar(&c.targetId)
 
     deleteCmd := connectorCmd.Command("delete", "delete a connector").Alias("rm").Action(c.removeConnector)
     deleteCmd.Arg("connector", "the name of the connector").Required().StringVar(&c.id)
@@ -357,6 +363,28 @@ func (c *connectorCommand) saveConnector(pc *fisk.ParseContext) error {
 
     fmt.Println(renderConnector(*connector))
 
+    return nil
+}
+
+func (c *connectorCommand) copyConnector(context *fisk.ParseContext) error {
+    appCtx, err := LoadOptions(c.opts)
+    fisk.FatalIfError(err, "failed to load options")
+    defer appCtx.Close()
+
+    // -- check if the connector exists
+    conn, err := appCtx.Client.GetConnector(c.id, c.opts.Timeout)
+    fisk.FatalIfError(err, "failed to get connector %s: %v", c.id, err)
+    exists := conn != nil
+
+    if !exists {
+        fmt.Printf("Connector %s not found\n", c.id)
+        return nil
+    }
+
+    _, err = appCtx.Client.CreateConnector(c.targetId, conn.Description, conn.RuntimeId, convert.ConvertStepsFromSpec(convert.ConvertStepsToSpec(conn.Steps)), c.opts.Timeout)
+    fisk.FatalIfError(err, "failed to create connector %s: %v", c.targetId, err)
+
+    fmt.Printf("Created connector %s\n", color.GreenString(c.targetId))
     return nil
 }
 

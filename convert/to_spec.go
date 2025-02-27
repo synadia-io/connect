@@ -51,6 +51,7 @@ func ConvertStepsToSpec(steps model.Steps) spec.StepsSpec {
                 Jwt:         ncfg.Jwt,
                 Seed:        ncfg.Seed,
             },
+            Threads: steps.Producer.Threads,
         }
 
         if steps.Producer.Core != nil {
