@@ -5,6 +5,7 @@ go 1.24
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
 	github.com/choria-io/fisk v0.6.4
+	github.com/evanphx/json-patch/v5 v5.9.11
 	github.com/fatih/color v1.18.0
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
 	github.com/jedib0t/go-pretty/v6 v6.6.6

@@ -18,6 +18,7 @@ import (
     "github.com/mitchellh/mapstructure"
     "github.com/synadia-io/connect/model"
     "gopkg.in/yaml.v3"
+    jsonpatch "github.com/evanphx/json-patch/v5"
 )
 
 type connectorCommand struct {
@@ -43,6 +44,7 @@ type connectorCommand struct {
     image       string
 
     targetId string
+    reload   bool
 
     runtime     string
     interactive bool
@@ -88,6 +90,9 @@ func ConfigureConnectorCommand(parentCmd commandHost, opts *Options) {
 
     stopCmd := connectorCmd.Command("stop", "stop a connector").Action(c.stopConnector)
     stopCmd.Arg("id", "The id of the connector to stop").Required().StringVar(&c.id)
+
+    reloadCmd := connectorCmd.Command("reload", "reload a connector").Alias("restart").Action(c.reloadConnector)
+    reloadCmd.Arg("id", "The id of the connector to reload").Required().StringVar(&c.id)
 }
 
 func (c *connectorCommand) listConnectors(pc *fisk.ParseContext) error {
@@ -278,6 +283,35 @@ func (c *connectorCommand) startConnector(pc *fisk.ParseContext) error {
     return nil
 }
 
+func (c *connectorCommand) reloadConnector(context *fisk.ParseContext) error {
+    appCtx, err := LoadOptions(c.opts)
+    fisk.FatalIfError(err, "failed to load options")
+    defer appCtx.Close()
+
+    instances, err := appCtx.Client.ListConnectorInstances(c.id, c.opts.Timeout)
+    fisk.FatalIfError(err, "failed to get connector instances")
+
+    if len(instances) >= 0 {
+        stoppedInstances, err := appCtx.Client.StopConnector(c.id, c.opts.Timeout)
+        fisk.FatalIfError(err, "failed to reload connector")
+
+        fmt.Printf("Instances stopped:\n")
+        for _, i := range stoppedInstances {
+            fmt.Printf("  %s\n", i.Id)
+        }
+    }
+
+    instances, err = appCtx.Client.StartConnector(c.id, &model.ConnectorStartOptions{}, c.opts.Timeout)
+    fisk.FatalIfError(err, "failed to reload connector")
+
+    fmt.Printf("Instances started: \n")
+    for _, i := range instances {
+        fmt.Printf("  %s\n", i.Id)
+    }
+
+    return nil
+}
+
 func (c *connectorCommand) stopConnector(pc *fisk.ParseContext) error {
     appCtx, err := LoadOptions(c.opts)
     fisk.FatalIfError(err, "failed to load options")
@@ -346,7 +380,7 @@ func (c *connectorCommand) saveConnector(pc *fisk.ParseContext) error {
 
         fmt.Printf("Created connector %s\n", color.GreenString(c.id))
     } else {
-        b, err := json.Marshal(result)
+        b, err := createMergePatch(sp, result)
         if err != nil {
             color.Red("Could not marshall connector patch: %s", err)
             os.Exit(1)
@@ -362,6 +396,18 @@ func (c *connectorCommand) saveConnector(pc *fisk.ParseContext) error {
     }
 
     fmt.Println(renderConnector(*connector))
+    fmt.Println()
+
+    // ask the user if we want to reload the connector
+    choice := ""
+    _ = survey.AskOne(&survey.Select{
+        Message: "Do you want to reload the connector now?",
+        Options: []string{"Yes", "No"},
+    }, &choice, survey.WithValidator(survey.Required))
+
+    if choice == "Yes" {
+        _ = c.reloadConnector(pc)
+    }
 
     return nil
 }
@@ -518,4 +564,17 @@ func (c *connectorCommand) selectConnectorTemplate(cl client.Client) (*spec.Conn
     modify()
 
     return &sp, nil
+}
+
+func createMergePatch(original any, modified any) ([]byte, error) {
+    originalB, err := json.Marshal(original)
+    if err != nil {
+        return nil, fmt.Errorf("could not marshal original connector: %w", err)
+    }
+    modifiedB, err := json.Marshal(modified)
+    if err != nil {
+        return nil, fmt.Errorf("could not marshal modified connector: %w", err)
+    }
+
+    return jsonpatch.CreateMergePatch(originalB, modifiedB)
 }
