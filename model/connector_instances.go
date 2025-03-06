@@ -7,25 +7,7 @@ import "fmt"
 
 type ConnectorInstancesRequest struct {
 	// The id of the connector to get instances for
-	ConnectorId string `json:"connector_id" yaml:"connector_id" mapstructure:"connector_id"`
-}
-
-// UnmarshalJSON implements json.Unmarshaler.
-func (j *ConnectorInstancesRequest) UnmarshalJSON(value []byte) error {
-	var raw map[string]interface{}
-	if err := json.Unmarshal(value, &raw); err != nil {
-		return err
-	}
-	if _, ok := raw["connector_id"]; raw != nil && !ok {
-		return fmt.Errorf("field connector_id in ConnectorInstancesRequest: required")
-	}
-	type Plain ConnectorInstancesRequest
-	var plain Plain
-	if err := json.Unmarshal(value, &plain); err != nil {
-		return err
-	}
-	*j = ConnectorInstancesRequest(plain)
-	return nil
+	ConnectorId *string `json:"connector_id,omitempty" yaml:"connector_id,omitempty" mapstructure:"connector_id,omitempty"`
 }
 
 type ConnectorInstancesResponse struct {

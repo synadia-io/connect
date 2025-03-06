@@ -36,9 +36,8 @@ func renderConnector(c model.Connector) string {
 
     b, err := yaml.Marshal(c.Steps)
     fisk.FatalIfError(err, "failed to render steps")
-    tbl.AppendRow(table.Row{"Steps", text.WrapText(string(b), 50)})
 
-    return tbl.Render()
+    return fmt.Sprintf("%s\n\n%s", tbl.Render(), string(b))
 }
 
 func renderRuntime(rt model.Runtime) string {

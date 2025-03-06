@@ -3,6 +3,8 @@ package client
 import (
     "fmt"
     "github.com/synadia-io/connect/model"
+    "slices"
+    "strings"
     "time"
 )
 
@@ -27,7 +29,12 @@ func (c *connectorClient) ListConnectors(timeout time.Duration) ([]model.Connect
         return []model.ConnectorSummary{}, nil
     }
 
-    return resp.Connectors, nil
+    result := resp.Connectors
+    slices.SortFunc(result, func(a, b model.ConnectorSummary) int {
+        return strings.Compare(a.ConnectorId, b.ConnectorId)
+    })
+
+    return result, nil
 }
 
 func (c *connectorClient) GetConnector(name string, timeout time.Duration) (*model.Connector, error) {
@@ -121,7 +128,7 @@ func (c *connectorClient) DeleteConnector(id string, timeout time.Duration) erro
 
 func (c *connectorClient) ListConnectorInstances(id string, timeout time.Duration) ([]model.Instance, error) {
     req := model.ConnectorInstancesRequest{
-        ConnectorId: id,
+        ConnectorId: &id,
     }
 
     var resp model.ConnectorInstancesResponse

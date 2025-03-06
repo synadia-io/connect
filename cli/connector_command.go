@@ -13,12 +13,12 @@ import (
 
     "github.com/AlecAivazis/survey/v2"
     "github.com/choria-io/fisk"
+    jsonpatch "github.com/evanphx/json-patch/v5"
     "github.com/fatih/color"
     "github.com/jedib0t/go-pretty/v6/table"
     "github.com/mitchellh/mapstructure"
     "github.com/synadia-io/connect/model"
     "gopkg.in/yaml.v3"
-    jsonpatch "github.com/evanphx/json-patch/v5"
 )
 
 type connectorCommand struct {
@@ -84,7 +84,7 @@ func ConfigureConnectorCommand(parentCmd commandHost, opts *Options) {
     startCmd.Flag("pull-username", "Username for the pull").IsSetByUser(&c.pullUsernameSetByUser).StringVar(&c.pullUsername)
     startCmd.Flag("pull-password", "Password for the pull").IsSetByUser(&c.pullPasswordSetByUser).StringVar(&c.pullPassword)
     startCmd.Flag("replicas", "Number of replicas to start").Default("1").IntVar(&c.replicas)
-    startCmd.Flag("placement-tags", "Placement tags to use").StringsVar(&c.placementTags)
+    startCmd.Flag("tag", "Placement tag to use").StringsVar(&c.placementTags)
     startCmd.Flag("env", "Environment variables to set").Short('e').StringMapVar(&c.envVars)
     startCmd.Flag("start-timeout", "How long to wait for the component to be started").Default("5m").StringVar(&c.startTimeout)
 
@@ -396,18 +396,18 @@ func (c *connectorCommand) saveConnector(pc *fisk.ParseContext) error {
     }
 
     fmt.Println(renderConnector(*connector))
-    fmt.Println()
-
-    // ask the user if we want to reload the connector
-    choice := ""
-    _ = survey.AskOne(&survey.Select{
-        Message: "Do you want to reload the connector now?",
-        Options: []string{"Yes", "No"},
-    }, &choice, survey.WithValidator(survey.Required))
-
-    if choice == "Yes" {
-        _ = c.reloadConnector(pc)
-    }
+    //fmt.Println()
+    //
+    //// ask the user if we want to reload the connector
+    //choice := ""
+    //_ = survey.AskOne(&survey.Select{
+    //    Message: "Do you want to reload the connector now?",
+    //    Options: []string{"Yes", "No"},
+    //}, &choice, survey.WithValidator(survey.Required))
+    //
+    //if choice == "Yes" {
+    //    _ = c.reloadConnector(pc)
+    //}
 
     return nil
 }
