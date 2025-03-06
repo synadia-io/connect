@@ -91,6 +91,9 @@
     build:
       generates:
         - target/connect
+      env:
+        GOOS: "{{.GOOS}}"
+        GOARCH: "{{.GOARCH}}"
       cmds:
         - go mod tidy
         - go build -ldflags="{{.LD_FLAGS}}" -o target/connect cmd/connect/*.go
