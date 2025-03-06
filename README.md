@@ -17,17 +17,18 @@ Make sure you are using the right nats context
 nats context select
 ```
 
-### Install as a plugin in NATS CLI
+To make sure your binary is correct and everything is up and running, try listing the available components:
 ```shell
-nats plugins register connect <path to your connect binary>
+connect library ls
 ```
 
-## Documentation
-Documentation for connect is rather sparse for the time being. We are working on improving the documentation and adding
-more examples. If you have any questions, feel free to ask in the #connector channel on the Synadia slack.
+Once you have the binary correctly installed, you may want to move on to create your first connector. Take a look at
+the [getting started guide](docs/getting-started.md) for more information on how to accomplish that.
 
-Reference:
-- [Connector Reference documentation](docs/reference/connector.md)
+Another useful resource is the [connector specification](spec/schemas/connector-spec.schema.json) which details the 
+structure of a connector.
+
+Further reference documentation can be found in the  [Connector Reference documentation](docs/reference/connector.md)
 
 ## Usage
 You can use the `connect` command to interact with the connect service and manage connectors or explore the library.
@@ -36,9 +37,6 @@ Take a look at the help page to see what you can do:
 ```shell
 connect --help
 ```
-
-## Getting Started
-To get started with connect, take a look at the [Getting Started](docs/getting-started.md) guide.
 
 ## Contributing
 We love to get feedback, bug reports, and contributions from our community. If you have any questions or want to
