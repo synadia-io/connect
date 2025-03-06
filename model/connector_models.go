@@ -267,12 +267,21 @@ func (j *Connector) UnmarshalJSON(value []byte) error {
 
 // The consumer reading messages from NATS
 type ConsumerStep struct {
-	// The JetStream configuration
-	Jetstream *ConsumerStepJetstream `json:"jetstream,omitempty" yaml:"jetstream,omitempty" mapstructure:"jetstream,omitempty"`
+	// The configuration for reading from Core NATS subjects
+	Core *ConsumerStepCore `json:"core,omitempty" yaml:"core,omitempty" mapstructure:"core,omitempty"`
+
+	// The configuration for reading from the NATS KV store
+	Kv *ConsumerStepKv `json:"kv,omitempty" yaml:"kv,omitempty" mapstructure:"kv,omitempty"`
 
 	// Nats corresponds to the JSON schema field "nats".
 	Nats NatsConfig `json:"nats" yaml:"nats" mapstructure:"nats"`
 
+	// The configuration for reading from JetStream streams
+	Stream *ConsumerStepStream `json:"stream,omitempty" yaml:"stream,omitempty" mapstructure:"stream,omitempty"`
+}
+
+// The configuration for reading from Core NATS subjects
+type ConsumerStepCore struct {
 	// The queue this connector should join
 	Queue *string `json:"queue,omitempty" yaml:"queue,omitempty" mapstructure:"queue,omitempty"`
 
@@ -280,22 +289,76 @@ type ConsumerStep struct {
 	Subject string `json:"subject" yaml:"subject" mapstructure:"subject"`
 }
 
-// The JetStream configuration
-type ConsumerStepJetstream struct {
-	// Whether to bind to the durable
-	Bind *bool `json:"bind,omitempty" yaml:"bind,omitempty" mapstructure:"bind,omitempty"`
+// UnmarshalJSON implements json.Unmarshaler.
+func (j *ConsumerStepCore) UnmarshalJSON(value []byte) error {
+	var raw map[string]interface{}
+	if err := json.Unmarshal(value, &raw); err != nil {
+		return err
+	}
+	if _, ok := raw["subject"]; raw != nil && !ok {
+		return fmt.Errorf("field subject in ConsumerStepCore: required")
+	}
+	type Plain ConsumerStepCore
+	var plain Plain
+	if err := json.Unmarshal(value, &plain); err != nil {
+		return err
+	}
+	*j = ConsumerStepCore(plain)
+	return nil
+}
 
-	// The JetStream deliver policy
-	DeliverPolicy *string `json:"deliver_policy,omitempty" yaml:"deliver_policy,omitempty" mapstructure:"deliver_policy,omitempty"`
+// The configuration for reading from the NATS KV store
+type ConsumerStepKv struct {
+	// The bucket to use when reading from the KV store
+	Bucket string `json:"bucket" yaml:"bucket" mapstructure:"bucket"`
 
-	// The durable name
-	Durable *string `json:"durable,omitempty" yaml:"durable,omitempty" mapstructure:"durable,omitempty"`
+	// The key to use when reading from the KV store
+	Key string `json:"key,omitempty" yaml:"key,omitempty" mapstructure:"key,omitempty"`
+}
 
-	// The maximum number of acks pending
-	MaxAckPending *int `json:"max_ack_pending,omitempty" yaml:"max_ack_pending,omitempty" mapstructure:"max_ack_pending,omitempty"`
+// UnmarshalJSON implements json.Unmarshaler.
+func (j *ConsumerStepKv) UnmarshalJSON(value []byte) error {
+	var raw map[string]interface{}
+	if err := json.Unmarshal(value, &raw); err != nil {
+		return err
+	}
+	if _, ok := raw["bucket"]; raw != nil && !ok {
+		return fmt.Errorf("field bucket in ConsumerStepKv: required")
+	}
+	type Plain ConsumerStepKv
+	var plain Plain
+	if err := json.Unmarshal(value, &plain); err != nil {
+		return err
+	}
+	if v, ok := raw["key"]; !ok || v == nil {
+		plain.Key = ">"
+	}
+	*j = ConsumerStepKv(plain)
+	return nil
+}
 
-	// The maximum ack wait time
-	MaxAckWait *string `json:"max_ack_wait,omitempty" yaml:"max_ack_wait,omitempty" mapstructure:"max_ack_wait,omitempty"`
+// The configuration for reading from JetStream streams
+type ConsumerStepStream struct {
+	// The subject to consume from
+	Subject string `json:"subject" yaml:"subject" mapstructure:"subject"`
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (j *ConsumerStepStream) UnmarshalJSON(value []byte) error {
+	var raw map[string]interface{}
+	if err := json.Unmarshal(value, &raw); err != nil {
+		return err
+	}
+	if _, ok := raw["subject"]; raw != nil && !ok {
+		return fmt.Errorf("field subject in ConsumerStepStream: required")
+	}
+	type Plain ConsumerStepStream
+	var plain Plain
+	if err := json.Unmarshal(value, &plain); err != nil {
+		return err
+	}
+	*j = ConsumerStepStream(plain)
+	return nil
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
@@ -306,9 +369,6 @@ func (j *ConsumerStep) UnmarshalJSON(value []byte) error {
 	}
 	if _, ok := raw["nats"]; raw != nil && !ok {
 		return fmt.Errorf("field nats in ConsumerStep: required")
-	}
-	if _, ok := raw["subject"]; raw != nil && !ok {
-		return fmt.Errorf("field subject in ConsumerStep: required")
 	}
 	type Plain ConsumerStep
 	var plain Plain
@@ -484,38 +544,98 @@ func (j *NatsConfig) UnmarshalJSON(value []byte) error {
 
 // The producer writing messages to NATS
 type ProducerStep struct {
-	// The JetStream configuration
-	Jetstream *ProducerStepJetstream `json:"jetstream,omitempty" yaml:"jetstream,omitempty" mapstructure:"jetstream,omitempty"`
+	// The configuration for writing to Core NATS subjects
+	Core *ProducerStepCore `json:"core,omitempty" yaml:"core,omitempty" mapstructure:"core,omitempty"`
+
+	// The configuration for writing to the NATS KV store
+	Kv *ProducerStepKv `json:"kv,omitempty" yaml:"kv,omitempty" mapstructure:"kv,omitempty"`
 
 	// Nats corresponds to the JSON schema field "nats".
 	Nats NatsConfig `json:"nats" yaml:"nats" mapstructure:"nats"`
 
-	// The subject to write messages to
-	Subject string `json:"subject" yaml:"subject" mapstructure:"subject"`
+	// The configuration for writing to JetStream streams
+	Stream *ProducerStepStream `json:"stream,omitempty" yaml:"stream,omitempty" mapstructure:"stream,omitempty"`
 
 	// The number of threads used to write messages.
 	Threads int `json:"threads,omitempty" yaml:"threads,omitempty" mapstructure:"threads,omitempty"`
 }
 
-// The JetStream configuration
-type ProducerStepJetstream struct {
-	// The ack wait time
-	AckWait *string `json:"ack_wait,omitempty" yaml:"ack_wait,omitempty" mapstructure:"ack_wait,omitempty"`
-
-	// The Batching Policy
-	Batching *ProducerStepJetstreamBatching `json:"batching,omitempty" yaml:"batching,omitempty" mapstructure:"batching,omitempty"`
-
-	// The message id to allow stream message deduplication
-	MsgId *string `json:"msg_id,omitempty" yaml:"msg_id,omitempty" mapstructure:"msg_id,omitempty"`
+// The configuration for writing to Core NATS subjects
+type ProducerStepCore struct {
+	// The subject to send data to
+	Subject string `json:"subject" yaml:"subject" mapstructure:"subject"`
 }
 
-// The Batching Policy
-type ProducerStepJetstreamBatching struct {
-	// The size of the batch
-	ByteSize *int `json:"byte_size,omitempty" yaml:"byte_size,omitempty" mapstructure:"byte_size,omitempty"`
+// UnmarshalJSON implements json.Unmarshaler.
+func (j *ProducerStepCore) UnmarshalJSON(value []byte) error {
+	var raw map[string]interface{}
+	if err := json.Unmarshal(value, &raw); err != nil {
+		return err
+	}
+	if _, ok := raw["subject"]; raw != nil && !ok {
+		return fmt.Errorf("field subject in ProducerStepCore: required")
+	}
+	type Plain ProducerStepCore
+	var plain Plain
+	if err := json.Unmarshal(value, &plain); err != nil {
+		return err
+	}
+	*j = ProducerStepCore(plain)
+	return nil
+}
 
-	// The number of messages to batch
-	Count *int `json:"count,omitempty" yaml:"count,omitempty" mapstructure:"count,omitempty"`
+// The configuration for writing to the NATS KV store
+type ProducerStepKv struct {
+	// The bucket to use when writing to the KV store
+	Bucket string `json:"bucket" yaml:"bucket" mapstructure:"bucket"`
+
+	// The prefix to use when writing to the KV store
+	Key string `json:"key" yaml:"key" mapstructure:"key"`
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (j *ProducerStepKv) UnmarshalJSON(value []byte) error {
+	var raw map[string]interface{}
+	if err := json.Unmarshal(value, &raw); err != nil {
+		return err
+	}
+	if _, ok := raw["bucket"]; raw != nil && !ok {
+		return fmt.Errorf("field bucket in ProducerStepKv: required")
+	}
+	if _, ok := raw["key"]; raw != nil && !ok {
+		return fmt.Errorf("field key in ProducerStepKv: required")
+	}
+	type Plain ProducerStepKv
+	var plain Plain
+	if err := json.Unmarshal(value, &plain); err != nil {
+		return err
+	}
+	*j = ProducerStepKv(plain)
+	return nil
+}
+
+// The configuration for writing to JetStream streams
+type ProducerStepStream struct {
+	// The subject to send data to
+	Subject string `json:"subject" yaml:"subject" mapstructure:"subject"`
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (j *ProducerStepStream) UnmarshalJSON(value []byte) error {
+	var raw map[string]interface{}
+	if err := json.Unmarshal(value, &raw); err != nil {
+		return err
+	}
+	if _, ok := raw["subject"]; raw != nil && !ok {
+		return fmt.Errorf("field subject in ProducerStepStream: required")
+	}
+	type Plain ProducerStepStream
+	var plain Plain
+	if err := json.Unmarshal(value, &plain); err != nil {
+		return err
+	}
+	*j = ProducerStepStream(plain)
+	return nil
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
@@ -526,9 +646,6 @@ func (j *ProducerStep) UnmarshalJSON(value []byte) error {
 	}
 	if _, ok := raw["nats"]; raw != nil && !ok {
 		return fmt.Errorf("field nats in ProducerStep: required")
-	}
-	if _, ok := raw["subject"]; raw != nil && !ok {
-		return fmt.Errorf("field subject in ProducerStep: required")
 	}
 	type Plain ProducerStep
 	var plain Plain

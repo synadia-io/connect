@@ -187,7 +187,7 @@ func printField(field model.ComponentField, prefix string) {
 
     fmt.Printf("\t%s field", field.Type)
     if field.Default != nil {
-        fmt.Printf(", defaults to %s\n", field.Default)
+        fmt.Printf(", defaults to %v\n", field.Default)
     } else {
         fmt.Print("\n")
     }

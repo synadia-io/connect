@@ -106,7 +106,7 @@ func LoadOptions(opts *Options) (*AppContext, error) {
         return nil, fmt.Errorf("failed to create client: %w", err)
     }
 
-    resp, err := nc.Request("$SRV.INFO.flow-node", nil, 5*time.Second)
+    resp, err := nc.Request("$SRV.INFO.connect-node", nil, 5*time.Second)
     if err != nil {
         return nil, fmt.Errorf("unable to contact the flow service: %w", err)
     }

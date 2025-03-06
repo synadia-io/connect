@@ -39,7 +39,8 @@ steps:
       subject: "testing.hello.input"
       url: nats://demo.nats.io:4222
   producer:
-    subject: "testing.hello.output"
+    core:
+      subject: "testing.hello.output"
     nats_config:
       url: nats://demo.nats.io:4222
 ```
@@ -50,7 +51,7 @@ Let's run through the different fields in this file:
 - `steps`: The steps that make up the connector. In this case, we have two steps: `source` and `producer`
 - `source.type`: The type of source. Take a look at the `connect component search` command to see the available sources.
 - `source.config`: The configuration for the source. This depends on the type of source being used.
-- `producer.subject`: The NATS subject on which the message will be published.
+- `producer.core.subject`: The NATS subject on which the message will be published.
 - `producer.nats_config.url`: The URL of the NATS server we want to publish the data to.
 
 Save the inlet and exit the editor. You can run `connect connectors list` (or `connect c ls`) to see the newly created inlet.
