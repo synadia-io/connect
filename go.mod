@@ -1,4 +1,4 @@
-module github.com/synadia-io/connect
+module github.com/synadia-io/connect/v2
 
 go 1.24
 

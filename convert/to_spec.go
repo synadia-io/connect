@@ -1,8 +1,8 @@
 package convert
 
 import (
-    "github.com/synadia-io/connect/model"
-    "github.com/synadia-io/connect/spec"
+    "github.com/synadia-io/connect/v2/model"
+    "github.com/synadia-io/connect/v2/spec"
 )
 
 func ConvertStepsToSpec(steps model.Steps) spec.StepsSpec {

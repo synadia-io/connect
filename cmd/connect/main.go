@@ -2,7 +2,7 @@ package main
 
 import (
     "github.com/choria-io/fisk"
-    "github.com/synadia-io/connect/cli"
+    "github.com/synadia-io/connect/v2/cli"
     "os"
     "runtime/debug"
     "time"

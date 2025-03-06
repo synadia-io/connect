@@ -2,7 +2,7 @@ package runtime
 
 import (
     "fmt"
-    "github.com/synadia-io/connect/model"
+    "github.com/synadia-io/connect/v2/model"
     "os"
     "strings"
 )

@@ -9,7 +9,7 @@ import (
     "github.com/choria-io/fisk"
     "github.com/nats-io/jsm.go/natscontext"
     "github.com/nats-io/nats.go"
-    "github.com/synadia-io/connect/client"
+    "github.com/synadia-io/connect/v2/client"
 )
 
 var DefaultOptions *Options

@@ -3,6 +3,14 @@
   vars:
     SCP_URL: https://cloud.nas-test.synadia.io/api/core/beta
     ACCOUNT: 2lsqayf1NIFEvVwRdTXlAonrGbO
+    VERSION:
+      sh: git describe --tags --always --abbrev=0 --match='v[0-9]*.[0-9]*.[0-9]*' 2> /dev/null | sed 's/^.//'
+    COMMIT_HASH:
+      sh: git rev-parse --short HEAD
+    BUILD_DATE:
+      sh: date '+%Y-%m-%dT%H:%M:%S'
+    LD_FLAGS:
+      sh: echo "-X main.Version={{.VERSION}} -X main.CommitHash={{.COMMIT_HASH}} -X main.BuildTimestamp={{.BUILD_DATE}}"
 
   tasks:
     clean:
@@ -85,7 +93,7 @@
         - target/connect
       cmds:
         - go mod tidy
-        - go build -o target/connect cmd/connect/*.go
+        - go build -ldflags="{{.LD_FLAGS}}" -o target/connect cmd/connect/*.go
 
     test:
       cmds:
