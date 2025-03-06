@@ -9,7 +9,8 @@ type ConnectorSpec struct {
 	// A description of the connector
 	Description string `json:"description" yaml:"description" mapstructure:"description"`
 
-	// Id of the runtime to use for this connector
+	// The runtime to use for this connector. The runtime can be suffixed with the
+	// version, e.g. 'wombat:edge'
 	RuntimeId string `json:"runtime_id" yaml:"runtime_id" mapstructure:"runtime_id"`
 
 	// Steps corresponds to the JSON schema field "steps".
