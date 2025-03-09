@@ -4,7 +4,7 @@ import (
     "context"
     "encoding/base64"
     "fmt"
-    "github.com/synadia-io/connect/v2/model"
+    "github.com/synadia-io/connect/model"
     "gopkg.in/yaml.v3"
     "log/slog"
     "os"

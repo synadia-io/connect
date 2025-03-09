@@ -3,8 +3,8 @@ package runtime_test
 import (
     "context"
     "encoding/base64"
-    "github.com/synadia-io/connect/v2/model"
-    "github.com/synadia-io/connect/v2/runtime"
+    "github.com/synadia-io/connect/model"
+    "github.com/synadia-io/connect/runtime"
     "log/slog"
     "strings"
 
