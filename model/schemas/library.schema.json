@@ -1,0 +1,453 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "io.synadia.connect.v1.library",
+  "$defs": {
+    "ComponentSearchRequest": {
+      "$id": "io.synadia.connect.v1.library.control.component.search.request",
+      "title": "ComponentSearchRequest",
+      "type": "object",
+      "properties": {
+        "filter": {
+          "$ref": "#/$defs/ComponentSearchFilter"
+        }
+      }
+    },
+    "ComponentSearchResponse": {
+      "$id": "io.synadia.connect.v1.library.control.component.search.response",
+      "title": "ComponentSearchResponse",
+      "type": "object",
+      "properties": {
+        "components": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ComponentSummary"
+          }
+        }
+      }
+    },
+    "ComponentGetRequest": {
+      "$id": "io.synadia.connect.v1.library.control.component.get.request",
+      "title": "ComponentGetRequest",
+      "type": "object",
+      "properties": {
+        "runtime_id": {
+          "type": "string",
+          "description": "The unique identifier of the runtime to which this component belongs"
+        },
+        "kind": {
+          "description": "The kind of the component",
+          "$ref": "#/$defs/ComponentKind"
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the component. This field can only contain alphanumeric characters and underscores",
+          "pattern": "^[a-zA-Z0-9_]*$"
+        }
+      },
+      "required": [
+        "runtime_id",
+        "kind",
+        "name"
+      ]},
+    "ComponentGetResponse": {
+      "$id": "io.synadia.connect.v1.library.control.component.get.response",
+      "title": "ComponentGetResponse",
+      "type": "object",
+      "properties": {
+        "component": {
+          "$ref": "#/$defs/Component"
+        },
+        "found": {
+          "type": "boolean",
+          "description": "Whether the component was found"
+        }
+      },
+      "required": ["found"]
+    },
+    "RuntimeListRequest": {
+      "$id": "io.synadia.connect.v1.library.control.runtime.list.request",
+      "title": "RuntimeListRequest",
+      "type": "object",
+      "properties": {
+
+      }
+    },
+    "RuntimeListResponse": {
+      "$id": "io.synadia.connect.v1.library.control.runtime.list.response",
+      "title": "RuntimeListResponse",
+      "type": "object",
+      "properties": {
+        "runtimes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RuntimeSummary"
+          }
+        }
+      }
+    },
+    "RuntimeGetRequest": {
+      "$id": "io.synadia.connect.v1.library.control.runtime.get.request",
+      "title": "RuntimeGetRequest",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the runtime"
+        }
+      },
+      "required": ["name"]
+    },
+    "RuntimeGetResponse": {
+      "$id": "io.synadia.connect.v1.library.control.runtime.get.response",
+      "title": "RuntimeGetResponse",
+      "type": "object",
+      "properties": {
+        "runtime": {
+          "$ref": "#/$defs/Runtime"
+        },
+        "found": {
+          "type": "boolean",
+          "description": "Whether the runtime was found"
+        }
+      },
+      "required": ["found"]
+    },
+    "ComponentField": {
+      "$id": "io.synadia.connect.v1.library.model.component.field",
+      "title": "ComponentField",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the field. This field can only contain alphanumeric characters and underscores",
+          "pattern": "^[a-zA-Z0-9_]*$"
+        },
+        "label": {
+          "type": "string",
+          "description": "A human readable label for the field"
+        },
+        "type": {
+          "type": "string",
+          "description": "The type of the field",
+          "enum": [
+            "bool",
+            "int",
+            "object",
+            "scanner",
+            "string",
+            "expression",
+            "condition"
+          ]
+        },
+        "kind": {
+          "type": "string",
+          "description": "The kind of the field",
+          "default": "scalar",
+          "enum": [
+            "scalar",
+            "map",
+            "list"
+          ]
+        },
+        "description": {
+          "type": "string",
+          "description": "A description of the field"
+        },
+        "secret": {
+          "type": "boolean",
+          "description": "If true, the value of the field is considered secret and should not be displayed in logs or UIs"
+        },
+        "default": {
+          "type": ["number","string","boolean","object","array", "null"],
+          "description": "The default value of the field"
+        },
+        "optional": {
+          "type": "boolean",
+          "description": "If true, the field is optional"
+        },
+        "examples": {
+          "type": "array",
+          "items": {
+            "type": ["number","string","boolean","object","array", "null"]
+          }
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ComponentField"
+          }
+        },
+        "constraints": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "regex": {
+                "type": "string",
+                "description": "A regular expression that the value must match"
+              },
+              "range": {
+                "type": "object",
+                "properties": {
+                  "lt": {
+                    "type": "number",
+                    "description": "If filled in, the value must be less than this"
+                  },
+                  "lte": {
+                    "type": "number",
+                    "description": "If filled in, the value must be less than or equal to this"
+                  },
+                  "gt": {
+                    "type": "number",
+                    "description": "If filled in, the value must be greater than this"
+                  },
+                  "gte": {
+                    "type": "number",
+                    "description": "If filled in, the value must be greater than or equal to this"
+                  }
+                }
+              },
+              "enum": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "preset": {
+                "type": "string",
+                "description": "A preset which implies the rules to which the value must adhere"
+              }
+            }
+          }
+        },
+        "render_hint": {
+          "type": "string",
+          "description": "A hint to the renderer on how to render the field"
+        },
+        "path": {
+          "type": "string",
+          "description": "The path to the field in the resulting configuration. If no path is provided, the field is assumed to be a grouping of other fields"
+        }
+      },
+      "required": [
+        "name",
+        "label",
+        "type"
+      ]
+    },
+    "ComponentStatus": {
+      "$id": "io.synadia.connect.v1.library.model.component.status",
+      "title": "ComponentStatus",
+      "type": "string",
+      "enum": [
+        "stable",
+        "preview",
+        "experimental",
+        "deprecated"
+      ]
+    },
+    "ComponentKind": {
+      "$id": "io.synadia.connect.v1.library.model.component.kind",
+      "title": "ComponentKind",
+      "description": "The kind of the component",
+      "type": "string",
+      "enum": [
+        "source",
+        "sink",
+        "scanner"
+      ]
+    },
+    "Component": {
+      "$id": "io.synadia.connect.v1.library.model.component",
+      "title": "Component",
+      "type": "object",
+      "properties": {
+        "runtime_id": {
+          "type": "string",
+          "description": "The unique identifier of the runtime to which this component belongs"
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the component. This field can only contain alphanumeric characters and underscores",
+          "pattern": "^[a-zA-Z0-9_]*$"
+        },
+        "label": {
+          "type": "string",
+          "description": "A human readable label for the component"
+        },
+        "kind": {
+          "$ref": "#/$defs/ComponentKind"
+        },
+        "status": {
+          "$ref": "#/$defs/ComponentStatus"
+        },
+        "description": {
+          "type": "string",
+          "description": "A description of the component"
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ComponentField"
+          }
+        }
+      },
+      "required": [
+        "runtime_id",
+        "name",
+        "label",
+        "kind",
+        "status"
+      ]
+    },
+    "ComponentSummary": {
+      "$id": "io.synadia.connect.v1.library.model.component.summary",
+      "title": "Component",
+      "type": "object",
+      "properties": {
+        "runtime_id": {
+          "type": "string",
+          "description": "The unique identifier of the runtime to which this component belongs"
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the component. This field can only contain alphanumeric characters and underscores",
+          "pattern": "^[a-zA-Z0-9_]*$"
+        },
+        "label": {
+          "type": "string",
+          "description": "A human readable label for the component"
+        },
+        "kind": {
+          "$ref": "#/$defs/ComponentKind"
+        },
+        "status": {
+          "$ref": "#/$defs/ComponentStatus"
+        },
+        "description": {
+          "type": "string",
+          "description": "A description of the component"
+        }
+      },
+      "required": [
+        "runtime_id",
+        "name",
+        "label",
+        "kind",
+        "status"
+      ]
+    },
+    "ComponentSearchFilter": {
+      "$id": "io.synadia.connect.v1.library.control.component.search.filter",
+      "title": "ComponentSearchFilter",
+      "type": "object",
+      "properties": {
+        "runtime_id": {
+          "type": "string",
+          "description": "The unique identifier of the runtime"
+        },
+        "status": {
+          "$ref": "#/$defs/ComponentStatus"
+        },
+        "kind": {
+          "$ref": "#/$defs/ComponentKind"
+        }
+      }
+    },
+    "Runtime": {
+      "$id": "io.synadia.connect.v1.library.model.runtime",
+      "title": "Runtime",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The unique identifier of the runtime"
+        },
+        "label": {
+          "type": "string",
+          "description": "A human readable label for the runtime"
+        },
+        "description": {
+          "type": "string",
+          "description": "A description of the runtime"
+        },
+        "author": {
+          "description": "The author of the runtime",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "The name of the author"
+            },
+            "email": {
+              "type": "string",
+              "description": "The email address of the author"
+            },
+            "url": {
+              "type": "string",
+              "description": "The url to a website related to the author"
+            }
+          },
+          "required": [
+            "name"
+          ]
+        },
+        "image": {
+          "type": "string",
+          "description": "The location of the image to execute"
+        },
+        "metrics": {
+          "description": "The metrics configuration of the runtime, if any",
+          "type": "object",
+          "properties": {
+            "port": {
+              "type": "integer",
+              "description": "The port number where metrics can be retrieved"
+            },
+            "path": {
+              "type": "string",
+              "description": "The path where metrics can be retrieved"
+            }
+          },
+          "required": [
+            "port"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "author",
+        "image"
+      ]
+    },
+    "RuntimeSummary": {
+      "$id": "io.synadia.connect.v1.library.model.runtime.summary",
+      "title": "RuntimeSummary",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The unique identifier of the runtime"
+        },
+        "label": {
+          "type": "string",
+          "description": "A human readable label for the runtime"
+        },
+        "description": {
+          "type": "string",
+          "description": "A description of the runtime"
+        },
+        "author": {
+          "description": "The author of the runtime",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "author"
+      ]
+    }
+  }
+}

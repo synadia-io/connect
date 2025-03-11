@@ -86,7 +86,7 @@ func ConfigureConnectorCommand(parentCmd commandHost, opts *Options) {
     startCmd.Flag("replicas", "Number of replicas to start").Default("1").IntVar(&c.replicas)
     startCmd.Flag("tag", "Placement tag to use").StringsVar(&c.placementTags)
     startCmd.Flag("env", "Environment variables to set").Short('e').StringMapVar(&c.envVars)
-    startCmd.Flag("start-timeout", "How long to wait for the component to be started").Default("5m").StringVar(&c.startTimeout)
+    startCmd.Flag("start-timeout", "How long to wait for the component to be started").Default("1m").StringVar(&c.startTimeout)
 
     stopCmd := connectorCmd.Command("stop", "stop a connector").Action(c.stopConnector)
     stopCmd.Arg("id", "The id of the connector to stop").Required().StringVar(&c.id)
@@ -272,7 +272,12 @@ func (c *connectorCommand) startConnector(pc *fisk.ParseContext) error {
         }
     }
 
-    instances, err := appCtx.Client.StartConnector(c.id, opts, c.opts.Timeout)
+    timeout, err := time.ParseDuration(c.startTimeout)
+    if err != nil {
+        timeout = time.Minute * 1
+    }
+
+    instances, err := appCtx.Client.StartConnector(c.id, opts, timeout)
     fisk.FatalIfError(err, "start")
 
     fmt.Printf("Connector %s instances started: \n", c.id)
@@ -365,7 +370,7 @@ func (c *connectorCommand) saveConnector(pc *fisk.ParseContext) error {
         fisk.FatalIfError(err, "could not edit connector spec: %v", err)
     }
 
-    if !changed {
+    if exists && !changed {
         fmt.Println(color.YellowString("No changes made"))
         return nil
     }
@@ -518,34 +523,11 @@ func (c *connectorCommand) selectConnectorTemplate(cl client.Client) (*spec.Conn
         return nil, fmt.Errorf("runtime %s not found", c.runtime)
     }
 
-    sp := spec.ConnectorSpec{
-        Description: "A summary of what this connector does",
-        RuntimeId:   rt.Id,
-    }
-
-    templates := []struct {
-        name   string
-        modify func()
-    }{
-        {name: "Inlet - Reading from a Source to NATS", modify: func() {
-            sp.Steps = spec.StepsSpec{
-                Source:   &spec.SourceStepSpec{},
-                Producer: &spec.ProducerStepSpec{},
-            }
-        }},
-        {name: "Outlet - Writing from NATS to a Sink", modify: func() {
-            sp.Steps = spec.StepsSpec{
-                Consumer: &spec.ConsumerStepSpec{},
-                Sink:     &spec.SinkStepSpec{},
-            }
-        }},
-    }
-
     var options []string
-    mapping := make(map[string]func())
+    mapping := make(map[string]spec.ConnectorSpec)
     for _, template := range templates {
-        options = append(options, template.name)
-        mapping[template.name] = template.modify
+        options = append(options, template.Description)
+        mapping[template.Description] = template
     }
 
     choice := ""
@@ -557,11 +539,10 @@ func (c *connectorCommand) selectConnectorTemplate(cl client.Client) (*spec.Conn
         return nil, err
     }
 
-    modify, ok := mapping[choice]
+    sp, ok := mapping[choice]
     if !ok {
         return nil, fmt.Errorf("template not found")
     }
-    modify()
 
     return &sp, nil
 }
