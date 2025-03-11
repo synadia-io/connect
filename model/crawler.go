@@ -75,6 +75,9 @@ type ComponentSpec struct {
 	// Fields corresponds to the JSON schema field "fields".
 	Fields []FieldSpec `json:"fields,omitempty" yaml:"fields,omitempty" mapstructure:"fields,omitempty"`
 
+	// The URL path to the icon. Can be a data: URL.
+	Icon *string `json:"icon,omitempty" yaml:"icon,omitempty" mapstructure:"icon,omitempty"`
+
 	// A human readable label for the component
 	Label string `json:"label" yaml:"label" mapstructure:"label"`
 
