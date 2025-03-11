@@ -14,6 +14,9 @@ type Component struct {
 	// Fields corresponds to the JSON schema field "fields".
 	Fields []ComponentField `json:"fields,omitempty" yaml:"fields,omitempty" mapstructure:"fields,omitempty"`
 
+	// The URL path to the icon. Can be a data: URL.
+	Icon *string `json:"icon,omitempty" yaml:"icon,omitempty" mapstructure:"icon,omitempty"`
+
 	// Kind corresponds to the JSON schema field "kind".
 	Kind ComponentKind `json:"kind" yaml:"kind" mapstructure:"kind"`
 
@@ -360,6 +363,9 @@ func (j *ComponentStatus) UnmarshalJSON(value []byte) error {
 type ComponentSummary struct {
 	// A description of the component
 	Description *string `json:"description,omitempty" yaml:"description,omitempty" mapstructure:"description,omitempty"`
+
+	// The URL path to the icon. Can be a data: URL.
+	Icon *string `json:"icon,omitempty" yaml:"icon,omitempty" mapstructure:"icon,omitempty"`
 
 	// Kind corresponds to the JSON schema field "kind".
 	Kind ComponentKind `json:"kind" yaml:"kind" mapstructure:"kind"`
