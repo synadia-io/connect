@@ -129,12 +129,12 @@ func loadNats(opts *Options) (*nats.Conn, error) {
         opts = DefaultOptions
     }
 
-    if opts.Servers == "" {
-        opts.ContextName = natscontext.SelectedContext()
-    }
-
     if opts.ContextName != "" {
         return natscontext.Connect(opts.ContextName)
+    }
+
+    if opts.Servers == "" {
+        opts.ContextName = natscontext.SelectedContext()
     }
 
     nopts := []nats.Option{}
