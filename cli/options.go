@@ -1,7 +1,6 @@
 package cli
 
 import (
-    "encoding/json"
     "fmt"
     "log/slog"
     "time"
@@ -68,7 +67,6 @@ type AppContext struct {
     Nc             *nats.Conn
     DefaultTimeout time.Duration
     Client         client.Client
-    Service        ServiceInfo
 }
 
 func (ac *AppContext) Close() {
@@ -106,21 +104,10 @@ func LoadOptions(opts *Options) (*AppContext, error) {
         return nil, fmt.Errorf("failed to create client: %w", err)
     }
 
-    resp, err := nc.Request("$SRV.INFO.connect-node", nil, 5*time.Second)
-    if err != nil {
-        return nil, fmt.Errorf("unable to contact the flow service: %w", err)
-    }
-
-    var si ServiceInfo
-    if err := json.Unmarshal(resp.Data, &si); err != nil {
-        return nil, fmt.Errorf("unable to decode service info: %w", err)
-    }
-
     return &AppContext{
         Nc:             nc,
         DefaultTimeout: opts.Timeout,
         Client:         cl,
-        Service:        si,
     }, nil
 }
 
@@ -129,7 +116,7 @@ func loadNats(opts *Options) (*nats.Conn, error) {
         opts = DefaultOptions
     }
 
-    if opts.Servers == "" {
+    if opts.Servers == "" && opts.ContextName == "" {
         opts.ContextName = natscontext.SelectedContext()
     }
 
@@ -158,5 +145,5 @@ func loadNats(opts *Options) (*nats.Conn, error) {
         nopts = append(nopts, nats.UserJWTAndSeed(opts.JWT, opts.Seed))
     }
 
-    return nats.Connect(opts.Servers)
+    return nats.Connect(opts.Servers, nopts...)
 }
