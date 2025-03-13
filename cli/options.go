@@ -158,5 +158,5 @@ func loadNats(opts *Options) (*nats.Conn, error) {
         nopts = append(nopts, nats.UserJWTAndSeed(opts.JWT, opts.Seed))
     }
 
-    return nats.Connect(opts.Servers)
+    return nats.Connect(opts.Servers, nopts...)
 }
