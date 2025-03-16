@@ -1,13 +1,13 @@
 package runtime
 
 const (
-    NatsUrlVar  = "__NATS_URL"
-    NatsJwtVar  = "__NATS_USER_JWT"
-    NatsSeedVar = "__NATS_USER_SEED"
+    NatsUrlVar  = "NEX_WORKLOAD_NATS_URL"
+    NatsJwtVar  = "NEX_WORKLOAD_NATS_B64_JWT"
+    NatsSeedVar = "NEX_WORKLOAD_NATS_NKEY"
 
-    GroupEnvVar     = "__CONNECTOR"
-    NamespaceEnvVar = "__NEX_NAMESPACE"
-    InstanceEnvVar  = "__NEX_WORKLOAD_ID"
+    GroupEnvVar     = "NEX_WORKLOAD_GROUP"
+    NamespaceEnvVar = "NEX_WORKLOAD_NAMESPACE"
+    InstanceEnvVar  = "NEX_WORKLOAD_ID"
 
     LogLevelEnvVar = "CONNECT_LOG_LEVEL"
 )

@@ -12,32 +12,94 @@ import (
     "strings"
 )
 
-func FromEnv() (*Runtime, error) {
-    logLevel := slog.LevelDebug
-    switch strings.ToLower(os.Getenv(LogLevelEnvVar)) {
-    case "debug":
-        logLevel = slog.LevelDebug
-    case "info":
-        logLevel = slog.LevelInfo
-    case "warn":
-        logLevel = slog.LevelWarn
-    case "error":
-        logLevel = slog.LevelError
-    }
+type Opt func(*Runtime)
 
-    return NewRuntime(logLevel,
-        os.Getenv(NamespaceEnvVar),
-        os.Getenv(GroupEnvVar),
-        os.Getenv(InstanceEnvVar)), nil
+func WithLogLevel(level slog.Level) Opt {
+    return func(r *Runtime) {
+        r.LogLevel = level
+    }
 }
 
-func NewRuntime(logLevel slog.Level, namespace string, connector string, instance string) *Runtime {
-    return &Runtime{
-        Namespace: namespace,
-        Connector: connector,
-        Instance:  instance,
-        LogLevel:  logLevel,
+func WithNamespace(ns string) Opt {
+    return func(r *Runtime) {
+        r.Namespace = ns
     }
+}
+
+func WithGroup(group string) Opt {
+    return func(r *Runtime) {
+        r.Connector = group
+    }
+}
+
+func WithInstance(instance string) Opt {
+    return func(r *Runtime) {
+        r.Instance = instance
+    }
+}
+
+func WithNatsUrl(url string) Opt {
+    return func(r *Runtime) {
+        r.NatsUrl = url
+    }
+}
+
+func WithNatsJwt(jwt string) Opt {
+    return func(r *Runtime) {
+        r.NatsJwt = jwt
+    }
+}
+
+func WithNatsSeed(seed string) Opt {
+    return func(r *Runtime) {
+        r.NatsSeed = seed
+    }
+}
+
+func FromEnv() (*Runtime, error) {
+    opts := []Opt{
+        WithNamespace(os.Getenv(NamespaceEnvVar)),
+        WithInstance(os.Getenv(InstanceEnvVar)),
+        WithGroup(os.Getenv(GroupEnvVar)),
+        WithNatsSeed(os.Getenv(NatsSeedVar)),
+        WithNatsUrl(os.Getenv(NatsUrlVar)),
+    }
+
+    if ll := os.Getenv(LogLevelEnvVar); ll != "" {
+        switch strings.ToLower(os.Getenv(LogLevelEnvVar)) {
+        case "debug":
+            opts = append(opts, WithLogLevel(slog.LevelDebug))
+        case "info":
+            opts = append(opts, WithLogLevel(slog.LevelInfo))
+        case "warn":
+            opts = append(opts, WithLogLevel(slog.LevelWarn))
+        case "error":
+            opts = append(opts, WithLogLevel(slog.LevelError))
+        }
+    }
+
+    if jwt := os.Getenv(NatsJwtVar); jwt != "" {
+        j, err := base64.StdEncoding.DecodeString(jwt)
+        if err != nil {
+            return nil, fmt.Errorf("failed to decode nats jwt: %w", err)
+        }
+
+        opts = append(opts, WithNatsJwt(string(j)))
+    }
+
+    return NewRuntime(opts...), nil
+}
+
+func NewRuntime(opts ...Opt) *Runtime {
+    result := &Runtime{
+        LogLevel: slog.LevelDebug,
+    }
+
+    for _, opt := range opts {
+        opt(result)
+    }
+
+    return result
 }
 
 type Workload func(ctx context.Context, runtime *Runtime, steps model.Steps) error
@@ -47,6 +109,10 @@ type Runtime struct {
     Connector string
     Instance  string
 
+    NatsUrl  string
+    NatsJwt  string
+    NatsSeed string
+
     // LogLevel is the log level for the runtime
     LogLevel slog.Level
 
@@ -55,6 +121,7 @@ type Runtime struct {
 }
 
 func (r *Runtime) NatsConfig() (*nats.Conn, error) {
+
     return nats.Connect(os.Getenv(NatsUrlVar),
         nats.UserJWTAndSeed(os.Getenv(NatsJwtVar), os.Getenv(NatsSeedVar)),
     )

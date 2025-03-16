@@ -19,7 +19,7 @@ var _ = Describe("Runtime", func() {
         It("should parse the given configuration", func() {
             cfg := `cHJvZHVjZXI6CiAgICBjb3JlOgogICAgICAgIHN1YmplY3Q6IHRlc3RpbmcuaGVsbG8uJHshbmFtZX0KICAgIG5hdHM6CiAgICAgICAgdXJsOiBuYXRzOi8vZGVtby5uYXRzLmlvOjQyMjIKc291cmNlOgogICAgY29uZmlnOgogICAgICAgIGludGVydmFsOiAxcwogICAgICAgIG1hcHBpbmc6IHwtCiAgICAgICAgICAgIGxldCBzZXEgPSBjb3VudGVyKG1heDogMTApCiAgICAgICAgICAgIHJvb3QubmFtZSA9ICJodW1hbiVkIi5mb3JtYXQoJHNlcSkKICAgICAgICAgICAgcm9vdC5tZXNzYWdlID0gImhlbGxvIGh1bWFuICVkIi5mb3JtYXQoJHNlcSkKICAgIHR5cGU6IGdlbmVyYXRlCg==`
 
-            rt := runtime.NewRuntime(slog.LevelDebug)
+            rt := runtime.NewRuntime()
             err := rt.Launch(context.Background(), func(ctx context.Context, runtime *runtime.Runtime, steps model.Steps) error {
                 Expect(steps.Source).ToNot(BeNil())
                 Expect(steps.Source.Type).To(Equal("generate"))
@@ -59,7 +59,7 @@ producer:
 
             cfg = []byte(base64.StdEncoding.EncodeToString(config))
             slog.Info("config", "cfg", string(cfg))
-            rt := runtime.NewRuntime(slog.LevelDebug)
+            rt := runtime.NewRuntime()
             err = rt.Launch(context.Background(), func(ctx context.Context, runtime *runtime.Runtime, steps model.Steps) error {
                 Expect(steps.Source).ToNot(BeNil())
                 Expect(steps.Source.Type).To(Equal("generate"))
