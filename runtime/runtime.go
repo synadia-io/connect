@@ -56,6 +56,12 @@ func WithNatsSeed(seed string) Opt {
     }
 }
 
+func WithLogger(logger *slog.Logger) Opt {
+    return func(r *Runtime) {
+        r.Logger = logger
+    }
+}
+
 func FromEnv() (*Runtime, error) {
     opts := []Opt{
         WithNamespace(os.Getenv(NamespaceEnvVar)),
@@ -93,6 +99,7 @@ func FromEnv() (*Runtime, error) {
 func NewRuntime(opts ...Opt) *Runtime {
     result := &Runtime{
         LogLevel: slog.LevelDebug,
+        Logger:   slog.Default(),
     }
 
     for _, opt := range opts {
