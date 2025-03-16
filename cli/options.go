@@ -52,17 +52,6 @@ type Options struct {
     LogLevel string
 }
 
-type ServiceInfo struct {
-    Name        string            `json:"name"`
-    Version     string            `json:"version"`
-    Description string            `json:"description"`
-    Metadata    map[string]string `json:"metadata"`
-}
-
-func (si ServiceInfo) String() string {
-    return fmt.Sprintf("%s %s", si.Name, si.Version)
-}
-
 type AppContext struct {
     Nc             *nats.Conn
     DefaultTimeout time.Duration
