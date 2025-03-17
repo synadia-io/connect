@@ -116,19 +116,13 @@ func (c *connectorCommand) listConnectors(pc *fisk.ParseContext) error {
         {Number: 1, Name: "Name"},
         {Number: 2, Name: "Description"},
         {Number: 3, Name: "Runtime"},
-        {Number: 4, Name: color.YellowString("~"), WidthMin: 3, WidthMax: 5, Align: text.AlignCenter, AlignHeader: text.AlignCenter},
-        {Number: 5, Name: color.GreenString("\u25B6"), WidthMin: 3, WidthMax: 5, Align: text.AlignCenter, AlignHeader: text.AlignCenter},
-        {Number: 6, Name: color.RedString("\u25FC"), WidthMin: 3, WidthMax: 5, Align: text.AlignCenter, AlignHeader: text.AlignCenter},
+        {Number: 4, Name: color.GreenString("\u25B6"), WidthMin: 3, WidthMax: 5, Align: text.AlignCenter, AlignHeader: text.AlignCenter},
+        {Number: 5, Name: color.RedString("\u25FC"), WidthMin: 3, WidthMax: 5, Align: text.AlignCenter, AlignHeader: text.AlignCenter},
     })
 
-    tbl.AppendHeader(table.Row{"Name", "Description", "Runtime", color.YellowString("~"), color.GreenString("\u25B6"), color.RedString("\u25FC")}, table.RowConfig{AutoMerge: true})
+    tbl.AppendHeader(table.Row{"Name", "Description", "Runtime", color.GreenString("\u25B6"), color.RedString("\u25FC")}, table.RowConfig{AutoMerge: true})
 
     for _, c := range resp {
-        pending := ""
-        if c.Instances.Pending > 0 {
-            pending = color.YellowString("%d", c.Instances.Pending)
-        }
-
         running := ""
         if c.Instances.Running > 0 {
             running = color.GreenString("%d", c.Instances.Running)
@@ -143,7 +137,6 @@ func (c *connectorCommand) listConnectors(pc *fisk.ParseContext) error {
             c.ConnectorId,
             text.WrapSoft(c.Description, 50),
             c.RuntimeId,
-            pending,
             running,
             stopped,
         })
@@ -202,41 +195,12 @@ func (c *connectorCommand) connectorStatus(pc *fisk.ParseContext) error {
 
     tbl := table.NewWriter()
     tbl.SetStyle(table.StyleRounded)
-    tbl.SetColumnConfigs([]table.ColumnConfig{
-        {Number: 1, Name: "ID", WidthMin: 8, WidthMax: 8},
-        {Number: 2, Name: "", WidthMin: 1, WidthMax: 1, Align: text.AlignCenter, AlignHeader: text.AlignCenter},
-        {Number: 3, Name: "Uptime"},
-        {Number: 4, Name: "Message"},
-    })
     tbl.SetTitle(fmt.Sprintf("Connector: %s", c.id))
-    tbl.AppendHeader(table.Row{"ID", "", "Uptime", "Message"})
+    tbl.AppendHeader(table.Row{"ID"})
 
     for _, i := range instances {
-        uptime := ""
-        if i.Status == model.InstanceStatusRunning && i.Uptime != nil {
-            uptime = *i.Uptime
-        }
-
-        msg := ""
-        if i.Message != nil {
-            msg = *i.Message
-        }
-
-        status := ""
-        switch i.Status {
-        case model.InstanceStatusRunning:
-            status = color.GreenString("\u25B6")
-        case model.InstanceStatusStopped:
-            status = color.RedString("\u25FC")
-        case model.InstanceStatusPending:
-            status = color.YellowString("~")
-        }
-
         tbl.AppendRow(table.Row{
-            i.Id[len(i.Id)-8:],
-            status,
-            uptime,
-            msg,
+            i.Id,
         })
     }
 
@@ -282,7 +246,7 @@ func (c *connectorCommand) startConnector(pc *fisk.ParseContext) error {
 
     fmt.Printf("Connector %s instances started: \n", c.id)
     for _, i := range instances {
-        fmt.Printf("  %s [%s]\n", i.Id, i.Status)
+        fmt.Printf("  %s\n", i.Id)
     }
 
     return nil
@@ -300,9 +264,8 @@ func (c *connectorCommand) reloadConnector(context *fisk.ParseContext) error {
         stoppedInstances, err := appCtx.Client.StopConnector(c.id, c.opts.Timeout)
         fisk.FatalIfError(err, "failed to reload connector")
 
-        fmt.Printf("Instances stopped:\n")
-        for _, i := range stoppedInstances {
-            fmt.Printf("  %s\n", i.Id)
+        if len(stoppedInstances) > 0 {
+            return fmt.Errorf("failed to stop all instances; %s still running", stoppedInstances)
         }
     }
 
@@ -328,8 +291,14 @@ func (c *connectorCommand) stopConnector(pc *fisk.ParseContext) error {
     }
 
     fmt.Printf("Connector %s stopped: \n", c.id)
-    for _, i := range instances {
-        fmt.Printf("  %s [%s]\n", i.Id, i.Status)
+
+    if len(instances) > 0 {
+        color.Yellow("Not all instances were stopped!")
+        color.Yellow("The following instances are still running:")
+
+        for _, i := range instances {
+            color.Yellow("  %s\n", i.Id)
+        }
     }
 
     return nil

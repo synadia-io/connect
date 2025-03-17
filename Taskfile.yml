@@ -32,6 +32,14 @@
       cmds:
         - go-jsonschema --struct-name-from-title
           --package model
+          --schema-output=io.synadia.connect.v1.model.secret=model/secret.go
+          --schema-output=io.synadia.connect.v1.model.secret.summary=model/secret.go
+          --schema-output=io.synadia.connect.v1.control.secret.list.request=model/secret_list.go
+          --schema-output=io.synadia.connect.v1.control.secret.list.response=model/secret_list.go
+          --schema-output=io.synadia.connect.v1.control.secret.delete.request=model/secret_delete.go
+          --schema-output=io.synadia.connect.v1.control.secret.delete.response=model/secret_delete.go
+          --schema-output=io.synadia.connect.v1.control.secret.set.request=model/secret_set.go
+          --schema-output=io.synadia.connect.v1.control.secret.set.response=model/secret_set.go
           --schema-output=io.synadia.connect.v1.library=model/library.go
           --schema-output=io.synadia.connect.v1.model.metrics=model/connector_models.go
           --schema-output=io.synadia.connect.v1.model.nats_config=model/connector_models.go
@@ -39,6 +47,7 @@
           --schema-output=io.synadia.connect.v1.model.connector.start.options=model/connector_models.go
           --schema-output=io.synadia.connect.v1.model.connector.summary=model/connector_models.go
           --schema-output=io.synadia.connect.v1.model.connector.instance=model/connector_models.go
+          --schema-output=io.synadia.connect.v1.model.connector.instances=model/connector_models.go
           --schema-output=io.synadia.connect.v1.model.connector.status=model/connector_models.go
           --schema-output=io.synadia.connect.v1.model.connector.steps=model/connector_models.go
           --schema-output=io.synadia.connect.v1.model.connector.steps.consumer=model/connector_models.go

@@ -4,7 +4,6 @@ package model
 
 import "encoding/json"
 import "fmt"
-import "reflect"
 
 // A composite transformer which can be used to combine several transformers
 type CompositeTransformerStep struct {
@@ -128,9 +127,6 @@ func (j *ConnectorStartOptions) UnmarshalJSON(value []byte) error {
 }
 
 type ConnectorStatus struct {
-	// The number of pending instances
-	Pending int `json:"pending" yaml:"pending" mapstructure:"pending"`
-
 	// The number of running instances
 	Running int `json:"running" yaml:"running" mapstructure:"running"`
 
@@ -148,9 +144,6 @@ func (j *ConnectorStatus) UnmarshalJSON(value []byte) error {
 	var plain Plain
 	if err := json.Unmarshal(value, &plain); err != nil {
 		return err
-	}
-	if v, ok := raw["pending"]; !ok || v == nil {
-		plain.Pending = 0.0
 	}
 	if v, ok := raw["running"]; !ok || v == nil {
 		plain.Running = 0.0
@@ -385,50 +378,6 @@ type Instance struct {
 
 	// The unique id of the instance
 	Id string `json:"id" yaml:"id" mapstructure:"id"`
-
-	// The message associated with the status. This can be an error message or just a
-	// completion message
-	Message *string `json:"message,omitempty" yaml:"message,omitempty" mapstructure:"message,omitempty"`
-
-	// The status of the instance
-	Status InstanceStatus `json:"status" yaml:"status" mapstructure:"status"`
-
-	// The amount of time the instance has been running
-	Uptime *string `json:"uptime,omitempty" yaml:"uptime,omitempty" mapstructure:"uptime,omitempty"`
-}
-
-type InstanceStatus string
-
-const InstanceStatusPending InstanceStatus = "pending"
-const InstanceStatusRunning InstanceStatus = "running"
-const InstanceStatusStopped InstanceStatus = "stopped"
-const InstanceStatusUnknown InstanceStatus = "unknown"
-
-var enumValues_InstanceStatus = []interface{}{
-	"pending",
-	"running",
-	"stopped",
-	"unknown",
-}
-
-// UnmarshalJSON implements json.Unmarshaler.
-func (j *InstanceStatus) UnmarshalJSON(value []byte) error {
-	var v string
-	if err := json.Unmarshal(value, &v); err != nil {
-		return err
-	}
-	var ok bool
-	for _, expected := range enumValues_InstanceStatus {
-		if reflect.DeepEqual(v, expected) {
-			ok = true
-			break
-		}
-	}
-	if !ok {
-		return fmt.Errorf("invalid value (expected one of %#v): %#v", enumValues_InstanceStatus, v)
-	}
-	*j = InstanceStatus(v)
-	return nil
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
@@ -443,15 +392,47 @@ func (j *Instance) UnmarshalJSON(value []byte) error {
 	if _, ok := raw["id"]; raw != nil && !ok {
 		return fmt.Errorf("field id in Instance: required")
 	}
-	if _, ok := raw["status"]; raw != nil && !ok {
-		return fmt.Errorf("field status in Instance: required")
-	}
 	type Plain Instance
 	var plain Plain
 	if err := json.Unmarshal(value, &plain); err != nil {
 		return err
 	}
 	*j = Instance(plain)
+	return nil
+}
+
+type Instances struct {
+	// The id of the connector
+	ConnectorId string `json:"connector_id" yaml:"connector_id" mapstructure:"connector_id"`
+
+	// The expected number of instances of the connector
+	Expected int `json:"expected" yaml:"expected" mapstructure:"expected"`
+
+	// The instances of the connector
+	Instances []Instance `json:"instances" yaml:"instances" mapstructure:"instances"`
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (j *Instances) UnmarshalJSON(value []byte) error {
+	var raw map[string]interface{}
+	if err := json.Unmarshal(value, &raw); err != nil {
+		return err
+	}
+	if _, ok := raw["connector_id"]; raw != nil && !ok {
+		return fmt.Errorf("field connector_id in Instances: required")
+	}
+	if _, ok := raw["expected"]; raw != nil && !ok {
+		return fmt.Errorf("field expected in Instances: required")
+	}
+	if _, ok := raw["instances"]; raw != nil && !ok {
+		return fmt.Errorf("field instances in Instances: required")
+	}
+	type Plain Instances
+	var plain Plain
+	if err := json.Unmarshal(value, &plain); err != nil {
+		return err
+	}
+	*j = Instances(plain)
 	return nil
 }
 
