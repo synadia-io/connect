@@ -290,7 +290,7 @@ func (c *connectorCommand) stopConnector(pc *fisk.ParseContext) error {
         return fmt.Errorf("failed to stop connector: %w", err)
     }
 
-    fmt.Printf("Connector %s stopped: \n", c.id)
+    fmt.Printf("Connector %s stopped\n", c.id)
 
     if len(instances) > 0 {
         color.Yellow("Not all instances were stopped!")

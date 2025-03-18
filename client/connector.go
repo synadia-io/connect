@@ -118,7 +118,8 @@ func (c *connectorClient) DeleteConnector(id string, timeout time.Duration) erro
         Id: id,
     }
 
-    _, err := c.t.RequestJson(c.subject("DELETE"), req, nil, WithTimeout(timeout))
+    var resp model.ConnectorDeleteResponse
+    _, err := c.t.RequestJson(c.subject("DELETE"), req, &resp, WithTimeout(timeout))
     if err != nil {
         return fmt.Errorf("unable to delete connector: %v", err)
     }

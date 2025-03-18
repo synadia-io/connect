@@ -2,3 +2,4 @@
 .vscode
 target
 coverprofile.out
+.DS_Store
