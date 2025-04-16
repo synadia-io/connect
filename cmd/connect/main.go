@@ -26,6 +26,7 @@ func main() {
 
     cli.ConfigureConnectorCommand(ncli, opts)
     cli.ConfigureLibraryCommand(ncli, opts)
+    cli.ConfigureLogsCommand(ncli, opts)
 
     ncli.MustParseWithUsage(os.Args[1:])
 }
