@@ -5,6 +5,7 @@ import (
     "encoding/json"
     "fmt"
     "github.com/jedib0t/go-pretty/v6/text"
+    "github.com/joho/godotenv"
     "github.com/synadia-io/connect/client"
     "github.com/synadia-io/connect/convert"
     "github.com/synadia-io/connect/spec"
@@ -27,7 +28,7 @@ type connectorCommand struct {
     file          string
     fileSetByUser bool
 
-    pull                  bool
+    noPull                bool
     pullUsername          string
     pullUsernameSetByUser bool
     pullPassword          string
@@ -36,6 +37,7 @@ type connectorCommand struct {
     replicas      int
     placementTags []string
     envVars       map[string]string
+    envFile       string
 
     startTimeout string
 
@@ -46,8 +48,9 @@ type connectorCommand struct {
     targetId string
     reload   bool
 
-    runtime     string
-    interactive bool
+    runtime          string
+    interactive      bool
+    envFileSetByUser bool
 }
 
 func ConfigureConnectorCommand(parentCmd commandHost, opts *Options) {
@@ -80,12 +83,13 @@ func ConfigureConnectorCommand(parentCmd commandHost, opts *Options) {
 
     startCmd := connectorCmd.Command("start", "Deploy a connector").Action(c.startConnector)
     startCmd.Arg("id", "The id of the connector to deploy").Required().StringVar(&c.id)
-    startCmd.Flag("pull", "Whether to pull the image").Default("false").UnNegatableBoolVar(&c.pull)
-    startCmd.Flag("pull-username", "Username for the pull").IsSetByUser(&c.pullUsernameSetByUser).StringVar(&c.pullUsername)
-    startCmd.Flag("pull-password", "Password for the pull").IsSetByUser(&c.pullPasswordSetByUser).StringVar(&c.pullPassword)
+    startCmd.Flag("no-pull", "Whether to skip pulling the image").Default("false").UnNegatableBoolVar(&c.noPull)
+    //startCmd.Flag("noPull-username", "Username for the noPull").IsSetByUser(&c.pullUsernameSetByUser).StringVar(&c.pullUsername)
+    //startCmd.Flag("noPull-password", "Password for the noPull").IsSetByUser(&c.pullPasswordSetByUser).StringVar(&c.pullPassword)
     startCmd.Flag("replicas", "Number of replicas to start").Default("1").IntVar(&c.replicas)
     startCmd.Flag("tag", "Placement tag to use").StringsVar(&c.placementTags)
     startCmd.Flag("env", "Environment variables to set").Short('e').StringMapVar(&c.envVars)
+    startCmd.Flag("env-file", "Read environment variables from file").Default(".env").IsSetByUser(&c.envFileSetByUser).StringVar(&c.envFile)
     startCmd.Flag("start-timeout", "How long to wait for the component to be started").Default("1m").StringVar(&c.startTimeout)
 
     stopCmd := connectorCmd.Command("stop", "stop a connector").Action(c.stopConnector)
@@ -214,8 +218,17 @@ func (c *connectorCommand) startConnector(pc *fisk.ParseContext) error {
     fisk.FatalIfError(err, "failed to load options")
     defer appCtx.Close()
 
+    envVars, err := LoadEnvFile(c.envFile, c.envFileSetByUser)
+    if err != nil {
+        return fmt.Errorf("failed to load env file: %w", err)
+    }
+
+    for k, v := range envVars {
+        c.envVars[k] = v
+    }
+
     opts := &model.ConnectorStartOptions{
-        Pull:          c.pull,
+        Pull:          !c.noPull,
         Replicas:      c.replicas,
         PlacementTags: c.placementTags,
         EnvVars:       c.envVars,
@@ -250,6 +263,20 @@ func (c *connectorCommand) startConnector(pc *fisk.ParseContext) error {
     }
 
     return nil
+}
+
+// LoadEnvFile loads environment variables from a file
+func LoadEnvFile(file string, shouldExist bool) (map[string]string, error) {
+    envVars := make(map[string]string)
+
+    if _, err := os.Stat(file); os.IsNotExist(err) {
+        if shouldExist {
+            return nil, fmt.Errorf("env file %q not found", file)
+        }
+        return envVars, nil
+    }
+
+    return godotenv.Read(file)
 }
 
 func (c *connectorCommand) reloadConnector(context *fisk.ParseContext) error {
