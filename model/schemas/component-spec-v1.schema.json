@@ -1,0 +1,276 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "io.synadia.connect.v1.library.spec",
+  "$defs": {
+    "AuthorSpec": {
+      "$id": "io.synadia.connect.v1.library.spec.author",
+      "title": "AuthorSpec",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the author"
+        },
+        "email": {
+          "type": "string",
+          "description": "The email address of the author"
+        },
+        "url": {
+          "type": "string",
+          "description": "The url to a website related to the author"
+        }
+      },
+      "required": [
+        "name"
+      ]
+    },
+    "RuntimeSpec": {
+      "$id": "io.synadia.connect.v1.library.spec.runtime",
+      "title": "RuntimeSpec",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The unique identifier of the runtime"
+        },
+        "label": {
+          "type": "string",
+          "description": "A human readable label for the runtime"
+        },
+        "description": {
+          "type": "string",
+          "description": "A description of the runtime"
+        },
+        "author": {
+          "$ref": "#/$defs/AuthorSpec"
+        },
+        "image": {
+          "type": "string",
+          "description": "The image of the runtime"
+        },
+        "metrics": {
+          "$ref": "#/$defs/MetricsSpec"
+        }
+      },
+      "required": [
+        "name",
+        "label",
+        "author",
+        "description",
+        "image"
+      ]
+    },
+    "MetricsSpec": {
+      "$id": "io.synadia.connect.v1.library.spec.metrics",
+      "title": "MetricsSpec",
+      "type": "object",
+      "properties": {
+        "port": {
+          "type": "integer",
+          "description": "The port number where metrics can be retrieved"
+        },
+        "path": {
+          "type": "string",
+          "description": "The path where metrics can be retrieved"
+        }
+      },
+      "required": [
+        "port"
+      ]
+    },
+    "RangeSpec": {
+      "$id": "io.synadia.connect.v1.library.spec.range",
+      "title": "RangeSpec",
+      "type": "object",
+      "properties": {
+        "lt": {
+          "type": "number",
+          "description": "If filled in, the value must be less than this"
+        },
+        "lte": {
+          "type": "number",
+          "description": "If filled in, the value must be less than or equal to this"
+        },
+        "gt": {
+          "type": "number",
+          "description": "If filled in, the value must be greater than this"
+        },
+        "gte": {
+          "type": "number",
+          "description": "If filled in, the value must be greater than or equal to this"
+        }
+      }
+    },
+    "ConstraintSpec": {
+      "$id": "io.synadia.connect.v1.library.spec.constraint",
+      "title": "ConstraintSpec",
+      "type": "object",
+      "properties": {
+        "regex": {
+          "type": "string",
+          "description": "A regular expression that the value must match"
+        },
+        "range": {
+          "$ref": "#/$defs/RangeSpec"
+        },
+        "enum": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "preset": {
+          "type": "string",
+          "description": "A preset which implies the rules to which the value must adhere"
+        }
+      }
+    },
+    "FieldSpec": {
+      "$id": "io.synadia.connect.v1.library.spec.field",
+      "title": "FieldSpec",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the field. This field can only contain alphanumeric characters and underscores",
+          "pattern": "^[a-zA-Z0-9_]*$"
+        },
+        "label": {
+          "type": "string",
+          "description": "A human readable label for the field"
+        },
+        "type": {
+          "type": "string",
+          "description": "The type of the field",
+          "enum": [
+            "bool",
+            "int",
+            "object",
+            "scanner",
+            "string",
+            "expression",
+            "condition"
+          ]
+        },
+        "kind": {
+          "type": "string",
+          "description": "The kind of the field",
+          "default": "scalar",
+          "enum": [
+            "scalar",
+            "map",
+            "list"
+          ]
+        },
+        "description": {
+          "type": "string",
+          "description": "A description of the field"
+        },
+        "secret": {
+          "type": "boolean",
+          "description": "If true, the value of the field is considered secret and should not be displayed in logs or UIs"
+        },
+        "default": {
+          "type": ["number","string","boolean","object","array", "null"],
+          "description": "The default value of the field"
+        },
+        "optional": {
+          "type": "boolean",
+          "description": "If true, the field is optional"
+        },
+        "examples": {
+          "type": "array",
+          "items": {
+            "type": ["number","string","boolean","object","array", "null"]
+          }
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/FieldSpec"
+          }
+        },
+        "constraints": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ConstraintSpec"
+          }
+        },
+        "render_hint": {
+          "type": "string",
+          "description": "A hint to the renderer on how to render the field"
+        },
+        "path": {
+          "type": "string",
+          "description": "The path to the field in the resulting configuration. If no path is provided, the field is assumed to be a grouping of other fields"
+        }
+      },
+      "required": [
+        "name",
+        "label",
+        "type"
+      ]
+    },
+    "ComponentStatusSpec": {
+      "$id": "io.synadia.connect.v1.library.spec.component_status",
+      "title": "ComponentStatusSpec",
+      "type": "string",
+      "enum": [
+        "stable",
+        "preview",
+        "experimental",
+        "deprecated"
+      ]
+    },
+    "ComponentKindSpec": {
+      "$id": "io.synadia.connect.v1.library.spec.component_kind",
+      "title": "ComponentKindSpec",
+      "description": "The kind of the component",
+      "type": "string",
+      "enum": [
+        "source",
+        "sink",
+        "scanner"
+      ]
+    },
+    "ComponentSpec": {
+      "$id": "io.synadia.connect.v1.library.spec.component",
+      "title": "ComponentSpec",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the component. This field can only contain alphanumeric characters and underscores",
+          "pattern": "^[a-zA-Z0-9_]*$"
+        },
+        "label": {
+          "type": "string",
+          "description": "A human readable label for the component"
+        },
+        "status": {
+          "$ref": "#/$defs/ComponentStatusSpec"
+        },
+        "description": {
+          "type": "string",
+          "description": "A description of the component"
+        },
+        "icon": {
+          "type": "string",
+          "description": "The URL path to the icon. Can be a data: URL."
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/FieldSpec"
+          }
+        }
+      },
+      "required": [
+        "name",
+        "label",
+        "description",
+        "status"
+      ]
+    }
+  }
+}
