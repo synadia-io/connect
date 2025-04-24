@@ -128,5 +128,9 @@ func ConvertTransformerFromSpec(sp spec.TransformerStepSpec) model.TransformerSt
         }
     }
 
+    if sp.Explode != nil {
+        result.Explode = model.ExplodeTransformerStep{}
+    }
+
     return result
 }
