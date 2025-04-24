@@ -32,6 +32,12 @@ func (b *TransformerStepBuilder) Service(v *ServiceTransformerStepBuilder) *Tran
     return b
 }
 
+func (b *TransformerStepBuilder) Explode(v *ExplodeTransformerStepBuilder) *TransformerStepBuilder {
+    r := v.Build()
+    b.res.Explode = r
+    return b
+}
+
 func (b *TransformerStepBuilder) Build() spec.TransformerStepSpec {
     return *b.res
 }
