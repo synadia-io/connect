@@ -362,6 +362,9 @@ type TransformerStepSpec struct {
 	// A composite transformer which can be used to combine several transformers
 	Composite *TransformerStepSpecComposite `json:"composite,omitempty" yaml:"composite,omitempty" mapstructure:"composite,omitempty"`
 
+	// Explode a message with a json array payload into multiple messages
+	Explode TransformerStepSpecExplode `json:"explode,omitempty" yaml:"explode,omitempty" mapstructure:"explode,omitempty"`
+
 	// A mapping transformer which can transform the message
 	Mapping *TransformerStepSpecMapping `json:"mapping,omitempty" yaml:"mapping,omitempty" mapstructure:"mapping,omitempty"`
 
@@ -392,6 +395,9 @@ func (j *TransformerStepSpecComposite) UnmarshalJSON(value []byte) error {
 	*j = TransformerStepSpecComposite(plain)
 	return nil
 }
+
+// Explode a message with a json array payload into multiple messages
+type TransformerStepSpecExplode map[string]interface{}
 
 // A mapping transformer which can transform the message
 type TransformerStepSpecMapping struct {

@@ -50,6 +50,12 @@
         }
       },
       "required": ["sourcecode"]
+    },
+    "explode": {
+      "title": "ExplodeTransformerStep",
+      "description": "Explode a message with a json array payload into multiple messages",
+      "type": "object",
+      "properties": {}
     }
   }
 }
