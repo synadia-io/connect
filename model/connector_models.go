@@ -372,6 +372,9 @@ func (j *ConsumerStep) UnmarshalJSON(value []byte) error {
 	return nil
 }
 
+// Explode a message with a json array payload into multiple messages
+type ExplodeTransformerStep map[string]interface{}
+
 type Instance struct {
 	// the id of the connector this instance belongs to
 	ConnectorId string `json:"connector_id" yaml:"connector_id" mapstructure:"connector_id"`
@@ -765,6 +768,9 @@ type Steps struct {
 type TransformerStep struct {
 	// Composite corresponds to the JSON schema field "composite".
 	Composite *CompositeTransformerStep `json:"composite,omitempty" yaml:"composite,omitempty" mapstructure:"composite,omitempty"`
+
+	// Explode corresponds to the JSON schema field "explode".
+	Explode ExplodeTransformerStep `json:"explode,omitempty" yaml:"explode,omitempty" mapstructure:"explode,omitempty"`
 
 	// Mapping corresponds to the JSON schema field "mapping".
 	Mapping *MappingTransformerStep `json:"mapping,omitempty" yaml:"mapping,omitempty" mapstructure:"mapping,omitempty"`
