@@ -129,7 +129,17 @@ func ConvertTransformerFromSpec(sp spec.TransformerStepSpec) model.TransformerSt
     }
 
     if sp.Explode != nil {
-        result.Explode = model.ExplodeTransformerStep{}
+        result.Explode = &model.ExplodeTransformerStep{
+            Delimiter: sp.Explode.Delimiter,
+            Format:    model.ExplodeTransformerStepFormat(sp.Explode.Format),
+        }
+    }
+
+    if sp.Combine != nil {
+        result.Combine = &model.CombineTransformerStep{
+            Path:   sp.Combine.Path,
+            Format: model.CombineTransformerStepFormat(sp.Combine.Format),
+        }
     }
 
     return result

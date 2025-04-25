@@ -7,7 +7,21 @@ type ExplodeTransformerStepBuilder struct {
 }
 
 func ExplodeTransformerStep() *ExplodeTransformerStepBuilder {
-    return &ExplodeTransformerStepBuilder{}
+    return &ExplodeTransformerStepBuilder{
+        res: &model.ExplodeTransformerStep{
+            Format: model.ExplodeTransformerStepFormatJsonArray,
+        },
+    }
+}
+
+func (b *ExplodeTransformerStepBuilder) Format(format model.ExplodeTransformerStepFormat) *ExplodeTransformerStepBuilder {
+    b.res.Format = format
+    return b
+}
+
+func (b *ExplodeTransformerStepBuilder) Delimiter(delimiter string) *ExplodeTransformerStepBuilder {
+    b.res.Delimiter = delimiter
+    return b
 }
 
 func (b *ExplodeTransformerStepBuilder) Build() model.ExplodeTransformerStep {

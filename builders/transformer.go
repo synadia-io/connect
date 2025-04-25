@@ -32,7 +32,13 @@ func (b *TransformerStepBuilder) Service(v *ServiceTransformerStepBuilder) *Tran
 
 func (b *TransformerStepBuilder) Explode(v *ExplodeTransformerStepBuilder) *TransformerStepBuilder {
     r := v.Build()
-    b.res.Explode = r
+    b.res.Explode = &r
+    return b
+}
+
+func (b *TransformerStepBuilder) Combine(v *CombineTransformerStepBuilder) *TransformerStepBuilder {
+    r := v.Build()
+    b.res.Combine = &r
     return b
 }
 
