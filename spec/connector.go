@@ -4,6 +4,7 @@ package spec
 
 import "encoding/json"
 import "fmt"
+import "reflect"
 
 type ConnectorSpec struct {
 	// A description of the connector
@@ -359,14 +360,85 @@ type StepsSpec struct {
 
 // The transformer for messages flowing through the connector
 type TransformerStepSpec struct {
+	// Combine all messages in the batch into a single message
+	Combine *TransformerStepSpecCombine `json:"combine,omitempty" yaml:"combine,omitempty" mapstructure:"combine,omitempty"`
+
 	// A composite transformer which can be used to combine several transformers
 	Composite *TransformerStepSpecComposite `json:"composite,omitempty" yaml:"composite,omitempty" mapstructure:"composite,omitempty"`
+
+	// Explode a message with a json array payload into multiple messages
+	Explode *TransformerStepSpecExplode `json:"explode,omitempty" yaml:"explode,omitempty" mapstructure:"explode,omitempty"`
 
 	// A mapping transformer which can transform the message
 	Mapping *TransformerStepSpecMapping `json:"mapping,omitempty" yaml:"mapping,omitempty" mapstructure:"mapping,omitempty"`
 
 	// A service transformer sends each message to a nats service to be transformed
 	Service *TransformerStepSpecService `json:"service,omitempty" yaml:"service,omitempty" mapstructure:"service,omitempty"`
+}
+
+// Combine all messages in the batch into a single message
+type TransformerStepSpecCombine struct {
+	// The format of the payload to explode
+	Format TransformerStepSpecCombineFormat `json:"format" yaml:"format" mapstructure:"format"`
+
+	// The path to use for each message in case the format is `tar` or `zip`.
+	// Expressions can be used to set a unique path for each message.
+	Path string `json:"path,omitempty" yaml:"path,omitempty" mapstructure:"path,omitempty"`
+}
+
+type TransformerStepSpecCombineFormat string
+
+const TransformerStepSpecCombineFormatJsonArray TransformerStepSpecCombineFormat = "json_array"
+const TransformerStepSpecCombineFormatLines TransformerStepSpecCombineFormat = "lines"
+const TransformerStepSpecCombineFormatTar TransformerStepSpecCombineFormat = "tar"
+const TransformerStepSpecCombineFormatZip TransformerStepSpecCombineFormat = "zip"
+
+var enumValues_TransformerStepSpecCombineFormat = []interface{}{
+	"json_array",
+	"lines",
+	"tar",
+	"zip",
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (j *TransformerStepSpecCombineFormat) UnmarshalJSON(value []byte) error {
+	var v string
+	if err := json.Unmarshal(value, &v); err != nil {
+		return err
+	}
+	var ok bool
+	for _, expected := range enumValues_TransformerStepSpecCombineFormat {
+		if reflect.DeepEqual(v, expected) {
+			ok = true
+			break
+		}
+	}
+	if !ok {
+		return fmt.Errorf("invalid value (expected one of %#v): %#v", enumValues_TransformerStepSpecCombineFormat, v)
+	}
+	*j = TransformerStepSpecCombineFormat(v)
+	return nil
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (j *TransformerStepSpecCombine) UnmarshalJSON(value []byte) error {
+	var raw map[string]interface{}
+	if err := json.Unmarshal(value, &raw); err != nil {
+		return err
+	}
+	type Plain TransformerStepSpecCombine
+	var plain Plain
+	if err := json.Unmarshal(value, &plain); err != nil {
+		return err
+	}
+	if v, ok := raw["format"]; !ok || v == nil {
+		plain.Format = "json_array"
+	}
+	if v, ok := raw["path"]; !ok || v == nil {
+		plain.Path = ","
+	}
+	*j = TransformerStepSpecCombine(plain)
+	return nil
 }
 
 // A composite transformer which can be used to combine several transformers
@@ -390,6 +462,76 @@ func (j *TransformerStepSpecComposite) UnmarshalJSON(value []byte) error {
 		return err
 	}
 	*j = TransformerStepSpecComposite(plain)
+	return nil
+}
+
+// Explode a message with a json array payload into multiple messages
+type TransformerStepSpecExplode struct {
+	// The delimiter to use for the payload in case format is csv
+	Delimiter string `json:"delimiter,omitempty" yaml:"delimiter,omitempty" mapstructure:"delimiter,omitempty"`
+
+	// The format of the payload to explode
+	Format TransformerStepSpecExplodeFormat `json:"format" yaml:"format" mapstructure:"format"`
+}
+
+type TransformerStepSpecExplodeFormat string
+
+const TransformerStepSpecExplodeFormatCsv TransformerStepSpecExplodeFormat = "csv"
+const TransformerStepSpecExplodeFormatJsonArray TransformerStepSpecExplodeFormat = "json_array"
+const TransformerStepSpecExplodeFormatJsonDocuments TransformerStepSpecExplodeFormat = "json_documents"
+const TransformerStepSpecExplodeFormatJsonMap TransformerStepSpecExplodeFormat = "json_map"
+const TransformerStepSpecExplodeFormatLines TransformerStepSpecExplodeFormat = "lines"
+const TransformerStepSpecExplodeFormatTar TransformerStepSpecExplodeFormat = "tar"
+const TransformerStepSpecExplodeFormatZip TransformerStepSpecExplodeFormat = "zip"
+
+var enumValues_TransformerStepSpecExplodeFormat = []interface{}{
+	"csv",
+	"json_array",
+	"json_map",
+	"json_documents",
+	"lines",
+	"tar",
+	"zip",
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (j *TransformerStepSpecExplodeFormat) UnmarshalJSON(value []byte) error {
+	var v string
+	if err := json.Unmarshal(value, &v); err != nil {
+		return err
+	}
+	var ok bool
+	for _, expected := range enumValues_TransformerStepSpecExplodeFormat {
+		if reflect.DeepEqual(v, expected) {
+			ok = true
+			break
+		}
+	}
+	if !ok {
+		return fmt.Errorf("invalid value (expected one of %#v): %#v", enumValues_TransformerStepSpecExplodeFormat, v)
+	}
+	*j = TransformerStepSpecExplodeFormat(v)
+	return nil
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (j *TransformerStepSpecExplode) UnmarshalJSON(value []byte) error {
+	var raw map[string]interface{}
+	if err := json.Unmarshal(value, &raw); err != nil {
+		return err
+	}
+	type Plain TransformerStepSpecExplode
+	var plain Plain
+	if err := json.Unmarshal(value, &plain); err != nil {
+		return err
+	}
+	if v, ok := raw["delimiter"]; !ok || v == nil {
+		plain.Delimiter = ","
+	}
+	if v, ok := raw["format"]; !ok || v == nil {
+		plain.Format = "json_array"
+	}
+	*j = TransformerStepSpecExplode(plain)
 	return nil
 }
 

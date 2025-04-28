@@ -58,6 +58,8 @@
           --schema-output=io.synadia.connect.v1.model.connector.steps.transformer.composite=model/connector_models.go
           --schema-output=io.synadia.connect.v1.model.connector.steps.transformer.mapping=model/connector_models.go
           --schema-output=io.synadia.connect.v1.model.connector.steps.transformer.service=model/connector_models.go
+          --schema-output=io.synadia.connect.v1.model.connector.steps.transformer.explode=model/connector_models.go
+          --schema-output=io.synadia.connect.v1.model.connector.steps.transformer.combine=model/connector_models.go
           --schema-output=io.synadia.connect.v1.control.connector.create.request=model/connector_create.go
           --schema-output=io.synadia.connect.v1.control.connector.create.response=model/connector_create.go
           --schema-output=io.synadia.connect.v1.control.connector.delete.request=model/connector_delete.go

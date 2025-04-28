@@ -50,6 +50,44 @@
         }
       },
       "required": ["sourcecode"]
+    },
+    "explode": {
+      "title": "ExplodeTransformerStep",
+      "description": "Explode a message with a json array payload into multiple messages",
+      "type": "object",
+      "properties": {
+        "format": {
+          "type": "string",
+          "description": "The format of the payload to explode",
+          "enum": ["csv", "json_array", "json_map", "json_documents", "lines", "tar", "zip"],
+          "default": "json_array"
+        },
+        "delimiter": {
+          "type": "string",
+          "description": "The delimiter to use for the payload in case format is csv",
+          "default": ","
+        }
+      },
+      "required": ["format"]
+    },
+    "combine": {
+      "title": "CombineTransformerStep",
+      "description": "Combine all messages in the batch into a single message",
+      "type": "object",
+      "properties": {
+        "format": {
+          "type": "string",
+          "description": "The format of the payload to explode",
+          "enum": ["json_array", "lines", "tar", "zip"],
+          "default": "json_array"
+        },
+        "path": {
+          "type": "string",
+          "description": "The path to use for each message in case the format is `tar` or `zip`. Expressions can be used to set a unique path for each message.",
+          "default": ","
+        }
+      },
+      "required": ["format"]
     }
   }
 }
