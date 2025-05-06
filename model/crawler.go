@@ -357,6 +357,9 @@ type RuntimeSpec struct {
 	// Author corresponds to the JSON schema field "author".
 	Author AuthorSpec `json:"author" yaml:"author" mapstructure:"author"`
 
+	// The default version of the runtime
+	DefaultVersion string `json:"default_version" yaml:"default_version" mapstructure:"default_version"`
+
 	// A description of the runtime
 	Description string `json:"description" yaml:"description" mapstructure:"description"`
 
@@ -398,6 +401,9 @@ func (j *RuntimeSpec) UnmarshalJSON(value []byte) error {
 	var plain Plain
 	if err := json.Unmarshal(value, &plain); err != nil {
 		return err
+	}
+	if v, ok := raw["default_version"]; !ok || v == nil {
+		plain.DefaultVersion = "latest"
 	}
 	*j = RuntimeSpec(plain)
 	return nil

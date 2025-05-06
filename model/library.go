@@ -454,6 +454,9 @@ type Runtime struct {
 	// The author of the runtime
 	Author RuntimeAuthor `json:"author" yaml:"author" mapstructure:"author"`
 
+	// The default version of the runtime
+	DefaultVersion string `json:"default_version" yaml:"default_version" mapstructure:"default_version"`
+
 	// A description of the runtime
 	Description *string `json:"description,omitempty" yaml:"description,omitempty" mapstructure:"description,omitempty"`
 
@@ -587,6 +590,9 @@ type RuntimeSummary struct {
 	// The author of the runtime
 	Author string `json:"author" yaml:"author" mapstructure:"author"`
 
+	// The default version of the runtime
+	DefaultVersion string `json:"default_version" yaml:"default_version" mapstructure:"default_version"`
+
 	// A description of the runtime
 	Description *string `json:"description,omitempty" yaml:"description,omitempty" mapstructure:"description,omitempty"`
 
@@ -605,6 +611,9 @@ func (j *RuntimeSummary) UnmarshalJSON(value []byte) error {
 	}
 	if _, ok := raw["author"]; raw != nil && !ok {
 		return fmt.Errorf("field author in RuntimeSummary: required")
+	}
+	if _, ok := raw["default_version"]; raw != nil && !ok {
+		return fmt.Errorf("field default_version in RuntimeSummary: required")
 	}
 	if _, ok := raw["id"]; raw != nil && !ok {
 		return fmt.Errorf("field id in RuntimeSummary: required")
@@ -643,6 +652,9 @@ func (j *Runtime) UnmarshalJSON(value []byte) error {
 	var plain Plain
 	if err := json.Unmarshal(value, &plain); err != nil {
 		return err
+	}
+	if v, ok := raw["default_version"]; !ok || v == nil {
+		plain.DefaultVersion = "latest"
 	}
 	*j = Runtime(plain)
 	return nil
