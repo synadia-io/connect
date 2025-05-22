@@ -8,7 +8,7 @@ import (
 var templates = []spec.ConnectorSpec{
     Connector().
         Description("Inlet :: Send generated data to Core NATS").
-        RuntimeId("wombat:main").
+        RuntimeId("wombat").
         Steps(Steps().
             Source(SourceStep("generate").
                 SetString("mapping", "root.message = \"Hello World\"")).
@@ -18,7 +18,7 @@ var templates = []spec.ConnectorSpec{
 
     Connector().
         Description("Outlet :: Send messages from Core NATS to MongoDB").
-        RuntimeId("wombat:main").
+        RuntimeId("wombat").
         Steps(Steps().
             Consumer(ConsumerStep(NatsConfig("nats://demo.nats.io:4222")).
                 Core(ConsumerStepCore("foo.bar"))).
