@@ -1,6 +1,5 @@
 # Synadia Connect
 
-[![License Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Go Report Card](https://goreportcard.com/badge/github.com/synadia-io/connect)](https://goreportcard.com/report/github.com/synadia-io/connect)
 [![Coverage Status](https://img.shields.io/badge/coverage-13.2%25-orange.svg)](https://github.com/synadia-io/connect)
 
@@ -22,7 +21,6 @@ Synadia Connect is a NATS-based data pipeline platform that enables seamless dat
 - [Development](#development)
 - [Testing](#testing)
 - [Contributing](#contributing)
-- [License](#license)
 
 ## Features
 
@@ -258,10 +256,6 @@ We welcome contributions from the community! Please see our [Contributing Guide]
 - **Slack**: Join #connectors on [NATS Slack](https://slack.nats.io)
 - **Issues**: [GitHub Issues](https://github.com/synadia-io/connect/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/synadia-io/connect/discussions)
-
-## License
-
-This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
 
 ---
 

@@ -344,10 +344,6 @@ slog.Debug("Debug message", "key", "value")
 
 All submissions require review. We use GitHub pull requests for this purpose. Expect feedback and be prepared to make adjustments.
 
-## License
-
-By contributing, you agree that your contributions will be licensed under the Apache 2.0 License.
-
 ## Recognition
 
 Contributors are recognized in several ways:
