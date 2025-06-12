@@ -8,12 +8,17 @@ type NatsConfigBuilder struct {
     nats *model.NatsConfig
 }
 
-func NatsConfig(url string) *NatsConfigBuilder {
+func NatsConfig() *NatsConfigBuilder {
     return &NatsConfigBuilder{
         nats: &model.NatsConfig{
-            Url: url,
+            Url: DefaultNatsUrl,
         },
     }
+}
+
+func (b *NatsConfigBuilder) Url(url string) *NatsConfigBuilder {
+    b.nats.Url = url
+    return b
 }
 
 func (b *NatsConfigBuilder) Auth(jwt string, seed string) *NatsConfigBuilder {

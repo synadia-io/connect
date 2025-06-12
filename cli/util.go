@@ -14,6 +14,10 @@ func splitCommand(s string) (string, []string, error) {
         return "", nil, err
     }
 
+    if len(cmdAndArgs) == 0 {
+        return "", nil, fmt.Errorf("empty command")
+    }
+
     cmd := cmdAndArgs[0]
     args := cmdAndArgs[1:]
     return cmd, args, nil
