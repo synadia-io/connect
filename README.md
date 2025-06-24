@@ -157,12 +157,11 @@ connect standalone list
 ### 📖 References  
 - [**Connector Specification**](spec/schemas/connector-spec.schema.json) - Connector structure details
 - [**Connector Reference**](docs/reference/connector.md) - Complete API reference
-- [**CLI Reference**](docs/cli-reference.md) - Command-line interface guide
 
 ### 🎯 Quick Links
 - [**Quick Start Example**](docs/examples/quick-start.md) - First connector in 5 minutes
 - [**API Integration**](docs/examples/api-integration.md) - HTTP to NATS bridge  
-- [**Template Reference**](docs/templates.md) - Available connector templates
+- [**Local Development**](docs/examples/local-development.md) - Complete development workflow
 
 ## Usage
 

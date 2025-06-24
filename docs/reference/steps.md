@@ -52,4 +52,4 @@ steps:
 | `consumer`    | [Consumer](./consumer.md)       |         | outlet   | The consumer information describing how to connect to NATS and how to read the messages. |
 | `transformer` | [Transformer](./transformer.md) |         | no       | An optional transformer to change the messages as they flow through the connector        |                                                                                                                                                                                                                                                                                    |
 | `producer`    | [Producer](./producer.md)       |         | inlet    | The producer configuration for the inlet.                                                |
-| `sink`        | [Sink](./sink.md)               |         | outlet   | The sink describes how data should be written to the external system.                    |
+| `sink`        | Sink                            |         | outlet   | The sink describes how data should be written to the external system.                    |

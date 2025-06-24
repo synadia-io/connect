@@ -4,28 +4,25 @@ This directory contains practical examples for using Synadia Connect in standalo
 
 ## Examples
 
-### 🚀 Getting Started
+### 🚀 Available Examples
 - [**Quick Start**](./quick-start.md) - Your first connector in 5 minutes
-- [**Basic Pipeline**](./basic-pipeline.md) - Simple data transformation
-- [**Template Tour**](./template-tour.md) - Overview of all templates
-
-### 🔄 Data Pipelines  
-- [**File Processing**](./file-processing.md) - Process files and send to NATS
 - [**API Integration**](./api-integration.md) - HTTP to NATS bridge
-- [**Stream Processing**](./stream-processing.md) - Real-time data transformation
-- [**Database Sync**](./database-sync.md) - NATS to MongoDB pipeline
-
-### 🛠️ Development Workflows
 - [**Local Development**](./local-development.md) - Full development setup
-- [**Testing Strategy**](./testing-strategy.md) - Test connectors effectively  
-- [**Multi-Environment**](./multi-environment.md) - Dev/staging/prod configs
-- [**Custom Runtime**](./custom-runtime.md) - Add your own runtime
 
-### 🏭 Production Ready
-- [**High Throughput**](./high-throughput.md) - Performance optimization
-- [**Error Handling**](./error-handling.md) - Robust error management
-- [**Monitoring**](./monitoring.md) - Observability and logging
-- [**Security**](./security.md) - Secure configuration practices
+### 📋 Coming Soon
+Additional examples are in development:
+- **Basic Pipeline** - Simple data transformation
+- **Template Tour** - Overview of all templates
+- **File Processing** - Process files and send to NATS
+- **Stream Processing** - Real-time data transformation
+- **Database Sync** - NATS to MongoDB pipeline
+- **Testing Strategy** - Test connectors effectively
+- **Multi-Environment** - Dev/staging/prod configs
+- **Custom Runtime** - Add your own runtime
+- **High Throughput** - Performance optimization
+- **Error Handling** - Robust error management
+- **Monitoring** - Observability and logging
+- **Security** - Secure configuration practices
 
 ## Usage
 

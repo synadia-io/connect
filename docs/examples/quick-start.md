@@ -203,8 +203,8 @@ Once you have this working:
 
 1. **Try Different Templates**: `connect standalone template list`
 2. **Explore API Integration**: See [API Integration Example](./api-integration.md)
-3. **Add Real Data Sources**: See [File Processing Example](./file-processing.md)
-4. **Learn About Runtimes**: See [Custom Runtime Example](./custom-runtime.md)
+3. **Complete Development Setup**: See [Local Development Example](./local-development.md)
+4. **View All Examples**: See [Examples Overview](./README.md)
 
 ## What You Learned
 
@@ -216,4 +216,4 @@ Once you have this working:
 
 ---
 
-**Next Example**: Try [Basic Pipeline](./basic-pipeline.md) to learn data transformation!
+**Next Example**: Try [API Integration](./api-integration.md) to learn HTTP-to-NATS bridging!
