@@ -170,10 +170,10 @@ You can use the `connect` command to interact with the hosted connect service an
 
 ```shell
 connect --help                    # Show all commands
-connect list                      # List connectors  
-connect create <name>             # Create connector
-connect start <name>              # Start connector
-connect stop <name>               # Stop connector
+connect connector list            # List connectors  
+connect connector create <name>   # Create connector
+connect connector start <name>    # Start connector
+connect connector stop <name>     # Stop connector
 connect library ls                # List available components
 ```
 
