@@ -50,7 +50,7 @@ Let's run through the different fields in this file:
 - `description`: A short description of what the connector does
 - `runtime_id`: The id of the runtime providing the building blocks for the connector. 
 - `steps`: The steps that make up the connector. In this case, we have two steps: `source` and `producer`
-- `source.type`: The type of source. Take a look at the `connect component search` command to see the available sources.
+- `source.type`: The type of source. Take a look at the `connect library list` command to see the available sources.
 - `source.config`: The configuration for the source. This depends on the type of source being used.
 - `producer.core.subject`: The NATS subject on which the message will be published.
 - `producer.nats_config.url`: The URL of the NATS server we want to publish the data to.

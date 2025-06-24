@@ -15,8 +15,8 @@ config:
 # Fields
 ## `type`
 The type of the source to use. The name can be found by querying the library using
-`connect component search --kind=source`
+`connect library list --kind=source`
 
 ## `config`
 The configuration for the source. The fields in this section are specific to the source type. Find
-the fields by querying the library using `connect component info source <type>`
+the fields by querying the library using `connect library get <runtime> source <type>`

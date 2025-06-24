@@ -667,8 +667,8 @@ When moving from standalone to managed service:
 connect standalone run my-connector --env ENV=dev
 
 # Production (managed service) 
-connect create my-connector --env ENV=prod
-connect start my-connector
+connect connector create my-connector --env ENV=prod
+connect connector start my-connector
 ```
 
 ## Getting Help

@@ -8,7 +8,7 @@ connector, the steps can vary. For example, an inlet will have at least a source
 at least a consumer and a sink. Certain connectors may have additional steps like a transformer to modify the messages as
 they flow through the connector.
 
-A Connector is defined in a YAML file and can be created using the `connect create` command.
+A Connector is defined in a YAML file and can be created using the `connect connector create` command.
 
 ## Example
 ```yaml
