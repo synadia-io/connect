@@ -24,6 +24,7 @@ func RegisterFlags(app *fisk.Application, version string, opts *Options) {
     app.Flag("context", "Configuration context").Envar("NATS_CONTEXT").PlaceHolder("NAME").StringVar(&opts.ContextName)
     app.Flag("timeout", "Time to wait on responses from NATS").Default("5s").Envar("NATS_TIMEOUT").PlaceHolder("DURATION").DurationVar(&opts.Timeout)
     app.Flag("log-level", "Log level to use").Default("info").EnumVar(&opts.LogLevel, "error", "warn", "info", "debug", "trace")
+    app.Flag("standalone", "Run in standalone mode without NATS services").BoolVar(&opts.Standalone)
 }
 
 // Options configure the CLI
@@ -50,6 +51,9 @@ type Options struct {
 
     // LogLevel is the log level to use
     LogLevel string
+
+    // Standalone enables standalone mode without NATS services
+    Standalone bool
 }
 
 type AppContext struct {
@@ -63,6 +67,10 @@ func (ac *AppContext) Close() {
 }
 
 func LoadOptions(opts *Options) (*AppContext, error) {
+    if opts.Standalone {
+        return nil, fmt.Errorf("this command requires NATS services and cannot be used in standalone mode. Use 'connect standalone' commands instead")
+    }
+
     nc, err := loadNats(opts)
     if err != nil {
         return nil, fmt.Errorf("failed to connect to nats: %w", err)

@@ -5,8 +5,18 @@
 
 Synadia Connect is a NATS-based data pipeline platform that enables seamless data movement between NATS and external systems. Built on top of the NATS ecosystem, Connect provides a simple yet powerful way to create data connectors that can read from various sources and write to different sinks, all while leveraging NATS as the central message broker.
 
+## Deployment Options
+
+Connect supports two deployment modes:
+
+### 🌐 **Managed Service** (Default)
+Use Synadia's hosted Connect service for production workloads with full infrastructure management.
+
+### 🐳 **Standalone Mode** (New!)
+Run connectors locally using Docker for development, testing, and offline scenarios.
+
 > [!IMPORTANT]
-> This project provides the Connect CLI and SDK to interact with the Connect service. The Connect service is currently hosted by Synadia during a private beta. We're excited to share what we're working on and gather feedback from the community.
+> This project provides the Connect CLI and SDK to interact with the Connect service. The Connect service is currently hosted by Synadia during a private beta. The standalone mode allows you to develop and test connectors locally without requiring access to the hosted service.
 > 
 > Join us in the #connectors channel on the [NATS Slack](https://slack.nats.io) for questions and discussions!
 
@@ -30,6 +40,7 @@ Synadia Connect is a NATS-based data pipeline platform that enables seamless dat
 - **Transformation Support**: Built-in data transformation capabilities
 - **Scalable Architecture**: Deploy multiple connector instances for high availability
 - **Rich Component Library**: Pre-built components for common data sources and sinks
+- **Standalone Mode**: Local development with Docker for offline scenarios
 
 ## Installation
 
@@ -52,16 +63,128 @@ task install  # Installs to ~/.local/bin
 # Check version
 connect --version
 
-# Ensure correct NATS context
+# Ensure correct NATS context (for managed service)
 nats context select
 
 # List available components
 connect library ls
+
+# Verify Docker for standalone mode
+docker --version
 ```
 
 ## Quick Start
 
-### 1. Create Your First Connector
+### 🚀 Standalone Mode (Recommended for Development)
+
+Get started with standalone mode in 30 seconds:
+
+```shell
+# Create a new connector from template
+connect standalone create my-connector --template generate
+
+# Validate the connector configuration
+connect standalone validate my-connector
+
+# Run the connector locally
+connect standalone run my-connector
+
+# View logs
+connect standalone logs my-connector --follow
+
+# Stop the connector
+connect standalone stop my-connector
+```
+
+### 📋 Available Standalone Commands
+
+**Connector Management:**
+```shell
+connect standalone create <name>           # Create connector from template
+connect standalone validate <name>         # Validate connector configuration  
+connect standalone run <name>              # Run connector in Docker
+connect standalone stop <name>             # Stop running connector
+connect standalone remove <name>           # Remove connector container
+connect standalone logs <name>             # View connector logs
+connect standalone list                     # List running connectors
+```
+
+**Template Management:**
+```shell
+connect standalone template list           # List available templates
+connect standalone template get <name>     # Get specific template
+```
+
+**Runtime Management:**
+```shell
+connect standalone runtime list            # List available runtimes
+connect standalone runtime add <id>        # Add custom runtime
+connect standalone runtime remove <id>     # Remove custom runtime  
+connect standalone runtime show <id>       # Show runtime details
+```
+
+### 🎯 Common Workflows
+
+**Development Workflow:**
+```shell
+# 1. Create from template
+connect standalone create my-data-pipeline --template nats-to-http
+
+# 2. Edit the generated my-data-pipeline.connector.yml file
+# 3. Validate your changes
+connect standalone validate my-data-pipeline
+
+# 4. Test locally
+connect standalone run my-data-pipeline --follow
+
+# 5. Iterate and improve
+connect standalone stop my-data-pipeline
+# Edit config, then repeat steps 3-5
+```
+
+**Testing Different Runtimes:**
+```shell
+# Add a custom runtime
+connect standalone runtime add my-runtime \
+  --registry registry.example.com/my-runtime \
+  --description "My custom runtime"
+
+# Use in connector spec
+# runtime_id: my-runtime:v1.0.0
+```
+
+### 🔧 Advanced Usage
+
+**Environment Variables:**
+```shell
+# Pass environment variables to connectors
+connect standalone run my-connector \
+  --env DATABASE_URL=postgres://localhost:5432/mydb \
+  --env API_KEY=secret123
+```
+
+**Custom Configuration:**
+```shell
+# Override default file locations
+connect standalone validate --file ./configs/my-connector.yml
+connect standalone run my-connector --file ./configs/my-connector.yml
+```
+
+**Container Management:**
+```shell
+# Remove stopped containers automatically
+connect standalone run my-connector --remove
+
+# Follow logs in real-time  
+connect standalone logs my-connector --follow
+
+# List all connectors
+connect standalone list
+```
+
+### 🌐 Managed Service Mode
+
+For production deployments using the hosted service:
 
 ```bash
 # Create an inlet connector (external source → NATS)
@@ -69,21 +192,14 @@ connect connector create my-inlet
 
 # Create an outlet connector (NATS → external sink)
 connect connector create my-outlet
-```
 
-### 2. Start the Connector
-
-```bash
 # Start with image pulling enabled
 connect connector start my-inlet --pull
 
 # Check status
 connect connector status my-inlet
-```
 
-### 3. View Logs
-
-```bash
+# View logs
 connect logs
 ```
 
@@ -115,7 +231,7 @@ Each connector consists of:
 ### CLI Commands
 
 ```bash
-# Connector management
+# Connector management (Managed Service)
 connect connector list                    # List all connectors
 connect connector create <id>             # Create a new connector
 connect connector edit <id>              # Edit existing connector
@@ -123,6 +239,11 @@ connect connector delete <id>            # Delete a connector
 connect connector start <id> [options]   # Start a connector
 connect connector stop <id>              # Stop a connector
 connect connector status <id>            # Get connector status
+
+# Standalone mode commands  
+connect standalone create <name>          # Create local connector
+connect standalone run <name>             # Run locally with Docker
+connect standalone logs <name>            # View connector logs
 
 # Library exploration
 connect library runtimes                 # List available runtimes
@@ -133,6 +254,8 @@ connect library get <runtime> <kind> <name>  # Get component details
 # Monitoring
 connect logs                             # View connector logs
 ```
+
+> 💡 **Tip**: Use `connect standalone` for development and `connect connector` (managed service) for production deployments.
 
 ### Configuration
 
@@ -156,11 +279,19 @@ config:
 
 ## Documentation
 
-- [Getting Started Guide](docs/getting-started.md) - Step-by-step tutorial
-- [Connector Reference](docs/reference/connector.md) - Detailed connector documentation
-- [Component Library](docs/reference/README.md) - Available components and their configurations
-- [Connector Specification](spec/schemas/connector-spec.schema.json) - JSON schema for connector definitions
-- [API Documentation](docs/api/README.md) - SDK and API reference
+### 📚 Getting Started
+- [**Getting Started Guide**](docs/getting-started.md) - Create your first connector  
+- [**Standalone Mode Guide**](docs/standalone-mode.md) - Complete standalone mode documentation
+- [**Examples**](docs/examples/) - Practical examples and tutorials
+
+### 📖 References  
+- [**Connector Specification**](spec/schemas/connector-spec.schema.json) - Connector structure details
+- [**Connector Reference**](docs/reference/connector.md) - Complete API reference
+
+### 🎯 Quick Links
+- [**Quick Start Example**](docs/examples/quick-start.md) - First connector in 5 minutes
+- [**API Integration**](docs/examples/api-integration.md) - HTTP to NATS bridge  
+- [**Local Development**](docs/examples/local-development.md) - Complete development workflow
 
 ## Development
 
@@ -169,6 +300,7 @@ config:
 - Go 1.22 or later
 - Task (task runner)
 - NATS Server (for local testing)
+- Docker (for standalone mode)
 
 ### Building
 

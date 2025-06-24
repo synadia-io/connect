@@ -119,3 +119,52 @@
       cmds:
         - mkdir -p ~/.local/bin
         - cp target/connect ~/.local/bin/connect
+
+    docs:verify:links:
+      desc: Verify all documentation links are valid
+      cmds:
+        - |
+          echo "🔍 Verifying documentation links..."
+          broken_links_file=$(mktemp)
+          echo "0" > "$broken_links_file"
+          
+          # Find all markdown files
+          for file in $(find . -name "*.md" -not -path "./target/*"); do
+            echo "Checking: $file"
+            
+            # Extract local markdown links [text](./path.md) or [text](path.md)
+            if grep -oE '\[.*\]\(\./[^)]*\.md\)|\[.*\]\([^)]*\.md\)' "$file" 2>/dev/null; then
+              grep -oE '\[.*\]\(\./[^)]*\.md\)|\[.*\]\([^)]*\.md\)' "$file" 2>/dev/null | while read -r link; do
+                # Extract just the file path from the link
+                path=$(echo "$link" | sed -E 's/.*\(([^)]*)\).*/\1/')
+                
+                # Convert relative path to absolute
+                if [[ "$path" == ./* ]]; then
+                  # Remove leading ./
+                  rel_path="${path#./}"
+                  abs_path="$(dirname "$file")/$rel_path"
+                elif [[ "$path" == ../* ]]; then
+                  abs_path="$(dirname "$file")/$path"
+                else
+                  abs_path="$(dirname "$file")/$path"
+                fi
+                
+                # Check if file exists
+                if [[ ! -f "$abs_path" ]]; then
+                  echo "❌ Broken link in $file: $path → $abs_path"
+                  current_count=$(cat "$broken_links_file")
+                  echo $((current_count + 1)) > "$broken_links_file"
+                fi
+              done
+            fi
+          done
+          
+          broken_links=$(cat "$broken_links_file")
+          rm "$broken_links_file"
+          
+          if [[ $broken_links -eq 0 ]]; then
+            echo "✅ All documentation links are valid!"
+          else
+            echo "❌ Found $broken_links broken links"
+            exit 1
+          fi
