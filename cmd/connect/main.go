@@ -24,9 +24,11 @@ func main() {
 
     configureVersionCommand(ncli)
 
+    // Configure all commands - standalone will be added conditionally
     cli.ConfigureConnectorCommand(ncli, opts)
     cli.ConfigureLibraryCommand(ncli, opts)
     cli.ConfigureLogsCommand(ncli, opts)
+    cli.ConfigureStandaloneCommand(ncli, opts)
 
     ncli.MustParseWithUsage(os.Args[1:])
 }
