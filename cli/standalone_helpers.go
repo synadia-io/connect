@@ -84,6 +84,11 @@ func (c *standaloneCommand) selectTemplate() (*spec.ConnectorSpec, error) {
 }
 
 func (c *standaloneCommand) writeConnectorFile(connectorSpec *spec.ConnectorSpec, filePath string) error {
+	// Check if file already exists
+	if _, err := os.Stat(filePath); err == nil {
+		return fmt.Errorf("file already exists: %s", filePath)
+	}
+
 	// Create the full spec structure
 	fullSpec := spec.Spec{
 		Type: spec.SpecTypeConnector,

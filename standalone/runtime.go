@@ -108,6 +108,14 @@ func (rm *RuntimeManager) GetRuntime(id string) (*Runtime, error) {
 
 // AddRuntime adds a new runtime configuration
 func (rm *RuntimeManager) AddRuntime(runtime Runtime) error {
+	// Validate required fields
+	if runtime.ID == "" {
+		return fmt.Errorf("ID is required")
+	}
+	if runtime.Registry == "" {
+		return fmt.Errorf("Registry is required")
+	}
+
 	runtimes, err := rm.LoadRuntimes()
 	if err != nil {
 		return err
@@ -126,6 +134,11 @@ func (rm *RuntimeManager) AddRuntime(runtime Runtime) error {
 
 // RemoveRuntime removes a runtime configuration
 func (rm *RuntimeManager) RemoveRuntime(id string) error {
+	// Protect default wombat runtime
+	if id == "wombat" {
+		return fmt.Errorf("cannot remove default runtime 'wombat'")
+	}
+
 	runtimes, err := rm.LoadRuntimes()
 	if err != nil {
 		return err
