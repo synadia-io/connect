@@ -55,6 +55,9 @@ git clone https://github.com/synadia-io/connect.git
 cd connect
 task build
 task install  # Installs to ~/.local/bin
+#Or with basic go build
+cd .connect/cmd/connect
+go build -o ~/.local/bin/connect.exe
 ```
 
 ### Verify Installation
@@ -161,6 +164,13 @@ connect standalone runtime add my-runtime \
 connect standalone run my-connector \
   --env DATABASE_URL=postgres://localhost:5432/mydb \
   --env API_KEY=secret123
+```
+
+**Custom     Docker options:**
+```shell
+# Pass environment variables to connectors
+connect standalone run my-connector \
+  '--docker-opts=--network host'
 ```
 
 **Custom Configuration:**
