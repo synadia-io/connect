@@ -86,6 +86,17 @@ var _ = Describe("Runner", func() {
 			Expect(opts.EnvVars).To(HaveKeyWithValue("KEY1", "value1"))
 			Expect(opts.EnvVars).To(HaveKeyWithValue("KEY2", "value2"))
 		})
+
+		It("should handle custom docker options", func() {
+			opts := &RunOptions{
+				ConnectorID: "test-connector",
+				Image:       "registry.synadia.io/connect-runtime-wombat:latest",
+				DockerOpts:  "--network host -e TEST=TEST",
+			}
+
+			Expect(opts.DockerOpts).To(Equal("--network host -e TEST=TEST"))
+		})
+
 	})
 
 	Describe("validateRunOptions", func() {
@@ -124,11 +135,11 @@ var _ = Describe("Runner", func() {
 			// Note: This is difficult to test without mocking user input
 			// In a real implementation, this would require stdin mocking
 			connectorID := "test-connector"
-			
+
 			// For now, we just verify the method exists and can be called
 			// In practice, this would prompt the user for input
 			replace, err := runner.PromptUserForReplacement(connectorID)
-			
+
 			// Since we can't mock user input easily in this test environment,
 			// we expect this to either work or fail gracefully
 			_ = replace

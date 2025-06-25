@@ -26,6 +26,7 @@ type standaloneCommand struct {
 	// Run command flags
 	image            string
 	envVars          map[string]string
+	dockerOpts       string
 	envFile          string
 	envFileSetByUser bool
 	follow           bool
@@ -60,6 +61,7 @@ func ConfigureStandaloneCommand(parentCmd commandHost, opts *Options) {
 	runCmd.Arg("name", "Connector name (will look for <name>.connector.yml)").Required().StringVar(&c.connectorName)
 	runCmd.Flag("image", "Override Docker image (uses runtime configuration by default)").StringVar(&c.image)
 	runCmd.Flag("env", "Environment variables to set").Short('e').StringMapVar(&c.envVars)
+	runCmd.Flag("docker-opts", "Custom docker options to set").StringVar(&c.dockerOpts)
 	runCmd.Flag("env-file", "Read environment variables from file").Default(".env").IsSetByUser(&c.envFileSetByUser).StringVar(&c.envFile)
 	runCmd.Flag("follow", "Follow logs after starting").Short('f').BoolVar(&c.follow)
 	runCmd.Flag("rm", "Remove container when it exits").BoolVar(&c.remove)
@@ -97,20 +99,20 @@ func ConfigureStandaloneCommand(parentCmd commandHost, opts *Options) {
 
 	// Runtime subcommands
 	runtimeCmd := standaloneCmd.Command("runtime", "Manage connector runtimes")
-	
+
 	runtimeCmd.Command("list", "List available runtimes").Alias("ls").Action(c.listRuntimes)
-	
+
 	runtimeAddCmd := runtimeCmd.Command("add", "Add a new runtime").Action(c.addRuntime)
 	runtimeAddCmd.Arg("id", "Runtime ID").Required().StringVar(&c.runtimeID)
 	runtimeAddCmd.Arg("registry", "Registry path (without version tag)").Required().StringVar(&c.runtimeRegistry)
 	runtimeAddCmd.Flag("name", "Runtime name").StringVar(&c.runtimeName)
 	runtimeAddCmd.Flag("description", "Runtime description").StringVar(&c.runtimeDescription)
 	runtimeAddCmd.Flag("author", "Runtime author").StringVar(&c.runtimeAuthor)
-	
+
 	runtimeRemoveCmd := runtimeCmd.Command("remove", "Remove a runtime").Alias("rm")
 	runtimeRemoveCmd.Arg("id", "Runtime ID").Required().StringVar(&c.runtimeID)
 	runtimeRemoveCmd.Action(c.removeRuntime)
-	
+
 	runtimeShowCmd := runtimeCmd.Command("show", "Show runtime details").Action(c.showRuntime)
 	runtimeShowCmd.Arg("id", "Runtime ID").Required().StringVar(&c.runtimeID)
 }
@@ -211,6 +213,7 @@ func (c *standaloneCommand) runConnector(pc *fisk.ParseContext) error {
 		Image:       image,
 		Steps:       steps,
 		EnvVars:     c.envVars,
+		DockerOpts:  c.dockerOpts,
 		Follow:      c.follow,
 		Remove:      c.remove,
 		RuntimeID:   connector.RuntimeId,
@@ -420,7 +423,7 @@ func (c *standaloneCommand) showRuntime(pc *fisk.ParseContext) error {
 	tbl := table.NewWriter()
 	tbl.SetStyle(table.StyleRounded)
 	tbl.SetTitle(fmt.Sprintf("Runtime: %s", runtime.ID))
-	
+
 	tbl.AppendRow(table.Row{"ID", runtime.ID})
 	tbl.AppendRow(table.Row{"Name", runtime.Name})
 	tbl.AppendRow(table.Row{"Description", runtime.Description})
