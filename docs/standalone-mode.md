@@ -173,7 +173,7 @@ Options:
 Examples:
   connect standalone run my-app --follow
   connect standalone run my-app --env DEBUG=true --env PORT=8080
-  connect standalone run my-app --docker-opts '--network=host'
+  connect standalone run my-app '--docker-opts=--network host'
   connect standalone run my-app --image custom-runtime:v1.0.0
    
 ```
