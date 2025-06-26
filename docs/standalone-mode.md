@@ -52,7 +52,7 @@ connect standalone --help
 
 ```shell
 # Create a connector from template
-connect standalone create my-first-connector --template generate
+connect standalone create my-first-connector --template generate-to-nats
 
 # This creates: my-first-connector.connector.yml
 ```
@@ -167,12 +167,15 @@ Options:
   --follow            Follow logs after starting
   --remove            Remove container when it stops
   --env KEY=VALUE     Set environment variables
+  --docker-opts <docker options>     Set environment variables
   --image <image>     Override runtime image
 
 Examples:
   connect standalone run my-app --follow
   connect standalone run my-app --env DEBUG=true --env PORT=8080
+  connect standalone run my-app --docker-opts '--network=host'
   connect standalone run my-app --image custom-runtime:v1.0.0
+   
 ```
 
 #### `stop` - Stop Running Connector
