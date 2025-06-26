@@ -26,6 +26,7 @@ type standaloneCommand struct {
 	// Run command flags
 	image            string
 	envVars          map[string]string
+	dockerOpts       string
 	envFile          string
 	envFileSetByUser bool
 	follow           bool
@@ -60,6 +61,7 @@ func ConfigureStandaloneCommand(parentCmd commandHost, opts *Options) {
 	runCmd.Arg("name", "Connector name (will look for <name>.connector.yml)").Required().StringVar(&c.connectorName)
 	runCmd.Flag("image", "Override Docker image (uses runtime configuration by default)").StringVar(&c.image)
 	runCmd.Flag("env", "Environment variables to set").Short('e').StringMapVar(&c.envVars)
+	runCmd.Flag("docker-opts", "Custom docker options to set").StringVar(&c.dockerOpts)
 	runCmd.Flag("env-file", "Read environment variables from file").Default(".env").IsSetByUser(&c.envFileSetByUser).StringVar(&c.envFile)
 	runCmd.Flag("follow", "Follow logs after starting").Short('f').BoolVar(&c.follow)
 	runCmd.Flag("rm", "Remove container when it exits").BoolVar(&c.remove)
@@ -211,6 +213,7 @@ func (c *standaloneCommand) runConnector(pc *fisk.ParseContext) error {
 		Image:       image,
 		Steps:       steps,
 		EnvVars:     c.envVars,
+		DockerOpts:  c.dockerOpts,
 		Follow:      c.follow,
 		Remove:      c.remove,
 		RuntimeID:   connector.RuntimeId,

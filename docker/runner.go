@@ -30,6 +30,7 @@ type RunOptions struct {
 	Image       string
 	Steps       model.Steps
 	EnvVars     map[string]string
+	DockerOpts  string
 	WorkDir     string
 	Follow      bool
 	Remove      bool
@@ -58,12 +59,12 @@ func (r *Runner) Run(ctx context.Context, opts *RunOptions) error {
 			if err != nil {
 				return fmt.Errorf("failed to get user input: %w", err)
 			}
-			
+
 			if !replace {
 				fmt.Printf("Keeping existing running container '%s'\n", opts.ConnectorID)
 				return nil
 			}
-			
+
 			// User wants to replace, remove the existing container
 			if err := r.RemoveContainer(ctx, opts.ConnectorID); err != nil {
 				return fmt.Errorf("failed to remove existing running container: %w", err)
@@ -111,6 +112,14 @@ func (r *Runner) Run(ctx context.Context, opts *RunOptions) error {
 	// Add environment variables
 	for k, v := range opts.EnvVars {
 		args = append(args, "-e", fmt.Sprintf("%s=%s", k, v))
+	}
+
+	// Add customer options
+	if opts.DockerOpts != "" {
+		dockerOpts := strings.Fields(opts.DockerOpts)
+		for _, opt := range dockerOpts {
+			args = append(args, opt)
+		}
 	}
 
 	// Add the image
@@ -242,7 +251,7 @@ func (r *Runner) extractRuntimeFromImage(image string) string {
 	// Remove tag if present
 	parts := strings.SplitN(image, ":", 2)
 	imageName := parts[0]
-	
+
 	// Extract runtime from image name pattern: */connect-runtime-<runtime>
 	if strings.Contains(imageName, "/connect-runtime-") {
 		parts := strings.Split(imageName, "/connect-runtime-")
@@ -250,7 +259,7 @@ func (r *Runner) extractRuntimeFromImage(image string) string {
 			return parts[1]
 		}
 	}
-	
+
 	// Fallback: use the last part of the image name
 	pathParts := strings.Split(imageName, "/")
 	return pathParts[len(pathParts)-1]
@@ -338,14 +347,14 @@ func (r *Runner) executeDockerCommandWithStdin(ctx context.Context, args []strin
 // GetContainerStatus checks if a container exists and returns its status
 func (r *Runner) GetContainerStatus(ctx context.Context, connectorID string) (*ContainerStatus, error) {
 	containerName := connectorID
-	
+
 	// Check if container exists and get its status
 	cmd := exec.CommandContext(ctx, "docker", "ps", "-a", "--filter", fmt.Sprintf("name=%s", containerName), "--format", "{{.Names}}\t{{.Status}}")
 	output, err := cmd.Output()
 	if err != nil {
 		return nil, fmt.Errorf("failed to check container status: %w", err)
 	}
-	
+
 	lines := strings.Split(strings.TrimSpace(string(output)), "\n")
 	if len(lines) == 1 && lines[0] == "" {
 		// No container found
@@ -355,7 +364,7 @@ func (r *Runner) GetContainerStatus(ctx context.Context, connectorID string) (*C
 			Exists: false,
 		}, nil
 	}
-	
+
 	// Parse the output - should be "container-name\tstatus"
 	for _, line := range lines {
 		parts := strings.Split(line, "\t")
@@ -367,7 +376,7 @@ func (r *Runner) GetContainerStatus(ctx context.Context, connectorID string) (*C
 			}, nil
 		}
 	}
-	
+
 	return &ContainerStatus{
 		Name:   containerName,
 		Status: "",
@@ -389,13 +398,13 @@ func (cs *ContainerStatus) IsContainerStopped() bool {
 func (r *Runner) PromptUserForReplacement(connectorID string) (bool, error) {
 	fmt.Printf("Container '%s' is already running.\n", connectorID)
 	fmt.Print("Do you want to stop and replace it? [y/N]: ")
-	
+
 	reader := bufio.NewReader(os.Stdin)
 	response, err := reader.ReadString('\n')
 	if err != nil {
 		return false, fmt.Errorf("failed to read user input: %w", err)
 	}
-	
+
 	response = strings.TrimSpace(strings.ToLower(response))
 	return response == "y" || response == "yes", nil
 }
@@ -404,11 +413,11 @@ func (r *Runner) PromptUserForReplacement(connectorID string) (bool, error) {
 func (r *Runner) RemoveContainer(ctx context.Context, connectorID string) error {
 	// Try to stop first (ignore errors if already stopped)
 	r.Stop(ctx, connectorID)
-	
+
 	// Remove the container
 	containerName := connectorID
 	args := []string{"rm", "-f", containerName} // Add -f to force remove
-	
+
 	fmt.Printf("Removing container: %s\n", containerName)
 	return r.executeDockerCommand(ctx, args, false)
 }
@@ -444,7 +453,7 @@ func (r *Runner) executeWithTempConfig(ctx context.Context, args []string, confi
 
 	// Add volume mount for the config file
 	mountArg := fmt.Sprintf("%s:/tmp/wombat-config.yaml:ro", tempFile.Name())
-	
+
 	// Insert volume mount before the image name
 	imageIndex := -1
 	for i, arg := range args {
@@ -453,7 +462,7 @@ func (r *Runner) executeWithTempConfig(ctx context.Context, args []string, confi
 			break
 		}
 	}
-	
+
 	if imageIndex == -1 {
 		// Find the image (last argument that doesn't start with -)
 		for i := len(args) - 1; i >= 0; i-- {
@@ -474,6 +483,6 @@ func (r *Runner) executeWithTempConfig(ctx context.Context, args []string, confi
 	}
 
 	fmt.Printf("Running: docker %s\n", strings.Join(args, " "))
-	
+
 	return r.executeDockerCommand(ctx, args, interactive)
 }
