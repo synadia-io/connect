@@ -18,7 +18,7 @@ This example creates a simple data generator that:
 
 ```shell
 # Create a new connector from the generate template
-connect standalone create my-first-connector --template generate
+connect standalone create my-first-connector --template generate-to-nats
 
 # This creates: my-first-connector.connector.yml
 ```

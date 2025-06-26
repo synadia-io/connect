@@ -1,5 +1,7 @@
 ## Getting Started
-So off to the horses then! Let's get started creating your first inlet.
+So off to the horses then! Let's get started creating your first inlet. 
+
+This guide assumes you have access to a NATS systems with managed connectors. If you want to test locally please see [standalone-mode](standalone-mode.md)
 
 ### Private Beta
 Connect is currently in private beta. If you would like to participate in the beta, please reach out to us on the 

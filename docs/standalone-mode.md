@@ -52,7 +52,7 @@ connect standalone --help
 
 ```shell
 # Create a connector from template
-connect standalone create my-first-connector --template generate
+connect standalone create my-first-connector --template generate-to-nats
 
 # This creates: my-first-connector.connector.yml
 ```
@@ -167,12 +167,15 @@ Options:
   --follow            Follow logs after starting
   --remove            Remove container when it stops
   --env KEY=VALUE     Set environment variables
+  --docker-opts <docker options>     Set environment variables
   --image <image>     Override runtime image
 
 Examples:
   connect standalone run my-app --follow
   connect standalone run my-app --env DEBUG=true --env PORT=8080
+  connect standalone run my-app '--docker-opts=--network host'
   connect standalone run my-app --image custom-runtime:v1.0.0
+   
 ```
 
 #### `stop` - Stop Running Connector
@@ -277,12 +280,10 @@ Examples:
 
 | Template | Description | Use Case |
 |----------|-------------|----------|
-| `generate` | Generate test data to NATS | Development, testing |
+| `generate-to-nats` | Generate test data to NATS | Development, testing |
 | `nats-to-http` | Stream NATS messages to HTTP | API integration |
-| `nats-to-nats` | Bridge NATS subjects/streams | Message routing |
-| `file-to-nats` | Read files and publish to NATS | File processing |
+| `nats-to-stream` | Bridge NATS subjects/streams | Message routing |
 | `nats-to-mongodb` | Store NATS messages in MongoDB | Data persistence |
-| `http-to-nats` | Receive HTTP and publish to NATS | Webhook processing |
 
 ### Using Templates
 
@@ -291,7 +292,7 @@ Examples:
 connect standalone template list
 
 # Create from specific template
-connect standalone create webhook-handler --template http-to-nats
+connect standalone create web-forward--template nats-to-http
 
 # Extract template for customization
 connect standalone template get nats-to-http --output base-template.yml
@@ -302,21 +303,22 @@ connect standalone template get nats-to-http --output base-template.yml
 Templates provide pre-configured connector definitions:
 
 ```yaml
-type: connector
 spec:
-  id: template-name
-  description: Template description
-  runtime_id: wombat
-  steps:
-    source:
-      type: http_server
-      config:
-        address: "0.0.0.0:8080"
-    producer:
-      nats:
-        url: "nats://localhost:4222"
-      core:
-        subject: webhooks.incoming
+    description: 'Connector: nats-to-http'
+    runtime_id: wombat
+    steps:
+        consumer:
+            core:
+                queue: workers
+                subject: events.http
+            nats:
+                url: nats://localhost:4222
+        sink:
+            config:
+                url: http://localhost:3000/webhook
+                verb: POST
+            type: http_client
+type: connector
 ```
 
 ## Runtime Management
@@ -375,6 +377,14 @@ connect standalone run my-app \
   --env DATABASE_URL=postgres://localhost/db \
   --env API_KEY=secret123 \
   --env DEBUG=true
+```
+
+### Custom Docker options
+
+Pass additional docker options for local testing
+
+```shell
+connect standalone run my-app --docker-opts='--network host -p 8080:8080'
 ```
 
 ### File Locations

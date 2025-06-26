@@ -197,7 +197,7 @@ func (r *Runner) ValidateDockerAvailable() error {
 	err := cmd.Run()
 	if err != nil {
 		// For demonstration purposes, show what would happen instead of failing
-		fmt.Println("Note: Docker not available, but showing what would be executed:")
+		fmt.Println("Note: Docker not available. Please run 'docker image ls' manually to verify. Trying to execute:")
 		return nil
 	}
 	return err
