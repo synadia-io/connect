@@ -61,25 +61,25 @@ func ConfigureConnectorCommand(parentCmd commandHost, opts *Options) {
 
     connectorCmd := parentCmd.Command("connector", "Manage connectors").Alias("c")
 
-    connectorCmd.Command("list", "list connectors").Alias("ls").Action(c.listConnectors)
+    connectorCmd.Command("list", "List connectors").Alias("ls").Action(c.listConnectors)
 
-    getCmd := connectorCmd.Command("get", "get a connector").Alias("show").Action(c.getConnector)
-    getCmd.Arg("connector", "the name of the connector").Required().StringVar(&c.id)
+    getCmd := connectorCmd.Command("get", "Get a connector").Alias("show").Action(c.getConnector)
+    getCmd.Arg("connector", "The name of the connector").Required().StringVar(&c.id)
 
     saveCmd := connectorCmd.Command("edit", "Add or modify a connector").Alias("create").Action(c.saveConnector)
     saveCmd.Arg("id", "The id of the connector to create or modify").Required().StringVar(&c.id)
-    saveCmd.Flag("file", "use the connector definition from the given file").Short('f').IsSetByUser(&c.fileSetByUser).Default("./ConnectFile").StringVar(&c.file)
+    saveCmd.Flag("file", "Use the connector definition from the given file").Short('f').IsSetByUser(&c.fileSetByUser).Default("./ConnectFile").StringVar(&c.file)
     saveCmd.Flag("runtime", "The runtime id").Default("wombat").StringVar(&c.runtime)
 
     copyCmd := connectorCmd.Command("copy", "Copy a connector").Action(c.copyConnector)
     copyCmd.Arg("id", "The id of the connector to copy").Required().StringVar(&c.id)
     copyCmd.Arg("target-id", "The id of the new connector").Required().StringVar(&c.targetId)
 
-    deleteCmd := connectorCmd.Command("delete", "delete a connector").Alias("rm").Action(c.removeConnector)
-    deleteCmd.Arg("connector", "the name of the connector").Required().StringVar(&c.id)
+    deleteCmd := connectorCmd.Command("delete", "Delete a connector").Alias("rm").Action(c.removeConnector)
+    deleteCmd.Arg("connector", "The name of the connector").Required().StringVar(&c.id)
 
-    statusCmd := connectorCmd.Command("status", "get the status of a connector").Action(c.connectorStatus)
-    statusCmd.Arg("id", "the id of the connector to get status for").Required().StringVar(&c.id)
+    statusCmd := connectorCmd.Command("status", "Get the status of a connector").Action(c.connectorStatus)
+    statusCmd.Arg("id", "The id of the connector to get status for").Required().StringVar(&c.id)
 
     startCmd := connectorCmd.Command("start", "Deploy a connector").Action(c.startConnector)
     startCmd.Arg("id", "The id of the connector to deploy").Required().StringVar(&c.id)
@@ -92,10 +92,10 @@ func ConfigureConnectorCommand(parentCmd commandHost, opts *Options) {
     startCmd.Flag("env-file", "Read environment variables from file").Default(".env").IsSetByUser(&c.envFileSetByUser).StringVar(&c.envFile)
     startCmd.Flag("start-timeout", "How long to wait for the component to be started").Default("1m").StringVar(&c.startTimeout)
 
-    stopCmd := connectorCmd.Command("stop", "stop a connector").Action(c.stopConnector)
+    stopCmd := connectorCmd.Command("stop", "Stop a connector").Action(c.stopConnector)
     stopCmd.Arg("id", "The id of the connector to stop").Required().StringVar(&c.id)
 
-    reloadCmd := connectorCmd.Command("reload", "reload a connector").Alias("restart").Action(c.reloadConnector)
+    reloadCmd := connectorCmd.Command("reload", "Reload a connector").Alias("restart").Action(c.reloadConnector)
     reloadCmd.Arg("id", "The id of the connector to reload").Required().StringVar(&c.id)
 }
 
