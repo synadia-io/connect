@@ -132,7 +132,7 @@ type connectorTemplate struct {
 // Built-in templates for standalone mode
 var standaloneTemplates = []connectorTemplate{
 	{
-		Description: "Generate to NATS Core",
+		Description: "generate-to-nats",
 		ConnectorSpec: Connector().
 			Description("Generate test messages and send to NATS Core").
 			RuntimeId("wombat").
@@ -145,7 +145,7 @@ var standaloneTemplates = []connectorTemplate{
 			Build(),
 	},
 	{
-		Description: "NATS Core to HTTP",
+		Description: "nats-to-http",
 		ConnectorSpec: Connector().
 			Description("Consume from NATS Core and send HTTP requests").
 			RuntimeId("wombat").
@@ -158,7 +158,7 @@ var standaloneTemplates = []connectorTemplate{
 			Build(),
 	},
 	{
-		Description: "NATS Core to NATS Stream",
+		Description: "nats-to-stream",
 		ConnectorSpec: Connector().
 			Description("Forward messages from NATS Core to JetStream").
 			RuntimeId("wombat").
@@ -170,14 +170,13 @@ var standaloneTemplates = []connectorTemplate{
 			Build(),
 	},
 	{
-		Description: "Generate to MongoDB",
+		Description: "nats-to-mongodb",
 		ConnectorSpec: Connector().
 			Description("Generate test data and write to MongoDB").
 			RuntimeId("wombat").
 			Steps(Steps().
-				Source(SourceStep("generate").
-					SetString("mapping", "root = {\"id\": uuid_v4(), \"timestamp\": now(), \"message\": \"test data\"}").
-					SetString("interval", "10s")).
+				Consumer(ConsumerStep(NatsConfig("nats://localhost:4222")).
+					Core(ConsumerStepCore("events.>").Queue("workers"))).
 				Sink(SinkStep("mongodb").
 					SetString("url", "mongodb://localhost:27017").
 					SetString("database", "testdb").

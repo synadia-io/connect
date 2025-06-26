@@ -97,20 +97,20 @@ func ConfigureStandaloneCommand(parentCmd commandHost, opts *Options) {
 
 	// Runtime subcommands
 	runtimeCmd := standaloneCmd.Command("runtime", "Manage connector runtimes")
-	
+
 	runtimeCmd.Command("list", "List available runtimes").Alias("ls").Action(c.listRuntimes)
-	
+
 	runtimeAddCmd := runtimeCmd.Command("add", "Add a new runtime").Action(c.addRuntime)
 	runtimeAddCmd.Arg("id", "Runtime ID").Required().StringVar(&c.runtimeID)
 	runtimeAddCmd.Arg("registry", "Registry path (without version tag)").Required().StringVar(&c.runtimeRegistry)
 	runtimeAddCmd.Flag("name", "Runtime name").StringVar(&c.runtimeName)
 	runtimeAddCmd.Flag("description", "Runtime description").StringVar(&c.runtimeDescription)
 	runtimeAddCmd.Flag("author", "Runtime author").StringVar(&c.runtimeAuthor)
-	
+
 	runtimeRemoveCmd := runtimeCmd.Command("remove", "Remove a runtime").Alias("rm")
 	runtimeRemoveCmd.Arg("id", "Runtime ID").Required().StringVar(&c.runtimeID)
 	runtimeRemoveCmd.Action(c.removeRuntime)
-	
+
 	runtimeShowCmd := runtimeCmd.Command("show", "Show runtime details").Action(c.showRuntime)
 	runtimeShowCmd.Arg("id", "Runtime ID").Required().StringVar(&c.runtimeID)
 }
@@ -306,7 +306,7 @@ func (c *standaloneCommand) listTemplates(pc *fisk.ParseContext) error {
 	fmt.Println("Available connector templates:")
 
 	for _, template := range standaloneTemplates {
-		fmt.Printf("  %s\n", template.Description)
+		fmt.Printf("  %s\t\t#%s\n", template.Description, template.ConnectorSpec.Description)
 	}
 
 	return nil
@@ -420,7 +420,7 @@ func (c *standaloneCommand) showRuntime(pc *fisk.ParseContext) error {
 	tbl := table.NewWriter()
 	tbl.SetStyle(table.StyleRounded)
 	tbl.SetTitle(fmt.Sprintf("Runtime: %s", runtime.ID))
-	
+
 	tbl.AppendRow(table.Row{"ID", runtime.ID})
 	tbl.AppendRow(table.Row{"Name", runtime.Name})
 	tbl.AppendRow(table.Row{"Description", runtime.Description})
