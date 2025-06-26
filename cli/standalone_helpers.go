@@ -158,20 +158,6 @@ var standaloneTemplates = []connectorTemplate{
 			Build(),
 	},
 	{
-		Description: "http-to-nats",
-		ConnectorSpec: Connector().
-			Description("Consume from NATS Core and send HTTP requests").
-			RuntimeId("wombat").
-			Steps(Steps().
-				Source(SourceStep("http_server").
-					SetString("address", "0.0.0.0:8080").
-					SetString("path", "/webhook").
-					SetString("timeout", "30s")).
-				Producer(ProducerStep(NatsConfig("nats://localhost:4222")).
-					Core(ProducerStepCore("events.test")))).
-			Build(),
-	},
-	{
 		Description: "nats-to-stream",
 		ConnectorSpec: Connector().
 			Description("Forward messages from NATS Core to JetStream").
