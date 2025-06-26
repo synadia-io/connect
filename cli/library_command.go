@@ -38,7 +38,7 @@ func ConfigureLibraryCommand(parentCmd commandHost, opts *Options) {
     runtimeCmd := componentCmd.Command("runtime", "Show information about a runtime").Action(c.getRuntime)
     runtimeCmd.Arg("id", "The id of the runtime to describe").Required().StringVar(&c.runtime)
 
-    searchCmd := componentCmd.Command("list", "list components").Alias("ls").Action(c.search)
+    searchCmd := componentCmd.Command("list", "List components").Alias("ls").Action(c.search)
     searchCmd.Flag("runtime", "The runtime id").StringVar(&c.runtime)
     searchCmd.Flag("kind", "The kind of components").EnumVar(&c.kind, kindOpts...)
     searchCmd.Flag("status", "The status of the components").EnumVar(&c.status, statusOpts...)
