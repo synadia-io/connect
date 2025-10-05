@@ -1,56 +1,61 @@
 package cli
 
 import (
-    "fmt"
-    "github.com/choria-io/fisk"
-    "github.com/nats-io/nats.go"
-    "os"
-    "os/signal"
-    "strings"
-    "syscall"
+	"fmt"
+	"os"
+	"os/signal"
+	"strings"
+	"syscall"
+
+	"github.com/choria-io/fisk"
+	"github.com/nats-io/nats.go"
 )
 
 type logsCommand struct {
-    opts *Options
+	opts *Options
 }
 
 func ConfigureLogsCommand(parentCmd commandHost, opts *Options) {
-    c := &logsCommand{
-        opts: opts,
-    }
+	c := &logsCommand{
+		opts: opts,
+	}
 
-    parentCmd.Command("logs", "View Logs").Alias("log").Action(c.logs)
+	parentCmd.Command("logs", "View Logs").Alias("log").Action(c.logs)
 }
 
 func (c *logsCommand) logs(pc *fisk.ParseContext) error {
-    appCtx, err := LoadOptions(c.opts)
-    fisk.FatalIfError(err, "failed to load options")
-    defer appCtx.Close()
+	appCtx, err := LoadOptions(c.opts)
+	fisk.FatalIfError(err, "failed to load options")
+	defer appCtx.Close()
 
-    fmt.Println("Capturing logs for all connectors. Press Ctrl+C to stop.")
-    fmt.Println(fmt.Sprintf("$NEX.logs.%s.>", appCtx.Client.Account()))
-    sub, err := appCtx.Nc.Subscribe(fmt.Sprintf("$NEX.logs.%s.>", appCtx.Client.Account()), func(msg *nats.Msg) {
-        sp := strings.Split(msg.Subject, ".")
-        if len(sp) > 5 {
-            return
-        }
+	fmt.Println("Capturing logs for all connectors. Press Ctrl+C to stop.")
+	subject := fmt.Sprintf("$NEX.FEED.%s.logs.>", appCtx.Client.Account())
+	fmt.Println(subject)
+	sub, err := appCtx.Nc.Subscribe(subject, func(msg *nats.Msg) {
+		sp := strings.Split(msg.Subject, ".")
+		if len(sp) > 6 {
+			return
+		}
 
-        instanceId := sp[3]
-        level := sp[4]
-        line := string(msg.Data)
+		instanceId := sp[4]
+		level := sp[5]
+		line := string(msg.Data)
 
-        // Skip metrics
-        if level == "metrics" {
-            return
-        }
+		// Skip metrics
+		if level == "metrics" {
+			return
+		}
 
-        fmt.Printf("%s %s\n", instanceId, line)
-    })
-    defer sub.Unsubscribe()
+		fmt.Printf("%s %s\n", instanceId, line)
+	})
+	if err != nil {
+		return fmt.Errorf("failed to subscribe to logs: %w", err)
+	}
+	defer sub.Unsubscribe()
 
-    sigs := make(chan os.Signal, 1)
-    signal.Notify(sigs, os.Interrupt, syscall.SIGTERM)
-    <-sigs
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, os.Interrupt, syscall.SIGTERM)
+	<-sigs
 
-    return nil
+	return nil
 }
