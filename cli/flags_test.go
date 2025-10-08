@@ -91,8 +91,8 @@ var _ = Describe("RegisterFlags", func() {
 
 		_, err := app.Parse([]string{})
 		Expect(err).To(BeNil())
-		// Default timeout is 5s
-		Expect(opts.Timeout).To(Equal(5 * time.Second))
+		// Default timeout is 30s
+		Expect(opts.Timeout).To(Equal(30 * time.Second))
 	})
 
 	It("should handle connection name default", func() {

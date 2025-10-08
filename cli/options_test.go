@@ -54,19 +54,19 @@ var _ = Describe("Options", func() {
 
 		It("should use default values", func() {
 			RegisterFlags(app, "1.0.0", opts)
-			
+
 			_, err := app.Parse([]string{})
 			Expect(err).ToNot(HaveOccurred())
 
 			// Check defaults
 			Expect(opts.ConnectionName).To(Equal("NATS Vent CLI Item 1.0.0"))
-			Expect(opts.Timeout).To(Equal(5 * time.Second))
+			Expect(opts.Timeout).To(Equal(30 * time.Second))
 			Expect(opts.LogLevel).To(Equal("info"))
 		})
 
 		It("should accept short flags", func() {
 			RegisterFlags(app, "1.0.0", opts)
-			
+
 			_, err := app.Parse([]string{"-s", "nats://short:4222"})
 			Expect(err).ToNot(HaveOccurred())
 
@@ -75,7 +75,7 @@ var _ = Describe("Options", func() {
 
 		It("should validate log level", func() {
 			RegisterFlags(app, "1.0.0", opts)
-			
+
 			// Valid log levels
 			for _, level := range []string{"error", "warn", "info", "debug", "trace"} {
 				_, err := app.Parse([]string{"--log-level", level})
