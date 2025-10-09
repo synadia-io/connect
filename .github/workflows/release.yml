@@ -2,8 +2,10 @@
 name: Release
 
 on:
-  release:
-    types: [created]
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'      # Only final releases (v0.1.0)
+      - 'v[0-9]+.[0-9]+.[0-9]+-rc*'  # Only RCs (v0.1.0-rc8)
 
 permissions:
   contents: write
@@ -14,30 +16,88 @@ env:
   GOPRIVATE: github.com/synadia-io/*
 
 jobs:
-  binary:
-    name: Release Go Binary
+  release:
+    name: Create Release
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        goos: [linux, windows, darwin]
-        goarch: [amd64, arm64, arm]
-        exclude:
-          - goarch: arm64
-            goos: windows
-          - goarch: arm
-            goos: windows
-          - goarch: arm
-            goos: darwin
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: wangyoucao577/go-release-action@v1
+      - name: Show disk space and Go temps
+        run: |
+          echo "=== Disk Usage ==="
+          df -h
+          echo
+          echo "=== Go Environment ==="
+          go env GOTMPDIR
+          go env GOCACHE
+          echo
+          echo "=== Temp Directories ==="
+          echo "TMPDIR: $TMPDIR"
+          echo "/tmp space:"
+          df -h /tmp
+          echo
+          echo "=== Available Space by Mount ==="
+          df -h | grep -E "(Filesystem|/dev/)"
+      - name: Checkout code
+        uses: actions/checkout@v5
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          goos: ${{ matrix.goos }}
-          goarch: ${{ matrix.goarch }}
-          project_path: "./cmd/connect"
-          binary_name: "connect"
-          extra_files: README.md
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: 1.25.1
+
+      - name: Install Task
+        uses: arduino/setup-task@v2
+        with:
+          version: 3.x
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup development environment
+        run: |
+          task setup
+          echo "$HOME/go/bin" >> $GITHUB_PATH
+
+      - name: Determine release info
+        id: release_info
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+
+          # Determine if this is a prerelease
+          if [[ "$TAG" == *"-rc"* ]]; then
+            echo "prerelease=true" >> $GITHUB_OUTPUT
+          else
+            echo "prerelease=false" >> $GITHUB_OUTPUT
+          fi
+
+          echo "name=Release $TAG" >> $GITHUB_OUTPUT
+
+      - name: Run pre-release checks
+        run: |
+          task check
+          task test
+
+      - name: Free up disk space and setup temp dirs
+        run: |
+          # Cleanup
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc
+          sudo docker system prune -af
+          # Create temp dir on larger filesystem
+          sudo mkdir -p /mnt/tmp /mnt/gocache
+          sudo chown $USER:$USER /mnt/tmp /mnt/gocache
+          df -h
+
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          version: latest
+          args: release --clean --skip=docker
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GOTMPDIR: /mnt/tmp
+          GOCACHE: /mnt/gocache
+          GORELEASER_CURRENT_TAG: ${{ steps.release_info.outputs.tag }} # override tag b/c git does not offer a tag sort to make "v1.0.6" come out on top when "v1.0.6-rc1" is present on the same commit. Goreleaser fixes this, but only in paid version
 
   docker:
     name: Build the connect image

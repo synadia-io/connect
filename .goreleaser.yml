@@ -1,0 +1,58 @@
+version: 2
+
+project_name: synadia-connect
+
+env:
+  - CGO_ENABLED=0
+
+git:
+  prerelease_suffix: "-"
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: connect
+    main: ./cmd/connect
+    binary: connect
+    ldflags:
+      - -w -s
+      - -X main.Version={{.Version}}
+      - -X main.DateBuilt={{.Date}}
+    goos:
+      - linux
+    goarch:
+      - amd64
+      - arm64
+
+archives:
+  - id: connect
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else }}{{ .Arch }}{{ end }}
+
+    files:
+      - README.md
+
+
+checksum:
+  name_template: 'checksums.txt'
+  algorithm: sha256
+
+snapshot:
+  version_template: "{{ .Tag }}-SNAPSHOT"
+
+
+changelog:
+  use: github
+  sort: asc
+  groups:
+    - title: 'Changes:'
+      order: 999
+  filters:
+    exclude:
+      - '^Merge pull request'
+      - '^Merge branch'
