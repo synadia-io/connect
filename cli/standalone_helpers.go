@@ -7,7 +7,7 @@ import (
 
 	"github.com/mitchellh/mapstructure"
 	"github.com/synadia-io/connect/spec"
-	. "github.com/synadia-io/connect/spec/builders"
+	"github.com/synadia-io/connect/spec/builders"
 	"gopkg.in/yaml.v3"
 )
 
@@ -101,51 +101,51 @@ type connectorTemplate struct {
 var standaloneTemplates = []connectorTemplate{
 	{
 		Description: "generate-to-nats",
-		ConnectorSpec: Connector().
+		ConnectorSpec: builders.Connector().
 			Description("Generate test messages and send to NATS Core").
 			RuntimeId("wombat").
-			Steps(Steps().
-				Source(SourceStep("generate").
+			Steps(builders.Steps().
+				Source(builders.SourceStep("generate").
 					SetString("mapping", "root.message = \"Hello from Wombat\"").
 					SetString("interval", "5s")).
-				Producer(ProducerStep(NatsConfig("nats://localhost:4222")).
-					Core(ProducerStepCore("events.test")))).
+				Producer(builders.ProducerStep(builders.NatsConfig("nats://localhost:4222")).
+					Core(builders.ProducerStepCore("events.test")))).
 			Build(),
 	},
 	{
 		Description: "nats-to-http",
-		ConnectorSpec: Connector().
+		ConnectorSpec: builders.Connector().
 			Description("Consume from NATS Core and send HTTP requests").
 			RuntimeId("wombat").
-			Steps(Steps().
-				Consumer(ConsumerStep(NatsConfig("nats://localhost:4222")).
-					Core(ConsumerStepCore("events.>").Queue("workers"))).
-				Sink(SinkStep("http_client").
+			Steps(builders.Steps().
+				Consumer(builders.ConsumerStep(builders.NatsConfig("nats://localhost:4222")).
+					Core(builders.ConsumerStepCore("events.>").Queue("workers"))).
+				Sink(builders.SinkStep("http_client").
 					SetString("url", "http://localhost:3000/webhook").
 					SetString("verb", "POST"))).
 			Build(),
 	},
 	{
 		Description: "nats-to-stream",
-		ConnectorSpec: Connector().
+		ConnectorSpec: builders.Connector().
 			Description("Forward messages from NATS Core to JetStream").
 			RuntimeId("wombat").
-			Steps(Steps().
-				Consumer(ConsumerStep(NatsConfig("nats://localhost:4222")).
-					Core(ConsumerStepCore("events.>").Queue("processors"))).
-				Producer(ProducerStep(NatsConfig("nats://localhost:4222")).
-					Stream(ProducerStepStream("stream.events")))).
+			Steps(builders.Steps().
+				Consumer(builders.ConsumerStep(builders.NatsConfig("nats://localhost:4222")).
+					Core(builders.ConsumerStepCore("events.>").Queue("processors"))).
+				Producer(builders.ProducerStep(builders.NatsConfig("nats://localhost:4222")).
+					Stream(builders.ProducerStepStream("stream.events")))).
 			Build(),
 	},
 	{
 		Description: "nats-to-mongodb",
-		ConnectorSpec: Connector().
+		ConnectorSpec: builders.Connector().
 			Description("Generate test data and write to MongoDB").
 			RuntimeId("wombat").
-			Steps(Steps().
-				Consumer(ConsumerStep(NatsConfig("nats://localhost:4222")).
-					Core(ConsumerStepCore("events.>").Queue("workers"))).
-				Sink(SinkStep("mongodb").
+			Steps(builders.Steps().
+				Consumer(builders.ConsumerStep(builders.NatsConfig("nats://localhost:4222")).
+					Core(builders.ConsumerStepCore("events.>").Queue("workers"))).
+				Sink(builders.SinkStep("mongodb").
 					SetString("url", "mongodb://localhost:27017").
 					SetString("database", "testdb").
 					SetString("collection", "events").

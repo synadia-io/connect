@@ -5,7 +5,7 @@ import (
 	"github.com/nats-io/nats-server/v2/server"
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nkeys"
-	. "github.com/onsi/gomega"
+	"github.com/onsi/gomega"
 )
 
 func Account(name string) Acc {
@@ -42,7 +42,7 @@ func (a *Acc) Creds() (string, []byte) {
 	userSeed, _ := user.Seed()
 	userClaim := jwt.NewUserClaims(userPk)
 	userJwt, err := userClaim.Encode(a.KeyPair)
-	Expect(err).ToNot(HaveOccurred())
+	gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
 	return userJwt, userSeed
 }
@@ -52,7 +52,7 @@ func (a *Acc) Connect(srv *server.Server) *nats.Conn {
 
 	natsUrl := srv.ClientURL()
 	nc, err := nats.Connect(natsUrl, nats.UserJWTAndSeed(userJwt, string(userSeed)))
-	Expect(err).ToNot(HaveOccurred())
+	gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
 	return nc
 }

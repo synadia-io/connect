@@ -2,27 +2,27 @@ package cli
 
 import (
 	"github.com/synadia-io/connect/spec"
-	. "github.com/synadia-io/connect/spec/builders"
+	"github.com/synadia-io/connect/spec/builders"
 )
 
 var templates = []spec.ConnectorSpec{
-	Connector().
+	builders.Connector().
 		Description("Inlet :: Send generated data to Core NATS").
 		RuntimeId("wombat").
-		Steps(Steps().
-			Source(SourceStep("generate").
+		Steps(builders.Steps().
+			Source(builders.SourceStep("generate").
 				SetString("mapping", "root.message = \"Hello World\"")).
-			Producer(ProducerStep(NatsConfig("nats://demo.nats.io:4222")).
-				Core(ProducerStepCore("foo.bar")))).
+			Producer(builders.ProducerStep(builders.NatsConfig("nats://demo.nats.io:4222")).
+				Core(builders.ProducerStepCore("foo.bar")))).
 		Build(),
 
-	Connector().
+	builders.Connector().
 		Description("Outlet :: Send messages from Core NATS to MongoDB").
 		RuntimeId("wombat").
-		Steps(Steps().
-			Consumer(ConsumerStep(NatsConfig("nats://demo.nats.io:4222")).
-				Core(ConsumerStepCore("foo.bar"))).
-			Sink(SinkStep("mongodb").
+		Steps(builders.Steps().
+			Consumer(builders.ConsumerStep(builders.NatsConfig("nats://demo.nats.io:4222")).
+				Core(builders.ConsumerStepCore("foo.bar"))).
+			Sink(builders.SinkStep("mongodb").
 				SetString("url", "mongodb+srv://your-mongo-server/?retryWrites=true").
 				SetString("database", "my-db").
 				SetString("collection", "my-collection").

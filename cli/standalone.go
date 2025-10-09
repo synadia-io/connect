@@ -13,6 +13,8 @@ import (
 	"github.com/synadia-io/connect/docker"
 	"github.com/synadia-io/connect/standalone"
 	"github.com/synadia-io/connect/validation"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 type standaloneCommand struct {
@@ -375,7 +377,7 @@ func (c *standaloneCommand) addRuntime(pc *fisk.ParseContext) error {
 	// Set defaults if not provided
 	name := c.runtimeName
 	if name == "" {
-		name = strings.Title(c.runtimeID) + " Runtime"
+		name = cases.Title(language.English).String(c.runtimeID) + " Runtime"
 	}
 
 	description := c.runtimeDescription
