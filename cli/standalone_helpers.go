@@ -6,8 +6,6 @@ import (
 	"strings"
 
 	"github.com/mitchellh/mapstructure"
-	"github.com/synadia-io/connect/convert"
-	"github.com/synadia-io/connect/model"
 	"github.com/synadia-io/connect/spec"
 	. "github.com/synadia-io/connect/spec/builders"
 	"gopkg.in/yaml.v3"
@@ -34,31 +32,6 @@ func (c *standaloneCommand) loadConnectorSpec(filePath string) (*spec.ConnectorS
 	}
 
 	return &connectorSpec, nil
-}
-
-func (c *standaloneCommand) loadConnectorSteps(filePath string) (*model.Steps, error) {
-	data, err := os.ReadFile(filePath)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read file: %w", err)
-	}
-
-	var sp spec.Spec
-	if err := yaml.Unmarshal(data, &sp); err != nil {
-		return nil, fmt.Errorf("failed to parse YAML: %w", err)
-	}
-
-	if sp.Type != spec.SpecTypeConnector {
-		return nil, fmt.Errorf("invalid spec type: expected %s, got %s", spec.SpecTypeConnector, sp.Type)
-	}
-
-	var connectorSpec spec.ConnectorSpec
-	if err := mapstructure.Decode(sp.Spec, &connectorSpec); err != nil {
-		return nil, fmt.Errorf("failed to decode connector spec: %w", err)
-	}
-
-	// Convert spec to model
-	steps := convert.ConvertStepsFromSpec(connectorSpec.Steps)
-	return &steps, nil
 }
 
 func (c *standaloneCommand) selectTemplate() (*spec.ConnectorSpec, error) {
@@ -116,11 +89,6 @@ func (c *standaloneCommand) writeConnectorFile(connectorSpec *spec.ConnectorSpec
 	}
 
 	return nil
-}
-
-// Helper function to create string pointers
-func stringPtr(s string) *string {
-	return &s
 }
 
 // connectorTemplate represents a built-in template

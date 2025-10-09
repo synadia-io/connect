@@ -42,15 +42,11 @@ type connectorCommand struct {
 
 	startTimeout string
 
-	id          string
-	description string
-	image       string
+	id string
 
 	targetId string
-	reload   bool
 
 	runtime          string
-	interactive      bool
 	envFileSetByUser bool
 }
 

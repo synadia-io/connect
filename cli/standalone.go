@@ -20,8 +20,6 @@ type standaloneCommand struct {
 
 	// Common flags
 	connectorName string // Standardized connector name parameter
-	file          string
-	fileSetByUser bool
 
 	// Run command flags
 	image            string
