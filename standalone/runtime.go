@@ -110,10 +110,10 @@ func (rm *RuntimeManager) GetRuntime(id string) (*Runtime, error) {
 func (rm *RuntimeManager) AddRuntime(runtime Runtime) error {
 	// Validate required fields
 	if runtime.ID == "" {
-		return fmt.Errorf("ID is required")
+		return fmt.Errorf("id is required")
 	}
 	if runtime.Registry == "" {
-		return fmt.Errorf("Registry is required")
+		return fmt.Errorf("registry is required")
 	}
 
 	runtimes, err := rm.LoadRuntimes()

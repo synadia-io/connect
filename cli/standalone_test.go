@@ -214,7 +214,7 @@ var _ = Describe("StandaloneCommand", func() {
 			// Clean up: try to remove the test runtime if it exists
 			if runtimeID != "" {
 				cmd.runtimeID = runtimeID
-				cmd.removeRuntime(nil) // Ignore errors - runtime might not exist
+				_ = cmd.removeRuntime(nil) // Ignore errors - runtime might not exist
 			}
 		})
 

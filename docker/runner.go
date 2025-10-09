@@ -78,12 +78,6 @@ func (r *Runner) Run(ctx context.Context, opts *RunOptions) error {
 		}
 	}
 
-	// Determine runtime ID from image or use provided RuntimeID
-	runtimeID := opts.RuntimeID
-	if runtimeID == "" {
-		runtimeID = r.extractRuntimeFromImage(opts.Image)
-	}
-
 	// Encode the original steps as base64 for the runtime
 	stepsYAML, err := yaml.Marshal(opts.Steps)
 	if err != nil {
@@ -117,9 +111,7 @@ func (r *Runner) Run(ctx context.Context, opts *RunOptions) error {
 	// Add customer options
 	if opts.DockerOpts != "" {
 		dockerOpts := strings.Fields(opts.DockerOpts)
-		for _, opt := range dockerOpts {
-			args = append(args, opt)
-		}
+		args = append(args, dockerOpts...)
 	}
 
 	// Add the image
@@ -166,7 +158,7 @@ func (r *Runner) Remove(ctx context.Context, connectorID string) error {
 	containerName := connectorID
 
 	// Stop first (ignore errors if already stopped)
-	r.Stop(ctx, connectorID)
+	_ = r.Stop(ctx, connectorID)
 
 	// Then remove with force flag
 	args := []string{"rm", "-f", containerName}
@@ -245,105 +237,6 @@ func (r *Runner) CreateConnectFile(steps model.Steps, workDir string) error {
 	return os.WriteFile(connectFilePath, data, 0644)
 }
 
-// extractRuntimeFromImage extracts the runtime ID from a Docker image name
-// Example: "registry.synadia.io/connect-runtime-wombat:latest" -> "wombat"
-func (r *Runner) extractRuntimeFromImage(image string) string {
-	// Remove tag if present
-	parts := strings.SplitN(image, ":", 2)
-	imageName := parts[0]
-
-	// Extract runtime from image name pattern: */connect-runtime-<runtime>
-	if strings.Contains(imageName, "/connect-runtime-") {
-		parts := strings.Split(imageName, "/connect-runtime-")
-		if len(parts) > 1 {
-			return parts[1]
-		}
-	}
-
-	// Fallback: use the last part of the image name
-	pathParts := strings.Split(imageName, "/")
-	return pathParts[len(pathParts)-1]
-}
-
-// runWithRawSteps runs the container with the original Synadia Connect steps (fallback)
-func (r *Runner) runWithRawSteps(ctx context.Context, opts *RunOptions) error {
-	// Encode the steps as base64 for passing to the container
-	stepsYAML, err := yaml.Marshal(opts.Steps)
-	if err != nil {
-		return fmt.Errorf("failed to marshal steps: %w", err)
-	}
-
-	encodedSteps := base64.StdEncoding.EncodeToString(stepsYAML)
-
-	// Build Docker command
-	args := []string{"run"}
-
-	if opts.Remove {
-		args = append(args, "--rm")
-	}
-
-	if opts.Follow {
-		args = append(args, "-it")
-	} else {
-		args = append(args, "-d")
-	}
-
-	// Add connector ID as name
-	if opts.ConnectorID != "" {
-		args = append(args, "--name", opts.ConnectorID)
-	}
-
-	// Add environment variables
-	for k, v := range opts.EnvVars {
-		args = append(args, "-e", fmt.Sprintf("%s=%s", k, v))
-	}
-
-	// Add connector configuration as environment variable
-	args = append(args, "-e", fmt.Sprintf("CONNECTOR_CONFIG=%s", encodedSteps))
-
-	// Add the image
-	args = append(args, opts.Image)
-
-	fmt.Printf("Running: docker %s\n", strings.Join(args, " "))
-
-	return r.executeDockerCommand(ctx, args, opts.Follow)
-}
-
-// executeDockerCommandWithStdin executes a Docker command and pipes config to stdin
-func (r *Runner) executeDockerCommandWithStdin(ctx context.Context, args []string, stdinData string, interactive bool) error {
-	cmd := exec.CommandContext(ctx, "docker", args...)
-
-	// Set up stdin pipe
-	stdin, err := cmd.StdinPipe()
-	if err != nil {
-		return fmt.Errorf("failed to create stdin pipe: %w", err)
-	}
-
-	if interactive {
-		// For interactive commands, connect to stdout/stderr
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-	} else {
-		// For non-interactive commands, capture output
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-	}
-
-	// Start the command
-	if err := cmd.Start(); err != nil {
-		return fmt.Errorf("failed to start docker command: %w", err)
-	}
-
-	// Write config to stdin and close
-	go func() {
-		defer stdin.Close()
-		stdin.Write([]byte(stdinData))
-	}()
-
-	// Wait for command to complete
-	return cmd.Wait()
-}
-
 // GetContainerStatus checks if a container exists and returns its status
 func (r *Runner) GetContainerStatus(ctx context.Context, connectorID string) (*ContainerStatus, error) {
 	containerName := connectorID
@@ -412,7 +305,7 @@ func (r *Runner) PromptUserForReplacement(connectorID string) (bool, error) {
 // RemoveContainer removes a container (stops it first if running)
 func (r *Runner) RemoveContainer(ctx context.Context, connectorID string) error {
 	// Try to stop first (ignore errors if already stopped)
-	r.Stop(ctx, connectorID)
+	_ = r.Stop(ctx, connectorID)
 
 	// Remove the container
 	containerName := connectorID
@@ -420,69 +313,4 @@ func (r *Runner) RemoveContainer(ctx context.Context, connectorID string) error 
 
 	fmt.Printf("Removing container: %s\n", containerName)
 	return r.executeDockerCommand(ctx, args, false)
-}
-
-// executeWithTempConfig creates a temporary config file and mounts it into the container
-func (r *Runner) executeWithTempConfig(ctx context.Context, args []string, configData string, interactive bool) error {
-	// Create a temporary file for the configuration
-	tempFile, err := os.CreateTemp("", "wombat-config-*.yaml")
-	if err != nil {
-		return fmt.Errorf("failed to create temporary config file: %w", err)
-	}
-	fmt.Printf("Created temp config file: %s\n", tempFile.Name())
-	defer func() {
-		fmt.Printf("Cleaning up temp config file: %s\n", tempFile.Name())
-		os.Remove(tempFile.Name())
-	}()
-
-	// Write config to temp file
-	if _, err := tempFile.WriteString(configData); err != nil {
-		tempFile.Close()
-		return fmt.Errorf("failed to write config to temp file: %w", err)
-	}
-	tempFile.Close()
-
-	// Modify Docker args to mount the config file and use it instead of stdin
-	// Remove the "-" argument and replace with the mounted file path
-	for i := len(args) - 1; i >= 0; i-- {
-		if args[i] == "-" {
-			args[i] = "/tmp/wombat-config.yaml"
-			break
-		}
-	}
-
-	// Add volume mount for the config file
-	mountArg := fmt.Sprintf("%s:/tmp/wombat-config.yaml:ro", tempFile.Name())
-
-	// Insert volume mount before the image name
-	imageIndex := -1
-	for i, arg := range args {
-		if !strings.HasPrefix(arg, "-") && i > 0 && !strings.HasPrefix(args[i-1], "-") {
-			imageIndex = i
-			break
-		}
-	}
-
-	if imageIndex == -1 {
-		// Find the image (last argument that doesn't start with -)
-		for i := len(args) - 1; i >= 0; i-- {
-			if !strings.HasPrefix(args[i], "-") {
-				imageIndex = i
-				break
-			}
-		}
-	}
-
-	if imageIndex > 0 {
-		// Insert volume mount before image
-		newArgs := make([]string, 0, len(args)+2)
-		newArgs = append(newArgs, args[:imageIndex]...)
-		newArgs = append(newArgs, "-v", mountArg)
-		newArgs = append(newArgs, args[imageIndex:]...)
-		args = newArgs
-	}
-
-	fmt.Printf("Running: docker %s\n", strings.Join(args, " "))
-
-	return r.executeDockerCommand(ctx, args, interactive)
 }

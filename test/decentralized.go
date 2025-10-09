@@ -10,7 +10,7 @@ import (
 	"github.com/nats-io/nats-server/v2/server"
 	"github.com/nats-io/nats-server/v2/test"
 	"github.com/nats-io/nkeys"
-	. "github.com/onsi/gomega"
+	"github.com/onsi/gomega"
 )
 
 type DecentralizedServer struct {
@@ -24,21 +24,21 @@ type DecentralizedServer struct {
 
 func NewDecentralizedServer() *DecentralizedServer {
 	tmpDir, err := os.MkdirTemp("", "vent-test")
-	Expect(err).ToNot(HaveOccurred())
+	gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
 	// Operator
 	op, _ := nkeys.CreateOperator()
 	opPk, _ := op.PublicKey()
 	opClaim := jwt.NewOperatorClaims(opPk)
 	opJwt, err := opClaim.Encode(op)
-	Expect(err).ToNot(HaveOccurred())
+	gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
 	// System account
 	sys, _ := nkeys.CreateAccount()
 	sysPk, _ := sys.PublicKey()
 	sysClaim := jwt.NewAccountClaims(sysPk)
 	sysJwt, err := sysClaim.Encode(op)
-	Expect(err).ToNot(HaveOccurred())
+	gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
 	return &DecentralizedServer{
 		tmpDir:       tmpDir,
@@ -54,7 +54,7 @@ func NewDecentralizedServer() *DecentralizedServer {
 
 func (s *DecentralizedServer) WithAccount(acc Acc) *DecentralizedServer {
 	accJwt, err := acc.Claims.Encode(s.operatorKp)
-	Expect(err).ToNot(HaveOccurred())
+	gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
 	s.accountJwts[acc.Id] = accJwt
 
@@ -79,7 +79,7 @@ func (s *DecentralizedServer) Run() *server.Server {
     `, s.tmpDir, s.operatorJwt, s.sysAccount, strings.Join(resolvers, "\n\t")))
 	conf := path.Join(s.tmpDir, "server.conf")
 	err := os.WriteFile(conf, confContent, os.FileMode(0640))
-	Expect(err).ToNot(HaveOccurred())
+	gomega.Expect(err).ToNot(gomega.HaveOccurred())
 
 	srv, _ := test.RunServerWithConfig(conf)
 	return srv

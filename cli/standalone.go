@@ -13,6 +13,8 @@ import (
 	"github.com/synadia-io/connect/docker"
 	"github.com/synadia-io/connect/standalone"
 	"github.com/synadia-io/connect/validation"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 type standaloneCommand struct {
@@ -20,8 +22,6 @@ type standaloneCommand struct {
 
 	// Common flags
 	connectorName string // Standardized connector name parameter
-	file          string
-	fileSetByUser bool
 
 	// Run command flags
 	image            string
@@ -204,7 +204,7 @@ func (c *standaloneCommand) runConnector(pc *fisk.ParseContext) error {
 
 	// Validate Docker is available
 	if err := runner.ValidateDockerAvailable(); err != nil {
-		return fmt.Errorf("Docker is not available: %w", err)
+		return fmt.Errorf("docker is not available: %w", err)
 	}
 
 	// Run the connector
@@ -377,7 +377,7 @@ func (c *standaloneCommand) addRuntime(pc *fisk.ParseContext) error {
 	// Set defaults if not provided
 	name := c.runtimeName
 	if name == "" {
-		name = strings.Title(c.runtimeID) + " Runtime"
+		name = cases.Title(language.English).String(c.runtimeID) + " Runtime"
 	}
 
 	description := c.runtimeDescription

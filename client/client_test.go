@@ -51,7 +51,7 @@ var _ = Describe("Client", func() {
 			// Verify the Close method exists by checking it can be called
 			// Note: We can't actually test Close() without a valid NATS connection
 			// This just verifies the method exists on the interface
-			var fn func() = client.Close
+			var fn = client.Close
 			Expect(fn).ToNot(BeNil())
 		})
 	})

@@ -19,7 +19,6 @@ type libraryCommand struct {
 	opts *Options
 
 	runtime   string
-	version   string
 	kind      string
 	status    string
 	component string

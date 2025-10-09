@@ -105,7 +105,7 @@ var _ = Describe("RuntimeManager", func() {
 
 			err := manager.AddRuntime(runtime)
 			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(ContainSubstring("ID is required"))
+			Expect(err.Error()).To(ContainSubstring("id is required"))
 		})
 
 		It("should validate registry field", func() {
@@ -117,7 +117,7 @@ var _ = Describe("RuntimeManager", func() {
 
 			err := manager.AddRuntime(runtime)
 			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(ContainSubstring("Registry is required"))
+			Expect(err.Error()).To(ContainSubstring("registry is required"))
 		})
 	})
 
