@@ -23,7 +23,7 @@ var _ = Describe("NatsConfigBuilder", func() {
 	Describe("Url", func() {
 		It("should set a custom URL", func() {
 			builder.Url("nats://custom.server:4222")
-			
+
 			result := builder.Build()
 			Expect(result.Url).To(Equal("nats://custom.server:4222"))
 		})
@@ -44,9 +44,9 @@ var _ = Describe("NatsConfigBuilder", func() {
 		It("should set JWT and seed authentication", func() {
 			jwt := "test-jwt-token"
 			seed := "test-seed-value"
-			
+
 			builder.Auth(jwt, seed)
-			
+
 			result := builder.Build()
 			Expect(result.AuthEnabled).To(BeTrue())
 			Expect(result.Jwt).ToNot(BeNil())
@@ -64,7 +64,7 @@ var _ = Describe("NatsConfigBuilder", func() {
 	Describe("Build", func() {
 		It("should build with default configuration", func() {
 			result := builder.Build()
-			
+
 			Expect(result.Url).To(Equal(DefaultNatsUrl))
 			Expect(result.AuthEnabled).To(BeFalse())
 			Expect(result.Jwt).To(BeNil())

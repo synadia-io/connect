@@ -3,27 +3,27 @@ package builders
 import "github.com/synadia-io/connect/spec"
 
 type CombineTransformerStepBuilder struct {
-    res *spec.TransformerStepSpecCombine
+	res *spec.TransformerStepSpecCombine
 }
 
 func CombineTransformerStep() *CombineTransformerStepBuilder {
-    return &CombineTransformerStepBuilder{
-        res: &spec.TransformerStepSpecCombine{
-            Format: spec.TransformerStepSpecCombineFormatJsonArray,
-        },
-    }
+	return &CombineTransformerStepBuilder{
+		res: &spec.TransformerStepSpecCombine{
+			Format: spec.TransformerStepSpecCombineFormatJsonArray,
+		},
+	}
 }
 
 func (b *CombineTransformerStepBuilder) Format(format spec.TransformerStepSpecCombineFormat) *CombineTransformerStepBuilder {
-    b.res.Format = format
-    return b
+	b.res.Format = format
+	return b
 }
 
 func (b *CombineTransformerStepBuilder) Path(path string) *CombineTransformerStepBuilder {
-    b.res.Path = path
-    return b
+	b.res.Path = path
+	return b
 }
 
 func (b *CombineTransformerStepBuilder) Build() spec.TransformerStepSpecCombine {
-    return *b.res
+	return *b.res
 }

@@ -66,7 +66,7 @@ func (c *connectorCommand) getConnectorWithClient(appCtx *AppContext) error {
 	if err != nil {
 		return fmt.Errorf("failed to get connector: %w", err)
 	}
-	
+
 	fmt.Println(renderConnector(*connector))
 	return nil
 }
@@ -76,7 +76,7 @@ func (c *connectorCommand) removeConnectorWithClient(appCtx *AppContext) error {
 	if err != nil {
 		return fmt.Errorf("failed to delete connector: %w", err)
 	}
-	
+
 	fmt.Printf("Connector %s deleted\n", c.id)
 	return nil
 }
@@ -86,12 +86,12 @@ func (c *connectorCommand) connectorStatusWithClient(appCtx *AppContext) error {
 	if err != nil {
 		return fmt.Errorf("failed to get connector status: %w", err)
 	}
-	
+
 	// Display status
 	fmt.Printf("Connector %s status:\n", c.id)
 	fmt.Printf("  Running: %d\n", status.Running)
 	fmt.Printf("  Stopped: %d\n", status.Stopped)
-	
+
 	return nil
 }
 

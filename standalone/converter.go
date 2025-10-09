@@ -22,7 +22,7 @@ func NewWombatConverter() *WombatConverter {
 
 func (c *WombatConverter) ConvertSteps(steps model.Steps) (string, error) {
 	var config strings.Builder
-	
+
 	// Build Wombat configuration
 	if steps.Source != nil {
 		sourceConfig, err := c.convertSource(*steps.Source)
@@ -97,38 +97,38 @@ func (c *WombatConverter) convertSource(source model.SourceStep) (string, error)
 
 func (c *WombatConverter) convertHTTPSource(source model.SourceStep) (string, error) {
 	config := "  http_server:\n"
-	
+
 	if port, ok := source.Config["port"]; ok {
 		config += fmt.Sprintf("    address: \"0.0.0.0:%v\"\n", port)
 	} else {
 		config += "    address: \"0.0.0.0:8080\"\n"
 	}
-	
+
 	if path, ok := source.Config["path"]; ok {
 		config += fmt.Sprintf("    path: \"%v\"\n", path)
 	} else {
 		config += "    path: \"/\"\n"
 	}
-	
+
 	return config, nil
 }
 
 func (c *WombatConverter) convertFileSource(source model.SourceStep) (string, error) {
 	config := "  file:\n"
-	
+
 	if path, ok := source.Config["path"]; ok {
 		config += fmt.Sprintf("    paths: [\"%v/**/*\"]\n", path)
 	} else {
 		config += "    paths: [\"/data/**/*\"]\n"
 	}
-	
+
 	return config, nil
 }
 
 func (c *WombatConverter) convertConsumer(consumer model.ConsumerStep) (string, error) {
 	config := "  nats:\n"
 	config += fmt.Sprintf("    urls: [\"%s\"]\n", consumer.Nats.Url)
-	
+
 	if consumer.Core != nil {
 		config += fmt.Sprintf("    subject: \"%s\"\n", consumer.Core.Subject)
 		if consumer.Core.Queue != nil {
@@ -144,7 +144,7 @@ func (c *WombatConverter) convertConsumer(consumer model.ConsumerStep) (string, 
 			config += fmt.Sprintf("    kv_key: \"%s\"\n", consumer.Kv.Key)
 		}
 	}
-	
+
 	// Add auth if configured
 	if consumer.Nats.AuthEnabled {
 		if consumer.Nats.Jwt != nil && consumer.Nats.Seed != nil {
@@ -153,7 +153,7 @@ func (c *WombatConverter) convertConsumer(consumer model.ConsumerStep) (string, 
 			config += fmt.Sprintf("      user_jwt: \"%s\"\n", *consumer.Nats.Jwt)
 		}
 	}
-	
+
 	return config, nil
 }
 
@@ -172,54 +172,54 @@ func (c *WombatConverter) convertSink(sink model.SinkStep) (string, error) {
 
 func (c *WombatConverter) convertHTTPSink(sink model.SinkStep) (string, error) {
 	config := "  http_client:\n"
-	
+
 	if url, ok := sink.Config["url"]; ok {
 		config += fmt.Sprintf("    url: \"%v\"\n", url)
 	}
-	
+
 	if method, ok := sink.Config["method"]; ok {
 		config += fmt.Sprintf("    verb: \"%v\"\n", method)
 	} else {
 		config += "    verb: \"POST\"\n"
 	}
-	
+
 	return config, nil
 }
 
 func (c *WombatConverter) convertFileSink(sink model.SinkStep) (string, error) {
 	config := "  file:\n"
-	
+
 	if path, ok := sink.Config["path"]; ok {
 		config += fmt.Sprintf("    path: \"%v\"\n", path)
 	} else {
 		config += "    path: \"/data/output.txt\"\n"
 	}
-	
+
 	return config, nil
 }
 
 func (c *WombatConverter) convertDatabaseSink(sink model.SinkStep) (string, error) {
 	config := "  sql_insert:\n"
-	
+
 	if driver, ok := sink.Config["driver"]; ok {
 		config += fmt.Sprintf("    driver: \"%v\"\n", driver)
 	}
-	
+
 	if dsn, ok := sink.Config["dsn"]; ok {
 		config += fmt.Sprintf("    dsn: \"%v\"\n", dsn)
 	}
-	
+
 	if table, ok := sink.Config["table"]; ok {
 		config += fmt.Sprintf("    table: \"%v\"\n", table)
 	}
-	
+
 	return config, nil
 }
 
 func (c *WombatConverter) convertProducer(producer model.ProducerStep) (string, error) {
 	config := "  nats:\n"
 	config += fmt.Sprintf("    urls: [\"%s\"]\n", producer.Nats.Url)
-	
+
 	if producer.Core != nil {
 		config += fmt.Sprintf("    subject: \"%s\"\n", producer.Core.Subject)
 	} else if producer.Stream != nil {
@@ -232,7 +232,7 @@ func (c *WombatConverter) convertProducer(producer model.ProducerStep) (string, 
 			config += fmt.Sprintf("    kv_key: \"%s\"\n", producer.Kv.Key)
 		}
 	}
-	
+
 	// Add auth if configured
 	if producer.Nats.AuthEnabled {
 		if producer.Nats.Jwt != nil && producer.Nats.Seed != nil {
@@ -241,7 +241,7 @@ func (c *WombatConverter) convertProducer(producer model.ProducerStep) (string, 
 			config += fmt.Sprintf("      user_jwt: \"%s\"\n", *producer.Nats.Jwt)
 		}
 	}
-	
+
 	return config, nil
 }
 
@@ -268,7 +268,7 @@ func GetConverter(runtimeID string) (ConfigConverter, error) {
 	// Parse runtime ID to get base runtime (remove version)
 	parts := strings.SplitN(runtimeID, ":", 2)
 	baseRuntime := parts[0]
-	
+
 	switch baseRuntime {
 	case "wombat":
 		return NewWombatConverter(), nil

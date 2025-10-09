@@ -3,24 +3,24 @@ package builders
 import "github.com/synadia-io/connect/model"
 
 type ServiceTransformerStepBuilder struct {
-    res *model.ServiceTransformerStep
+	res *model.ServiceTransformerStep
 }
 
 func ServiceTransformerStep(endpoint string, nats *NatsConfigBuilder) *ServiceTransformerStepBuilder {
-    return &ServiceTransformerStepBuilder{
-        res: &model.ServiceTransformerStep{
-            Endpoint: endpoint,
-            Nats:     nats.Build(),
-            Timeout:  "5s",
-        },
-    }
+	return &ServiceTransformerStepBuilder{
+		res: &model.ServiceTransformerStep{
+			Endpoint: endpoint,
+			Nats:     nats.Build(),
+			Timeout:  "5s",
+		},
+	}
 }
 
 func (b *ServiceTransformerStepBuilder) Timeout(timeout string) *ServiceTransformerStepBuilder {
-    b.res.Timeout = timeout
-    return b
+	b.res.Timeout = timeout
+	return b
 }
 
 func (b *ServiceTransformerStepBuilder) Build() model.ServiceTransformerStep {
-    return *b.res
+	return *b.res
 }

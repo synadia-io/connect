@@ -2,14 +2,15 @@ package test
 
 import (
 	"fmt"
+	"os"
+	"path"
+	"strings"
+
 	"github.com/nats-io/jwt/v2"
 	"github.com/nats-io/nats-server/v2/server"
 	"github.com/nats-io/nats-server/v2/test"
 	"github.com/nats-io/nkeys"
 	. "github.com/onsi/gomega"
-	"os"
-	"path"
-	"strings"
 )
 
 type DecentralizedServer struct {

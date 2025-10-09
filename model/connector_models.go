@@ -2,9 +2,11 @@
 
 package model
 
-import "encoding/json"
-import "fmt"
-import "reflect"
+import (
+	"encoding/json"
+	"fmt"
+	"reflect"
+)
 
 // Combine all messages in the batch into a single message
 type CombineTransformerStep struct {

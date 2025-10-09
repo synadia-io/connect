@@ -70,7 +70,7 @@ var _ = Describe("SinkStepBuilder", func() {
 		It("should overwrite existing values", func() {
 			builder.SetString("key", "value1")
 			builder.SetString("key", "value2")
-			
+
 			result := builder.Build()
 			Expect(result.Config["key"]).To(Equal("value2"))
 		})

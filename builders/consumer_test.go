@@ -29,7 +29,7 @@ var _ = Describe("ConsumerStepBuilder", func() {
 		It("should add a core consumer configuration", func() {
 			core := ConsumerStepCore("test.subject")
 			builder.Core(core)
-			
+
 			result := builder.Build()
 			Expect(result.Core).ToNot(BeNil())
 			Expect(result.Core.Subject).To(Equal("test.subject"))
@@ -38,14 +38,14 @@ var _ = Describe("ConsumerStepBuilder", func() {
 		It("should support method chaining", func() {
 			core := ConsumerStepCore("test.subject")
 			result := builder.Core(core)
-			
+
 			Expect(result).To(Equal(builder))
 		})
 
 		It("should support queue groups", func() {
 			core := ConsumerStepCore("test.>").Queue("test-queue")
 			builder.Core(core)
-			
+
 			result := builder.Build()
 			Expect(result.Core).ToNot(BeNil())
 			Expect(result.Core.Subject).To(Equal("test.>"))
@@ -58,7 +58,7 @@ var _ = Describe("ConsumerStepBuilder", func() {
 		It("should add a key-value consumer configuration", func() {
 			kv := ConsumerStepKv("test-bucket", "test-key")
 			builder.Kv(kv)
-			
+
 			result := builder.Build()
 			Expect(result.Kv).ToNot(BeNil())
 			Expect(result.Kv.Bucket).To(Equal("test-bucket"))
@@ -70,7 +70,7 @@ var _ = Describe("ConsumerStepBuilder", func() {
 		It("should add a stream consumer configuration", func() {
 			stream := ConsumerStepStream("test.stream.subject")
 			builder.Stream(stream)
-			
+
 			result := builder.Build()
 			Expect(result.Stream).ToNot(BeNil())
 			Expect(result.Stream.Subject).To(Equal("test.stream.subject"))
@@ -80,7 +80,7 @@ var _ = Describe("ConsumerStepBuilder", func() {
 	Describe("Build", func() {
 		It("should build a consumer with only NATS config", func() {
 			result := builder.Build()
-			
+
 			Expect(result.Nats).ToNot(BeNil())
 			Expect(result.Core).To(BeNil())
 			Expect(result.Kv).To(BeNil())

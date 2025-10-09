@@ -2,8 +2,10 @@
 
 package spec
 
-import "encoding/json"
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
+)
 
 type NatsConfigSpec struct {
 	// Whether authentication is enabled

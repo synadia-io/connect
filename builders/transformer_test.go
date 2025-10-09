@@ -1,9 +1,9 @@
 package builders
 
 import (
-	"github.com/synadia-io/connect/model"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/synadia-io/connect/model"
 )
 
 var _ = Describe("TransformerStepBuilder", func() {
@@ -24,7 +24,7 @@ var _ = Describe("TransformerStepBuilder", func() {
 		It("should add a mapping transformer", func() {
 			mapping := MappingTransformerStep("root.field = 'value'")
 			builder.Mapping(mapping)
-			
+
 			result := builder.Build()
 			Expect(result.Mapping).ToNot(BeNil())
 			Expect(result.Mapping.Sourcecode).To(Equal("root.field = 'value'"))
@@ -40,9 +40,9 @@ var _ = Describe("TransformerStepBuilder", func() {
 		It("should add a service transformer", func() {
 			natsConfig := NatsConfig().Url("nats://localhost:4222")
 			service := ServiceTransformerStep("service.transform", natsConfig)
-			
+
 			builder.Service(service)
-			
+
 			result := builder.Build()
 			Expect(result.Service).ToNot(BeNil())
 			Expect(result.Service.Endpoint).To(Equal("service.transform"))
@@ -53,9 +53,9 @@ var _ = Describe("TransformerStepBuilder", func() {
 			natsConfig := NatsConfig()
 			service := ServiceTransformerStep("service.endpoint", natsConfig).
 				Timeout("10s")
-			
+
 			builder.Service(service)
-			
+
 			result := builder.Build()
 			Expect(result.Service.Timeout).To(Equal("10s"))
 		})
@@ -65,10 +65,10 @@ var _ = Describe("TransformerStepBuilder", func() {
 		It("should add a composite transformer", func() {
 			sub1 := TransformerStep().Mapping(MappingTransformerStep("step1"))
 			sub2 := TransformerStep().Mapping(MappingTransformerStep("step2"))
-			
+
 			composite := CompositeTransformerStep().Sequential(sub1, sub2)
 			builder.Composite(composite)
-			
+
 			result := builder.Build()
 			Expect(result.Composite).ToNot(BeNil())
 			Expect(result.Composite.Sequential).To(HaveLen(2))
@@ -79,9 +79,9 @@ var _ = Describe("TransformerStepBuilder", func() {
 		It("should add an explode transformer", func() {
 			explode := ExplodeTransformerStep().
 				Format(model.ExplodeTransformerStepFormatJsonArray)
-			
+
 			builder.Explode(explode)
-			
+
 			result := builder.Build()
 			Expect(result.Explode).ToNot(BeNil())
 			Expect(result.Explode.Format).To(Equal(model.ExplodeTransformerStepFormatJsonArray))
@@ -92,9 +92,9 @@ var _ = Describe("TransformerStepBuilder", func() {
 		It("should add a combine transformer", func() {
 			combine := CombineTransformerStep().
 				Format(model.CombineTransformerStepFormatLines)
-			
+
 			builder.Combine(combine)
-			
+
 			result := builder.Build()
 			Expect(result.Combine).ToNot(BeNil())
 			Expect(result.Combine.Format).To(Equal(model.CombineTransformerStepFormatLines))
@@ -104,7 +104,7 @@ var _ = Describe("TransformerStepBuilder", func() {
 	Describe("Build", func() {
 		It("should build an empty transformer", func() {
 			result := builder.Build()
-			
+
 			Expect(result.Mapping).To(BeNil())
 			Expect(result.Service).To(BeNil())
 			Expect(result.Composite).To(BeNil())

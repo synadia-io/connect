@@ -13,7 +13,7 @@ var _ = Describe("LogsCommand", func() {
 
 	BeforeEach(func() {
 		appCtx, _ = newMockAppContext()
-		
+
 		cmd = &logsCommand{
 			opts: &Options{},
 		}

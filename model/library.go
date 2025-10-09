@@ -2,10 +2,12 @@
 
 package model
 
-import "encoding/json"
-import "fmt"
-import "reflect"
-import "regexp"
+import (
+	"encoding/json"
+	"fmt"
+	"reflect"
+	"regexp"
+)
 
 type Component struct {
 	// A description of the component

@@ -201,8 +201,9 @@ func (rm *RuntimeManager) initializeDefaultRuntimes() error {
 
 // ResolveRuntimeImage resolves a runtime reference to a full Docker image name
 // Examples:
-//   "wombat" -> "registry.synadia.io/connect-runtime-wombat:latest"
-//   "wombat:v1.0.3" -> "registry.synadia.io/connect-runtime-wombat:v1.0.3"
+//
+//	"wombat" -> "registry.synadia.io/connect-runtime-wombat:latest"
+//	"wombat:v1.0.3" -> "registry.synadia.io/connect-runtime-wombat:v1.0.3"
 func (rm *RuntimeManager) ResolveRuntimeImage(runtimeRef string) (string, error) {
 	// Parse runtime reference (id:version)
 	parts := strings.SplitN(runtimeRef, ":", 2)

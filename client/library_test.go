@@ -2,9 +2,9 @@ package client
 
 import (
 	"github.com/nats-io/nats.go"
-	"github.com/synadia-io/connect/model"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/synadia-io/connect/model"
 )
 
 var _ = Describe("LibraryClient", func() {
@@ -34,13 +34,13 @@ var _ = Describe("LibraryClient", func() {
 			runtimeId := "synadia"
 			kind := model.ComponentKindSource
 			status := model.ComponentStatusStable
-			
+
 			filter := &model.ComponentSearchFilter{
 				RuntimeId: &runtimeId,
 				Kind:      &kind,
 				Status:    &status,
 			}
-			
+
 			// In a real test with a NATS server, this would verify the request
 			// For now, we just ensure the method exists and accepts the right parameters
 			var _ = lc.SearchComponents
@@ -52,7 +52,7 @@ var _ = Describe("LibraryClient", func() {
 		It("should accept correct parameters", func() {
 			// Verify method signature
 			var _ = lc.GetComponent
-			
+
 			// In a real integration test, we would verify:
 			// - The correct subject is used
 			// - The request is properly formatted
