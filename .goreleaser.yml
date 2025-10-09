@@ -8,10 +8,6 @@ env:
 git:
   prerelease_suffix: "-"
 
-before:
-  hooks:
-    - go mod tidy
-
 builds:
   - id: connect
     main: ./cmd/connect
