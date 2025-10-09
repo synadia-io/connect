@@ -2,8 +2,10 @@
 
 package model
 
-import "encoding/json"
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
+)
 
 type SecretSetRequest struct {
 	// A description of the secret

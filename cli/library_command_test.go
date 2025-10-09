@@ -1,9 +1,9 @@
 package cli
 
 import (
-	"github.com/synadia-io/connect/model"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/synadia-io/connect/model"
 )
 
 var _ = Describe("LibraryCommand", func() {
@@ -15,7 +15,7 @@ var _ = Describe("LibraryCommand", func() {
 
 	BeforeEach(func() {
 		appCtx, mockCl = newMockAppContext()
-		
+
 		cmd = &libraryCommand{
 			opts: &Options{},
 		}
@@ -43,7 +43,7 @@ var _ = Describe("LibraryCommand", func() {
 
 		It("should handle empty runtime list", func() {
 			mockCl.runtimes = []model.RuntimeSummary{}
-			
+
 			err := cmd.listRuntimesWithClient(appCtx)
 			Expect(err).ToNot(HaveOccurred())
 		})
@@ -64,7 +64,7 @@ var _ = Describe("LibraryCommand", func() {
 			description := "Native Synadia runtime"
 			email := "support@synadia.com"
 			url := "https://synadia.com"
-			
+
 			mockCl.runtime = &model.Runtime{
 				Id:          "synadia",
 				Label:       "Synadia Runtime",
@@ -83,7 +83,7 @@ var _ = Describe("LibraryCommand", func() {
 
 		It("should handle runtime not found", func() {
 			mockCl.runtime = nil
-			
+
 			err := cmd.getRuntimeWithClient(appCtx)
 			// The function might not return an error for nil runtime
 			// but would display empty data
@@ -114,7 +114,7 @@ var _ = Describe("LibraryCommand", func() {
 
 		It("should search with runtime filter", func() {
 			cmd.runtime = "synadia"
-			
+
 			mockCl.components = []model.ComponentSummary{
 				{
 					RuntimeId: "synadia",
@@ -130,7 +130,7 @@ var _ = Describe("LibraryCommand", func() {
 
 		It("should search with kind filter", func() {
 			cmd.kind = "source"
-			
+
 			mockCl.components = []model.ComponentSummary{
 				{
 					RuntimeId: "synadia",
@@ -146,7 +146,7 @@ var _ = Describe("LibraryCommand", func() {
 
 		It("should handle empty search results", func() {
 			mockCl.components = []model.ComponentSummary{}
-			
+
 			err := cmd.searchWithClient(appCtx)
 			Expect(err).ToNot(HaveOccurred())
 		})
@@ -161,7 +161,7 @@ var _ = Describe("LibraryCommand", func() {
 
 		It("should display component info", func() {
 			description := "Reads messages from NATS Core"
-			
+
 			mockCl.component = &model.Component{
 				RuntimeId:   "synadia",
 				Name:        "nats_core_source",
@@ -184,7 +184,7 @@ var _ = Describe("LibraryCommand", func() {
 
 		It("should handle component not found", func() {
 			mockCl.component = nil
-			
+
 			err := cmd.infoWithClient(appCtx)
 			// The function might not return an error for nil component
 			Expect(err).ToNot(HaveOccurred())

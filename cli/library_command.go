@@ -1,250 +1,252 @@
 package cli
 
 import (
-    "fmt"
-    "github.com/choria-io/fisk"
-    "github.com/fatih/color"
-    "github.com/jedib0t/go-pretty/v6/table"
-    "github.com/jedib0t/go-pretty/v6/text"
-    "github.com/synadia-io/connect/model"
+	"fmt"
 
-    "gopkg.in/yaml.v3"
-    "os"
-    "strings"
+	"github.com/choria-io/fisk"
+	"github.com/fatih/color"
+	"github.com/jedib0t/go-pretty/v6/table"
+	"github.com/jedib0t/go-pretty/v6/text"
+	"github.com/synadia-io/connect/model"
+
+	"os"
+	"strings"
+
+	"gopkg.in/yaml.v3"
 )
 
 type libraryCommand struct {
-    opts *Options
+	opts *Options
 
-    runtime   string
-    version   string
-    kind      string
-    status    string
-    component string
+	runtime   string
+	version   string
+	kind      string
+	status    string
+	component string
 }
 
 func ConfigureLibraryCommand(parentCmd commandHost, opts *Options) {
-    c := &libraryCommand{
-        opts: opts,
-    }
+	c := &libraryCommand{
+		opts: opts,
+	}
 
-    componentCmd := parentCmd.Command("library", "Manage the library").Alias("l")
+	componentCmd := parentCmd.Command("library", "Manage the library").Alias("l")
 
-    kindOpts := []string{string(model.ComponentKindSource), string(model.ComponentKindSink), string(model.ComponentKindScanner)}
-    statusOpts := []string{string(model.ComponentStatusStable), string(model.ComponentStatusPreview), string(model.ComponentStatusExperimental), string(model.ComponentStatusDeprecated)}
+	kindOpts := []string{string(model.ComponentKindSource), string(model.ComponentKindSink), string(model.ComponentKindScanner)}
+	statusOpts := []string{string(model.ComponentStatusStable), string(model.ComponentStatusPreview), string(model.ComponentStatusExperimental), string(model.ComponentStatusDeprecated)}
 
-    componentCmd.Command("runtimes", "List the available runtimes").Action(c.listRuntimes)
+	componentCmd.Command("runtimes", "List the available runtimes").Action(c.listRuntimes)
 
-    runtimeCmd := componentCmd.Command("runtime", "Show information about a runtime").Action(c.getRuntime)
-    runtimeCmd.Arg("id", "The id of the runtime to describe").Required().StringVar(&c.runtime)
+	runtimeCmd := componentCmd.Command("runtime", "Show information about a runtime").Action(c.getRuntime)
+	runtimeCmd.Arg("id", "The id of the runtime to describe").Required().StringVar(&c.runtime)
 
-    searchCmd := componentCmd.Command("list", "List components").Alias("ls").Action(c.search)
-    searchCmd.Flag("runtime", "The runtime id").StringVar(&c.runtime)
-    searchCmd.Flag("kind", "The kind of components").EnumVar(&c.kind, kindOpts...)
-    searchCmd.Flag("status", "The status of the components").EnumVar(&c.status, statusOpts...)
+	searchCmd := componentCmd.Command("list", "List components").Alias("ls").Action(c.search)
+	searchCmd.Flag("runtime", "The runtime id").StringVar(&c.runtime)
+	searchCmd.Flag("kind", "The kind of components").EnumVar(&c.kind, kindOpts...)
+	searchCmd.Flag("status", "The status of the components").EnumVar(&c.status, statusOpts...)
 
-    infoCmd := componentCmd.Command("get", "Get component information").Alias("show").Action(c.info)
-    infoCmd.Arg("runtime", "The runtime id").StringVar(&c.runtime)
-    infoCmd.Arg("kind", "The kind of component").EnumVar(&c.kind, kindOpts...)
-    infoCmd.Arg("name", "The name of the component").StringVar(&c.component)
+	infoCmd := componentCmd.Command("get", "Get component information").Alias("show").Action(c.info)
+	infoCmd.Arg("runtime", "The runtime id").StringVar(&c.runtime)
+	infoCmd.Arg("kind", "The kind of component").EnumVar(&c.kind, kindOpts...)
+	infoCmd.Arg("name", "The name of the component").StringVar(&c.component)
 }
 
 func (c *libraryCommand) listRuntimes(pc *fisk.ParseContext) error {
-    appCtx, err := LoadOptions(c.opts)
-    fisk.FatalIfError(err, "failed to load options")
-    defer appCtx.Close()
+	appCtx, err := LoadOptions(c.opts)
+	fisk.FatalIfError(err, "failed to load options")
+	defer appCtx.Close()
 
-    w := table.NewWriter()
-    w.AppendHeader(table.Row{"Id", "Name", "Description", "Author"})
-    w.SetStyle(table.StyleRounded)
+	w := table.NewWriter()
+	w.AppendHeader(table.Row{"Id", "Name", "Description", "Author"})
+	w.SetStyle(table.StyleRounded)
 
-    runtimes, err := appCtx.Client.ListRuntimes(c.opts.Timeout)
-    if err != nil {
-        color.Red("Could not list runtimes: %s", err)
-        os.Exit(1)
-    }
+	runtimes, err := appCtx.Client.ListRuntimes(c.opts.Timeout)
+	if err != nil {
+		color.Red("Could not list runtimes: %s", err)
+		os.Exit(1)
+	}
 
-    for _, runtime := range runtimes {
-        desc := ""
-        if runtime.Description != nil {
-            desc = *runtime.Description
-        }
-        w.AppendRow(table.Row{runtime.Id, runtime.Label, desc, runtime.Author})
-    }
+	for _, runtime := range runtimes {
+		desc := ""
+		if runtime.Description != nil {
+			desc = *runtime.Description
+		}
+		w.AppendRow(table.Row{runtime.Id, runtime.Label, desc, runtime.Author})
+	}
 
-    result := w.Render()
-    fmt.Println(result)
-    return nil
+	result := w.Render()
+	fmt.Println(result)
+	return nil
 }
 
 func (c *libraryCommand) getRuntime(pc *fisk.ParseContext) error {
-    appCtx, err := LoadOptions(c.opts)
-    fisk.FatalIfError(err, "failed to load options")
-    defer appCtx.Close()
+	appCtx, err := LoadOptions(c.opts)
+	fisk.FatalIfError(err, "failed to load options")
+	defer appCtx.Close()
 
-    rt, err := appCtx.Client.GetRuntime(c.runtime, c.opts.Timeout)
-    if err != nil {
-        color.Red("Could not get runtime: %s", err)
-        os.Exit(1)
-    }
+	rt, err := appCtx.Client.GetRuntime(c.runtime, c.opts.Timeout)
+	if err != nil {
+		color.Red("Could not get runtime: %s", err)
+		os.Exit(1)
+	}
 
-    if rt == nil {
-        color.Red("Runtime not found")
-        os.Exit(1)
-    }
+	if rt == nil {
+		color.Red("Runtime not found")
+		os.Exit(1)
+	}
 
-    fmt.Println(renderRuntime(*rt))
+	fmt.Println(renderRuntime(*rt))
 
-    return nil
+	return nil
 }
 
 func (c *libraryCommand) search(pc *fisk.ParseContext) error {
-    appCtx, err := LoadOptions(c.opts)
-    fisk.FatalIfError(err, "failed to load options")
-    defer appCtx.Close()
+	appCtx, err := LoadOptions(c.opts)
+	fisk.FatalIfError(err, "failed to load options")
+	defer appCtx.Close()
 
-    w := table.NewWriter()
-    w.AppendHeader(table.Row{"Name", "Kind", "Runtime", "Status"})
-    w.SetStyle(table.StyleRounded)
+	w := table.NewWriter()
+	w.AppendHeader(table.Row{"Name", "Kind", "Runtime", "Status"})
+	w.SetStyle(table.StyleRounded)
 
-    filter := &model.ComponentSearchFilter{}
+	filter := &model.ComponentSearchFilter{}
 
-    if c.runtime != "" {
-        filter.RuntimeId = &c.runtime
-    }
+	if c.runtime != "" {
+		filter.RuntimeId = &c.runtime
+	}
 
-    if c.status != "" {
-        st := model.ComponentStatus(c.status)
-        filter.Status = &st
-    }
+	if c.status != "" {
+		st := model.ComponentStatus(c.status)
+		filter.Status = &st
+	}
 
-    if c.kind != "" {
-        k := model.ComponentKind(c.kind)
-        filter.Kind = &k
-    }
+	if c.kind != "" {
+		k := model.ComponentKind(c.kind)
+		filter.Kind = &k
+	}
 
-    components, err := appCtx.Client.SearchComponents(filter, c.opts.Timeout)
-    if err != nil {
-        color.Red("Could not list components: %s", err)
-        os.Exit(1)
-    }
+	components, err := appCtx.Client.SearchComponents(filter, c.opts.Timeout)
+	if err != nil {
+		color.Red("Could not list components: %s", err)
+		os.Exit(1)
+	}
 
-    for _, component := range components {
-        w.AppendRow(table.Row{component.Name, component.Kind, component.RuntimeId, component.Status})
-    }
+	for _, component := range components {
+		w.AppendRow(table.Row{component.Name, component.Kind, component.RuntimeId, component.Status})
+	}
 
-    result := w.Render()
-    fmt.Println(result)
-    return nil
+	result := w.Render()
+	fmt.Println(result)
+	return nil
 }
 
 func (c *libraryCommand) info(pc *fisk.ParseContext) error {
-    appCtx, err := LoadOptions(c.opts)
-    fisk.FatalIfError(err, "failed to load options")
-    defer appCtx.Close()
+	appCtx, err := LoadOptions(c.opts)
+	fisk.FatalIfError(err, "failed to load options")
+	defer appCtx.Close()
 
-    component, err := appCtx.Client.GetComponent(c.runtime, model.ComponentKind(c.kind), c.component, c.opts.Timeout)
-    if err != nil {
-        color.Red("Could not get component: %s", err)
-        os.Exit(1)
-    }
+	component, err := appCtx.Client.GetComponent(c.runtime, model.ComponentKind(c.kind), c.component, c.opts.Timeout)
+	if err != nil {
+		color.Red("Could not get component: %s", err)
+		os.Exit(1)
+	}
 
-    // Component info.
-    w := table.NewWriter()
-    w.SetStyle(table.StyleRounded)
-    w.SetTitle("Component Description")
-    w.AppendRow(table.Row{"Runtime", component.RuntimeId})
-    w.AppendRow(table.Row{"Name", component.Name})
-    w.AppendRow(table.Row{"Kind", component.Kind})
-    w.AppendRow(table.Row{"Status", component.Status})
+	// Component info.
+	w := table.NewWriter()
+	w.SetStyle(table.StyleRounded)
+	w.SetTitle("Component Description")
+	w.AppendRow(table.Row{"Runtime", component.RuntimeId})
+	w.AppendRow(table.Row{"Name", component.Name})
+	w.AppendRow(table.Row{"Kind", component.Kind})
+	w.AppendRow(table.Row{"Status", component.Status})
 
-    if component.Description != nil {
-        w.AppendRow(table.Row{"Description", text.WrapSoft(*component.Description, 75)})
-    }
+	if component.Description != nil {
+		w.AppendRow(table.Row{"Description", text.WrapSoft(*component.Description, 75)})
+	}
 
-    result := w.Render()
-    fmt.Println(result)
+	result := w.Render()
+	fmt.Println(result)
 
-    for _, field := range component.Fields {
-        printField(field, "")
-    }
+	for _, field := range component.Fields {
+		printField(field, "")
+	}
 
-    return nil
+	return nil
 }
 
 func printField(field model.ComponentField, prefix string) {
-    boldUnderline := color.New(color.Bold, color.Underline)
-    bold := color.New(color.Bold)
+	boldUnderline := color.New(color.Bold, color.Underline)
+	bold := color.New(color.Bold)
 
-    indent := func(s string, indent int) string {
-        tab := strings.Repeat("\t", indent)
-        indented := tab + strings.ReplaceAll(s, "\n", "\n"+tab)
-        return strings.TrimSuffix(indented, tab)
-    }
+	indent := func(s string, indent int) string {
+		tab := strings.Repeat("\t", indent)
+		indented := tab + strings.ReplaceAll(s, "\n", "\n"+tab)
+		return strings.TrimSuffix(indented, tab)
+	}
 
-    name := fmt.Sprintf("%s%s", prefix, field.Name)
-    _, _ = boldUnderline.Printf("%s\n", name)
+	name := fmt.Sprintf("%s%s", prefix, field.Name)
+	_, _ = boldUnderline.Printf("%s\n", name)
 
-    fmt.Printf("\t%s field", field.Type)
-    if field.Default != nil {
-        fmt.Printf(", defaults to %v\n", field.Default)
-    } else {
-        fmt.Print("\n")
-    }
+	fmt.Printf("\t%s field", field.Type)
+	if field.Default != nil {
+		fmt.Printf(", defaults to %v\n", field.Default)
+	} else {
+		fmt.Print("\n")
+	}
 
-    if field.Description != nil {
-        wrappedDescription := text.WrapSoft(*field.Description, 85)
-        fmt.Printf("\n%s\n", indent(wrappedDescription, 1))
-    }
+	if field.Description != nil {
+		wrappedDescription := text.WrapSoft(*field.Description, 85)
+		fmt.Printf("\n%s\n", indent(wrappedDescription, 1))
+	}
 
-    if len(field.Examples) > 0 {
-        _, _ = bold.Printf("\n\t%s\n", "Examples")
-        for _, example := range field.Examples {
-            m := map[string]any{field.Name: example}
-            yml, _ := yaml.Marshal(m)
-            fmt.Printf("%s", indent(string(yml), 2))
-        }
-    }
+	if len(field.Examples) > 0 {
+		_, _ = bold.Printf("\n\t%s\n", "Examples")
+		for _, example := range field.Examples {
+			m := map[string]any{field.Name: example}
+			yml, _ := yaml.Marshal(m)
+			fmt.Printf("%s", indent(string(yml), 2))
+		}
+	}
 
-    if len(field.Constraints) > 0 {
-        _, _ = bold.Printf("\n\t%s\n", "Constraints")
+	if len(field.Constraints) > 0 {
+		_, _ = bold.Printf("\n\t%s\n", "Constraints")
 
-        for _, constraint := range field.Constraints {
-            if constraint.Regex != nil {
-                fmt.Printf("\t\t%s: %s\n", "regex", *constraint.Regex)
-            }
-            if constraint.Range != nil {
-                if constraint.Range.Lt != nil {
-                    fmt.Printf("\t\t%s: %v\n", "lesser than", *constraint.Range.Lt)
-                }
-                if constraint.Range.Lte != nil {
-                    fmt.Printf("\t\t%s: %v\n", "lesser than equal", constraint.Range.Lte)
-                }
-                if constraint.Range.Gt != nil {
-                    fmt.Printf("\t\t%s: %v\n", "greater than", constraint.Range.Gt)
-                }
-                if constraint.Range.Gte != nil {
-                    fmt.Printf("\t\t%s: %v\n", "greater than equal", constraint.Range.Gte)
-                }
-            }
-            if len(constraint.Enum) > 0 {
-                fmt.Printf("\t\t%s: %s\n", "enum", constraint.Enum)
-            }
-            if constraint.Preset != nil {
-                fmt.Printf("\t\t%s: %s\n", "preset", *constraint.Preset)
-            }
-        }
-    }
+		for _, constraint := range field.Constraints {
+			if constraint.Regex != nil {
+				fmt.Printf("\t\t%s: %s\n", "regex", *constraint.Regex)
+			}
+			if constraint.Range != nil {
+				if constraint.Range.Lt != nil {
+					fmt.Printf("\t\t%s: %v\n", "lesser than", *constraint.Range.Lt)
+				}
+				if constraint.Range.Lte != nil {
+					fmt.Printf("\t\t%s: %v\n", "lesser than equal", constraint.Range.Lte)
+				}
+				if constraint.Range.Gt != nil {
+					fmt.Printf("\t\t%s: %v\n", "greater than", constraint.Range.Gt)
+				}
+				if constraint.Range.Gte != nil {
+					fmt.Printf("\t\t%s: %v\n", "greater than equal", constraint.Range.Gte)
+				}
+			}
+			if len(constraint.Enum) > 0 {
+				fmt.Printf("\t\t%s: %s\n", "enum", constraint.Enum)
+			}
+			if constraint.Preset != nil {
+				fmt.Printf("\t\t%s: %s\n", "preset", *constraint.Preset)
+			}
+		}
+	}
 
-    // Separator
-    fmt.Println()
+	// Separator
+	fmt.Println()
 
-    for _, innerField := range field.Fields {
-        if innerField == nil {
-            continue
-        }
+	for _, innerField := range field.Fields {
+		if innerField == nil {
+			continue
+		}
 
-        genPrefix := fmt.Sprintf("%s%s.", prefix, field.Name)
-        printField(*innerField, genPrefix)
-    }
+		genPrefix := fmt.Sprintf("%s%s.", prefix, field.Name)
+		printField(*innerField, genPrefix)
+	}
 }

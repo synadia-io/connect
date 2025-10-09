@@ -11,10 +11,10 @@ import (
 
 var _ = Describe("StandaloneCommand", func() {
 	var (
-		opts      *Options
-		cmd       *standaloneCommand
-		tempDir   string
-		appCtx    *AppContext
+		opts    *Options
+		cmd     *standaloneCommand
+		tempDir string
+		appCtx  *AppContext
 	)
 
 	BeforeEach(func() {
@@ -74,7 +74,7 @@ var _ = Describe("StandaloneCommand", func() {
 	Describe("createConnector", func() {
 		BeforeEach(func() {
 			cmd.connectorName = "test-connector"
-			cmd.templateName = "generate"  // Use "generate" which matches "Generate to NATS Core"
+			cmd.templateName = "generate" // Use "generate" which matches "Generate to NATS Core"
 		})
 
 		It("should create a connector file with correct content", func() {

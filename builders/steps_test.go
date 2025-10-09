@@ -24,7 +24,7 @@ var _ = Describe("StepsBuilder", func() {
 			natsConfig := NatsConfig().Url("nats://localhost:4222")
 			producer := ProducerStep(natsConfig)
 			builder.Producer(producer)
-			
+
 			steps := builder.Build()
 			Expect(steps.Producer).ToNot(BeNil())
 		})
@@ -35,7 +35,7 @@ var _ = Describe("StepsBuilder", func() {
 			natsConfig := NatsConfig().Url("nats://localhost:4222")
 			consumer := ConsumerStep(natsConfig)
 			builder.Consumer(consumer)
-			
+
 			steps := builder.Build()
 			Expect(steps.Consumer).ToNot(BeNil())
 		})
@@ -45,7 +45,7 @@ var _ = Describe("StepsBuilder", func() {
 		It("should add a source step", func() {
 			source := SourceStep("test-source")
 			builder.Source(source)
-			
+
 			steps := builder.Build()
 			Expect(steps.Source).ToNot(BeNil())
 			Expect(steps.Source.Type).To(Equal("test-source"))
@@ -56,7 +56,7 @@ var _ = Describe("StepsBuilder", func() {
 		It("should add a sink step", func() {
 			sink := SinkStep("test-sink")
 			builder.Sink(sink)
-			
+
 			steps := builder.Build()
 			Expect(steps.Sink).ToNot(BeNil())
 			Expect(steps.Sink.Type).To(Equal("test-sink"))
@@ -67,7 +67,7 @@ var _ = Describe("StepsBuilder", func() {
 		It("should add a transformer step", func() {
 			transformer := TransformerStep()
 			builder.Transformer(transformer)
-			
+
 			steps := builder.Build()
 			Expect(steps.Transformer).ToNot(BeNil())
 		})

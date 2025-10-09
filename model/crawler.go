@@ -2,10 +2,12 @@
 
 package model
 
-import "encoding/json"
-import "fmt"
-import "reflect"
-import "regexp"
+import (
+	"encoding/json"
+	"fmt"
+	"reflect"
+	"regexp"
+)
 
 type AuthorSpec struct {
 	// The email address of the author

@@ -4,17 +4,17 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/synadia-io/connect/model"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/synadia-io/connect/model"
 )
 
 var _ = Describe("ConnectorCommand", func() {
 	var (
-		opts      *Options
-		cmd       *connectorCommand
-		mockCl    *mockClient
-		appCtx    *AppContext
+		opts   *Options
+		cmd    *connectorCommand
+		mockCl *mockClient
+		appCtx *AppContext
 	)
 
 	BeforeEach(func() {
@@ -22,9 +22,9 @@ var _ = Describe("ConnectorCommand", func() {
 		opts = &Options{
 			Timeout: 5 * time.Second,
 		}
-		
+
 		appCtx, mockCl = newMockAppContext()
-		
+
 		cmd = &connectorCommand{
 			opts:    opts,
 			envVars: make(map[string]string),
@@ -46,7 +46,7 @@ var _ = Describe("ConnectorCommand", func() {
 				},
 				{
 					ConnectorId: "test-connector-2",
-					Description: "Test Connector 2", 
+					Description: "Test Connector 2",
 					RuntimeId:   "wombat",
 					Instances: model.ConnectorSummaryInstances{
 						Running: 0,
@@ -62,14 +62,14 @@ var _ = Describe("ConnectorCommand", func() {
 
 		It("should handle empty connector list", func() {
 			mockCl.connectors = []model.ConnectorSummary{}
-			
+
 			err := cmd.listConnectorsWithClient(appCtx)
 			Expect(err).ToNot(HaveOccurred())
 		})
 
 		It("should handle errors from client", func() {
 			mockCl.connectorError = fmt.Errorf("connection failed")
-			
+
 			err := cmd.listConnectorsWithClient(appCtx)
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("connection failed"))
@@ -100,7 +100,7 @@ var _ = Describe("ConnectorCommand", func() {
 		It("should handle connector not found", func() {
 			mockCl.connector = nil
 			mockCl.connectorError = fmt.Errorf("connector not found")
-			
+
 			err := cmd.getConnectorWithClient(appCtx)
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("connector not found"))
@@ -120,7 +120,7 @@ var _ = Describe("ConnectorCommand", func() {
 
 		It("should handle delete errors", func() {
 			mockCl.connectorError = fmt.Errorf("cannot delete running connector")
-			
+
 			err := cmd.removeConnectorWithClient(appCtx)
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("cannot delete running connector"))
@@ -144,7 +144,7 @@ var _ = Describe("ConnectorCommand", func() {
 
 		It("should handle status errors", func() {
 			mockCl.connectorError = fmt.Errorf("status unavailable")
-			
+
 			err := cmd.connectorStatusWithClient(appCtx)
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("status unavailable"))
@@ -178,7 +178,7 @@ var _ = Describe("ConnectorCommand", func() {
 
 		It("should handle no-pull option", func() {
 			cmd.noPull = true
-			
+
 			err := cmd.startConnectorWithClient(appCtx)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(mockCl.startOptions.Pull).To(BeFalse())
@@ -187,7 +187,7 @@ var _ = Describe("ConnectorCommand", func() {
 		It("should handle environment variables", func() {
 			cmd.envVars["KEY1"] = "value1"
 			cmd.envVars["KEY2"] = "value2"
-			
+
 			err := cmd.startConnectorWithClient(appCtx)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(mockCl.startOptions.EnvVars).To(HaveLen(2))
@@ -197,7 +197,7 @@ var _ = Describe("ConnectorCommand", func() {
 
 		It("should handle placement tags", func() {
 			cmd.placementTags = []string{"tag1", "tag2"}
-			
+
 			err := cmd.startConnectorWithClient(appCtx)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(mockCl.startOptions.PlacementTags).To(Equal([]string{"tag1", "tag2"}))
@@ -205,7 +205,7 @@ var _ = Describe("ConnectorCommand", func() {
 
 		It("should parse start timeout", func() {
 			cmd.startTimeout = "30s"
-			
+
 			err := cmd.startConnectorWithClient(appCtx)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(mockCl.startOptions.Timeout).To(Equal("30s"))
@@ -213,7 +213,7 @@ var _ = Describe("ConnectorCommand", func() {
 
 		It("should handle invalid timeout", func() {
 			cmd.startTimeout = "invalid"
-			
+
 			err := cmd.startConnectorWithClient(appCtx)
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("invalid timeout"))
@@ -221,7 +221,7 @@ var _ = Describe("ConnectorCommand", func() {
 
 		It("should handle start errors", func() {
 			mockCl.connectorError = fmt.Errorf("failed to start")
-			
+
 			err := cmd.startConnectorWithClient(appCtx)
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("failed to start"))
@@ -248,7 +248,7 @@ var _ = Describe("ConnectorCommand", func() {
 
 		It("should handle stop errors", func() {
 			mockCl.connectorError = fmt.Errorf("failed to stop")
-			
+
 			err := cmd.stopConnectorWithClient(appCtx)
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("failed to stop"))
@@ -281,7 +281,7 @@ var _ = Describe("ConnectorCommand", func() {
 
 		It("should handle source connector not found", func() {
 			mockCl.connectorError = fmt.Errorf("connector not found")
-			
+
 			err := cmd.copyConnectorWithClient(appCtx)
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("connector not found"))
@@ -310,7 +310,7 @@ var _ = Describe("ConnectorCommand", func() {
 
 		It("should handle reload errors during stop", func() {
 			mockCl.connectorError = fmt.Errorf("failed to stop")
-			
+
 			err := cmd.reloadConnectorWithClient(appCtx)
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("failed to stop"))

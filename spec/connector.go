@@ -2,9 +2,11 @@
 
 package spec
 
-import "encoding/json"
-import "fmt"
-import "reflect"
+import (
+	"encoding/json"
+	"fmt"
+	"reflect"
+)
 
 type ConnectorSpec struct {
 	// A description of the connector

@@ -9,34 +9,34 @@ import (
 // mockClient implements the client.Client interface for testing
 type mockClient struct {
 	// ConnectorClient methods
-	connectors       []model.ConnectorSummary
-	connector        *model.Connector
-	connectorStatus  *model.ConnectorStatus
-	connectorError   error
-	instances        []model.Instance
-	startOptions     *model.ConnectorStartOptions
-	createCalled     bool
-	deleteCalled     bool
-	patchCalled      bool
-	startCalled      bool
-	stopCalled       bool
-	
+	connectors      []model.ConnectorSummary
+	connector       *model.Connector
+	connectorStatus *model.ConnectorStatus
+	connectorError  error
+	instances       []model.Instance
+	startOptions    *model.ConnectorStartOptions
+	createCalled    bool
+	deleteCalled    bool
+	patchCalled     bool
+	startCalled     bool
+	stopCalled      bool
+
 	// LibraryClient methods
 	runtimes   []model.RuntimeSummary
 	runtime    *model.Runtime
 	components []model.ComponentSummary
 	component  *model.Component
-	
+
 	// Client methods
 	account string
 }
 
 func newMockClient() *mockClient {
 	return &mockClient{
-		account: "test-account",
+		account:    "test-account",
 		connectors: []model.ConnectorSummary{},
-		instances: []model.Instance{},
-		runtimes: []model.RuntimeSummary{},
+		instances:  []model.Instance{},
+		runtimes:   []model.RuntimeSummary{},
 		components: []model.ComponentSummary{},
 	}
 }

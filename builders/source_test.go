@@ -23,7 +23,7 @@ var _ = Describe("SourceStepBuilder", func() {
 	Describe("SetString", func() {
 		It("should set a string value", func() {
 			builder.SetString("key", "value")
-			
+
 			result := builder.Build()
 			Expect(result.Config).ToNot(BeNil())
 			Expect(result.Config["key"]).To(Equal("value"))
@@ -32,14 +32,14 @@ var _ = Describe("SourceStepBuilder", func() {
 		It("should initialize config map if nil", func() {
 			builder.res.Config = nil
 			builder.SetString("key", "value")
-			
+
 			Expect(builder.res.Config).ToNot(BeNil())
 			Expect(builder.res.Config["key"]).To(Equal("value"))
 		})
 
 		It("should support method chaining", func() {
 			result := builder.SetString("key1", "value1").SetString("key2", "value2")
-			
+
 			Expect(result).To(Equal(builder))
 			config := result.Build().Config
 			Expect(config["key1"]).To(Equal("value1"))
@@ -50,14 +50,14 @@ var _ = Describe("SourceStepBuilder", func() {
 	Describe("SetStrings", func() {
 		It("should set a string array value", func() {
 			builder.SetStrings("keys", "value1", "value2", "value3")
-			
+
 			result := builder.Build()
 			Expect(result.Config["keys"]).To(Equal([]string{"value1", "value2", "value3"}))
 		})
 
 		It("should handle empty array", func() {
 			builder.SetStrings("keys")
-			
+
 			result := builder.Build()
 			// When called with no variadic arguments, Go creates a nil slice
 			Expect(result.Config["keys"]).To(BeNil())
@@ -66,7 +66,7 @@ var _ = Describe("SourceStepBuilder", func() {
 		It("should initialize config map if nil", func() {
 			builder.res.Config = nil
 			builder.SetStrings("keys", "value")
-			
+
 			Expect(builder.res.Config).ToNot(BeNil())
 		})
 	})
@@ -74,14 +74,14 @@ var _ = Describe("SourceStepBuilder", func() {
 	Describe("SetInt", func() {
 		It("should set an integer value", func() {
 			builder.SetInt("count", 42)
-			
+
 			result := builder.Build()
 			Expect(result.Config["count"]).To(Equal(42))
 		})
 
 		It("should handle negative values", func() {
 			builder.SetInt("offset", -10)
-			
+
 			result := builder.Build()
 			Expect(result.Config["offset"]).To(Equal(-10))
 		})
@@ -89,7 +89,7 @@ var _ = Describe("SourceStepBuilder", func() {
 		It("should initialize config map if nil", func() {
 			builder.res.Config = nil
 			builder.SetInt("count", 1)
-			
+
 			Expect(builder.res.Config).ToNot(BeNil())
 		})
 	})
@@ -97,14 +97,14 @@ var _ = Describe("SourceStepBuilder", func() {
 	Describe("SetBool", func() {
 		It("should set a boolean value to true", func() {
 			builder.SetBool("enabled", true)
-			
+
 			result := builder.Build()
 			Expect(result.Config["enabled"]).To(Equal(true))
 		})
 
 		It("should set a boolean value to false", func() {
 			builder.SetBool("disabled", false)
-			
+
 			result := builder.Build()
 			Expect(result.Config["disabled"]).To(Equal(false))
 		})
@@ -112,7 +112,7 @@ var _ = Describe("SourceStepBuilder", func() {
 		It("should initialize config map if nil", func() {
 			builder.res.Config = nil
 			builder.SetBool("flag", true)
-			
+
 			Expect(builder.res.Config).ToNot(BeNil())
 		})
 	})
@@ -136,7 +136,7 @@ var _ = Describe("SourceStepBuilder", func() {
 		It("should build with empty config", func() {
 			newBuilder := SourceStep("empty-source")
 			result := newBuilder.Build()
-			
+
 			Expect(result.Type).To(Equal("empty-source"))
 			Expect(result.Config).To(BeNil())
 		})

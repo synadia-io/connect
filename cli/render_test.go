@@ -1,9 +1,9 @@
 package cli
 
 import (
-	"github.com/synadia-io/connect/model"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/synadia-io/connect/model"
 )
 
 var _ = Describe("Render", func() {
@@ -68,7 +68,7 @@ var _ = Describe("Render", func() {
 			description := "Test runtime description"
 			email := "test@example.com"
 			url := "https://example.com"
-			
+
 			runtime := model.Runtime{
 				Id:          "test-runtime",
 				Label:       "Test Runtime",

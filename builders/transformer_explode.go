@@ -3,27 +3,27 @@ package builders
 import "github.com/synadia-io/connect/model"
 
 type ExplodeTransformerStepBuilder struct {
-    res *model.ExplodeTransformerStep
+	res *model.ExplodeTransformerStep
 }
 
 func ExplodeTransformerStep() *ExplodeTransformerStepBuilder {
-    return &ExplodeTransformerStepBuilder{
-        res: &model.ExplodeTransformerStep{
-            Format: model.ExplodeTransformerStepFormatJsonArray,
-        },
-    }
+	return &ExplodeTransformerStepBuilder{
+		res: &model.ExplodeTransformerStep{
+			Format: model.ExplodeTransformerStepFormatJsonArray,
+		},
+	}
 }
 
 func (b *ExplodeTransformerStepBuilder) Format(format model.ExplodeTransformerStepFormat) *ExplodeTransformerStepBuilder {
-    b.res.Format = format
-    return b
+	b.res.Format = format
+	return b
 }
 
 func (b *ExplodeTransformerStepBuilder) Delimiter(delimiter string) *ExplodeTransformerStepBuilder {
-    b.res.Delimiter = delimiter
-    return b
+	b.res.Delimiter = delimiter
+	return b
 }
 
 func (b *ExplodeTransformerStepBuilder) Build() model.ExplodeTransformerStep {
-    return *b.res
+	return *b.res
 }
