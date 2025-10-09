@@ -18,8 +18,8 @@ func Account(name string) Acc {
 	accSkSeed, _ := accSk.Seed()
 	accClaim.Name = name
 	accClaim.SigningKeys.Add(accSkPk)
-	accClaim.Limits.JetStreamLimits.MemoryStorage = -1
-	accClaim.Limits.JetStreamLimits.DiskStorage = -1
+	accClaim.Limits.MemoryStorage = -1
+	accClaim.Limits.DiskStorage = -1
 
 	return Acc{
 		Id:          accPk,

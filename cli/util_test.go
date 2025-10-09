@@ -63,18 +63,18 @@ var _ = Describe("Util", func() {
 		})
 
 		AfterEach(func() {
-			os.Setenv("EDITOR", originalEditor)
+			_ = os.Setenv("EDITOR", originalEditor)
 		})
 
 		It("should return error when EDITOR is not set", func() {
-			os.Unsetenv("EDITOR")
+			_ = os.Unsetenv("EDITOR")
 			err := editFile("test.txt")
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("set EDITOR environment variable"))
 		})
 
 		It("should return error for invalid EDITOR format", func() {
-			os.Setenv("EDITOR", `vim "unclosed quote`)
+			_ = os.Setenv("EDITOR", `vim "unclosed quote`)
 			err := editFile("test.txt")
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("could not parse EDITOR"))
@@ -82,7 +82,7 @@ var _ = Describe("Util", func() {
 
 		It("should return error when editor command fails", func() {
 			// Use a command that doesn't exist
-			os.Setenv("EDITOR", "nonexistenteditor")
+			_ = os.Setenv("EDITOR", "nonexistenteditor")
 			err := editFile("test.txt")
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("could not edit file"))

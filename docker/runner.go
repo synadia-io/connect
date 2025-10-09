@@ -78,12 +78,6 @@ func (r *Runner) Run(ctx context.Context, opts *RunOptions) error {
 		}
 	}
 
-	// Determine runtime ID from image or use provided RuntimeID
-	runtimeID := opts.RuntimeID
-	if runtimeID == "" {
-		runtimeID = r.extractRuntimeFromImage(opts.Image)
-	}
-
 	// Encode the original steps as base64 for the runtime
 	stepsYAML, err := yaml.Marshal(opts.Steps)
 	if err != nil {
@@ -117,9 +111,7 @@ func (r *Runner) Run(ctx context.Context, opts *RunOptions) error {
 	// Add customer options
 	if opts.DockerOpts != "" {
 		dockerOpts := strings.Fields(opts.DockerOpts)
-		for _, opt := range dockerOpts {
-			args = append(args, opt)
-		}
+		args = append(args, dockerOpts...)
 	}
 
 	// Add the image
@@ -166,7 +158,7 @@ func (r *Runner) Remove(ctx context.Context, connectorID string) error {
 	containerName := connectorID
 
 	// Stop first (ignore errors if already stopped)
-	r.Stop(ctx, connectorID)
+	_ = r.Stop(ctx, connectorID)
 
 	// Then remove with force flag
 	args := []string{"rm", "-f", containerName}
@@ -245,26 +237,6 @@ func (r *Runner) CreateConnectFile(steps model.Steps, workDir string) error {
 	return os.WriteFile(connectFilePath, data, 0644)
 }
 
-// extractRuntimeFromImage extracts the runtime ID from a Docker image name
-// Example: "registry.synadia.io/connect-runtime-wombat:latest" -> "wombat"
-func (r *Runner) extractRuntimeFromImage(image string) string {
-	// Remove tag if present
-	parts := strings.SplitN(image, ":", 2)
-	imageName := parts[0]
-
-	// Extract runtime from image name pattern: */connect-runtime-<runtime>
-	if strings.Contains(imageName, "/connect-runtime-") {
-		parts := strings.Split(imageName, "/connect-runtime-")
-		if len(parts) > 1 {
-			return parts[1]
-		}
-	}
-
-	// Fallback: use the last part of the image name
-	pathParts := strings.Split(imageName, "/")
-	return pathParts[len(pathParts)-1]
-}
-
 // GetContainerStatus checks if a container exists and returns its status
 func (r *Runner) GetContainerStatus(ctx context.Context, connectorID string) (*ContainerStatus, error) {
 	containerName := connectorID
@@ -333,7 +305,7 @@ func (r *Runner) PromptUserForReplacement(connectorID string) (bool, error) {
 // RemoveContainer removes a container (stops it first if running)
 func (r *Runner) RemoveContainer(ctx context.Context, connectorID string) error {
 	// Try to stop first (ignore errors if already stopped)
-	r.Stop(ctx, connectorID)
+	_ = r.Stop(ctx, connectorID)
 
 	// Remove the container
 	containerName := connectorID

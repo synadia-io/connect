@@ -95,7 +95,7 @@ func (t *Transport) RequestJson(subject string, payload any, target any, opts ..
 		return false, err
 	}
 
-	if b == nil || len(b) == 0 {
+	if len(b) == 0 {
 		return false, nil
 	}
 

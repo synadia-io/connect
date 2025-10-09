@@ -51,7 +51,7 @@ func (c *logsCommand) logs(pc *fisk.ParseContext) error {
 	if err != nil {
 		return fmt.Errorf("failed to subscribe to logs: %w", err)
 	}
-	defer sub.Unsubscribe()
+	defer func() { _ = sub.Unsubscribe() }()
 
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, os.Interrupt, syscall.SIGTERM)

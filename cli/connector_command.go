@@ -441,7 +441,7 @@ func fromFile(existing *spec.ConnectorSpec, file string) (*spec.ConnectorSpec, b
 	// -- open the file
 	f, err := os.Open(file)
 	fisk.FatalIfError(err, "failed to open ConnectFile %q: %v", file, err)
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	// -- read the file
 	var sp spec.Spec
@@ -480,13 +480,15 @@ func fromEditor(existing *spec.ConnectorSpec) (*spec.ConnectorSpec, bool, error)
 	if err != nil {
 		return nil, false, fmt.Errorf("could not create temporary file: %s", err)
 	}
-	defer os.Remove(tmpFile.Name())
+	defer func() { _ = os.Remove(tmpFile.Name()) }()
 
 	_, err = fmt.Fprint(tmpFile, string(configYml))
 	if err != nil {
 		return nil, false, fmt.Errorf("could not write to temporary file: %s", err)
 	}
-	tmpFile.Close()
+	if err := tmpFile.Close(); err != nil {
+		return nil, false, fmt.Errorf("could not close temporary file: %s", err)
+	}
 
 	err = editFile(tmpFile.Name())
 	if err != nil {

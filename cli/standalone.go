@@ -204,7 +204,7 @@ func (c *standaloneCommand) runConnector(pc *fisk.ParseContext) error {
 
 	// Validate Docker is available
 	if err := runner.ValidateDockerAvailable(); err != nil {
-		return fmt.Errorf("Docker is not available: %w", err)
+		return fmt.Errorf("docker is not available: %w", err)
 	}
 
 	// Run the connector
