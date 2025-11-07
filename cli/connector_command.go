@@ -373,7 +373,7 @@ func (c *connectorCommand) saveConnector(pc *fisk.ParseContext) error {
 
 	var connector *model.Connector
 	if !exists {
-		connector, err = appCtx.Client.CreateConnector(c.id, result.Description, result.RuntimeId, &c.runtimeVersion, convert.ConvertStepsFromSpec(result.Steps), c.opts.Timeout)
+		connector, err = appCtx.Client.CreateConnector(c.id, result.Description, result.RuntimeId, c.runtimeVersion, convert.ConvertStepsFromSpec(result.Steps), c.opts.Timeout)
 		if err != nil {
 			color.Red("Could not save connector: %s", err)
 			os.Exit(1)
@@ -428,7 +428,7 @@ func (c *connectorCommand) copyConnector(context *fisk.ParseContext) error {
 		return nil
 	}
 
-	_, err = appCtx.Client.CreateConnector(c.targetId, conn.Description, conn.RuntimeId, &c.runtimeVersion, convert.ConvertStepsFromSpec(convert.ConvertStepsToSpec(conn.Steps)), c.opts.Timeout)
+	_, err = appCtx.Client.CreateConnector(c.targetId, conn.Description, conn.RuntimeId, c.runtimeVersion, convert.ConvertStepsFromSpec(convert.ConvertStepsToSpec(conn.Steps)), c.opts.Timeout)
 	fisk.FatalIfError(err, "failed to create connector %s: %v", c.targetId, err)
 
 	fmt.Printf("Created connector %s\n", color.GreenString(c.targetId))

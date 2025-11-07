@@ -142,7 +142,7 @@ func (c *connectorCommand) copyConnectorWithClient(appCtx *AppContext) error {
 	}
 
 	// Create the copy
-	copied, err := appCtx.Client.CreateConnector(c.targetId, connector.Description, connector.RuntimeId, &c.runtimeVersion, connector.Steps, c.opts.Timeout)
+	copied, err := appCtx.Client.CreateConnector(c.targetId, connector.Description, connector.RuntimeId, c.runtimeVersion, connector.Steps, c.opts.Timeout)
 	if err != nil {
 		return fmt.Errorf("failed to create connector copy: %w", err)
 	}

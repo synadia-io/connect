@@ -20,7 +20,7 @@ type ConnectorClient interface {
 	ListConnectors(timeout time.Duration) ([]model.ConnectorSummary, error)
 	GetConnector(id string, timeout time.Duration) (*model.Connector, error)
 	GetConnectorStatus(id string, timeout time.Duration) (*model.ConnectorStatus, error)
-	CreateConnector(id, description, runtimeId string, runtimeVersion *string, steps model.Steps, timeout time.Duration) (*model.Connector, error)
+	CreateConnector(id, description, runtimeId string, runtimeVersion string, steps model.Steps, timeout time.Duration) (*model.Connector, error)
 	PatchConnector(id string, patch string, timeout time.Duration) (*model.Connector, error)
 	DeleteConnector(id string, timeout time.Duration) error
 

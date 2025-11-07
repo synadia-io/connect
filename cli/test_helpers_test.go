@@ -70,7 +70,7 @@ func (m *mockClient) GetConnectorStatus(id string, timeout time.Duration) (*mode
 	return m.connectorStatus, nil
 }
 
-func (m *mockClient) CreateConnector(id, description, runtimeId string, runtimeVersion *string, steps model.Steps, timeout time.Duration) (*model.Connector, error) {
+func (m *mockClient) CreateConnector(id, description, runtimeId string, runtimeVersion string, steps model.Steps, timeout time.Duration) (*model.Connector, error) {
 	m.createCalled = true
 	if m.connectorError != nil {
 		return nil, m.connectorError
