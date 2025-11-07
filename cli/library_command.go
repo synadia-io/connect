@@ -18,10 +18,11 @@ import (
 type libraryCommand struct {
 	opts *Options
 
-	runtime   string
-	kind      string
-	status    string
-	component string
+	runtime        string
+	kind           string
+	status         string
+	component      string
+	runtimeVersion string
 }
 
 func ConfigureLibraryCommand(parentCmd commandHost, opts *Options) {
@@ -38,9 +39,14 @@ func ConfigureLibraryCommand(parentCmd commandHost, opts *Options) {
 
 	runtimeCmd := componentCmd.Command("runtime", "Show information about a runtime").Action(c.getRuntime)
 	runtimeCmd.Arg("id", "The id of the runtime to describe").Required().StringVar(&c.runtime)
+	runtimeCmd.Flag("runtime-version", "The runtime version").Required().StringVar(&c.runtimeVersion)
+
+	versionsCmd := componentCmd.Command("versions", "List versions of a runtime").Action(c.listRuntimeVersions)
+	versionsCmd.Arg("id", "The runtime id").Required().StringVar(&c.runtime)
 
 	searchCmd := componentCmd.Command("list", "List components").Alias("ls").Action(c.search)
 	searchCmd.Flag("runtime", "The runtime id").StringVar(&c.runtime)
+	searchCmd.Flag("runtime-version", "The runtime version").StringVar(&c.runtimeVersion)
 	searchCmd.Flag("kind", "The kind of components").EnumVar(&c.kind, kindOpts...)
 	searchCmd.Flag("status", "The status of the components").EnumVar(&c.status, statusOpts...)
 
@@ -48,6 +54,7 @@ func ConfigureLibraryCommand(parentCmd commandHost, opts *Options) {
 	infoCmd.Arg("runtime", "The runtime id").StringVar(&c.runtime)
 	infoCmd.Arg("kind", "The kind of component").EnumVar(&c.kind, kindOpts...)
 	infoCmd.Arg("name", "The name of the component").StringVar(&c.component)
+	infoCmd.Flag("runtime-version", "The runtime version").StringVar(&c.runtimeVersion)
 }
 
 func (c *libraryCommand) listRuntimes(pc *fisk.ParseContext) error {
@@ -56,7 +63,7 @@ func (c *libraryCommand) listRuntimes(pc *fisk.ParseContext) error {
 	defer appCtx.Close()
 
 	w := table.NewWriter()
-	w.AppendHeader(table.Row{"Id", "Name", "Description", "Author"})
+	w.AppendHeader(table.Row{"Id", "Version", "Name", "Description", "Author"})
 	w.SetStyle(table.StyleRounded)
 
 	runtimes, err := appCtx.Client.ListRuntimes(c.opts.Timeout)
@@ -70,7 +77,8 @@ func (c *libraryCommand) listRuntimes(pc *fisk.ParseContext) error {
 		if runtime.Description != nil {
 			desc = *runtime.Description
 		}
-		w.AppendRow(table.Row{runtime.Id, runtime.Label, desc, runtime.Author})
+		version := runtime.Version
+		w.AppendRow(table.Row{runtime.Id, version, runtime.Label, desc, runtime.Author.Name})
 	}
 
 	result := w.Render()
@@ -83,7 +91,7 @@ func (c *libraryCommand) getRuntime(pc *fisk.ParseContext) error {
 	fisk.FatalIfError(err, "failed to load options")
 	defer appCtx.Close()
 
-	rt, err := appCtx.Client.GetRuntime(c.runtime, c.opts.Timeout)
+	rt, err := appCtx.Client.GetRuntime(c.runtime, &c.runtimeVersion, c.opts.Timeout)
 	if err != nil {
 		color.Red("Could not get runtime: %s", err)
 		os.Exit(1)
@@ -99,13 +107,50 @@ func (c *libraryCommand) getRuntime(pc *fisk.ParseContext) error {
 	return nil
 }
 
+func (c *libraryCommand) listRuntimeVersions(pc *fisk.ParseContext) error {
+	appCtx, err := LoadOptions(c.opts)
+	fisk.FatalIfError(err, "failed to load options")
+	defer appCtx.Close()
+
+	runtimes, err := appCtx.Client.ListRuntimes(c.opts.Timeout)
+	if err != nil {
+		color.Red("Could not list runtimes: %s", err)
+		os.Exit(1)
+	}
+
+	var versions []string
+	for _, runtime := range runtimes {
+		if runtime.Id == c.runtime {
+			versions = append(versions, runtime.Version)
+		}
+	}
+
+	if len(versions) == 0 {
+		color.Red("No versions found for runtime '%s'", c.runtime)
+		os.Exit(1)
+	}
+
+	fmt.Printf("Available versions for runtime '%s':\n", c.runtime)
+	w := table.NewWriter()
+	w.AppendHeader(table.Row{"Version"})
+	w.SetStyle(table.StyleRounded)
+
+	for _, version := range versions {
+		w.AppendRow(table.Row{version})
+	}
+
+	result := w.Render()
+	fmt.Println(result)
+	return nil
+}
+
 func (c *libraryCommand) search(pc *fisk.ParseContext) error {
 	appCtx, err := LoadOptions(c.opts)
 	fisk.FatalIfError(err, "failed to load options")
 	defer appCtx.Close()
 
 	w := table.NewWriter()
-	w.AppendHeader(table.Row{"Name", "Kind", "Runtime", "Status"})
+	w.AppendHeader(table.Row{"Name", "Kind", "Runtime", "Version", "Status"})
 	w.SetStyle(table.StyleRounded)
 
 	filter := &model.ComponentSearchFilter{}
@@ -124,6 +169,10 @@ func (c *libraryCommand) search(pc *fisk.ParseContext) error {
 		filter.Kind = &k
 	}
 
+	if c.runtimeVersion != "" {
+		filter.RuntimeVersion = &c.runtimeVersion
+	}
+
 	components, err := appCtx.Client.SearchComponents(filter, c.opts.Timeout)
 	if err != nil {
 		color.Red("Could not list components: %s", err)
@@ -131,7 +180,7 @@ func (c *libraryCommand) search(pc *fisk.ParseContext) error {
 	}
 
 	for _, component := range components {
-		w.AppendRow(table.Row{component.Name, component.Kind, component.RuntimeId, component.Status})
+		w.AppendRow(table.Row{component.Name, component.Kind, component.RuntimeId, component.RuntimeVersion, component.Status})
 	}
 
 	result := w.Render()
@@ -144,7 +193,12 @@ func (c *libraryCommand) info(pc *fisk.ParseContext) error {
 	fisk.FatalIfError(err, "failed to load options")
 	defer appCtx.Close()
 
-	component, err := appCtx.Client.GetComponent(c.runtime, model.ComponentKind(c.kind), c.component, c.opts.Timeout)
+	var runtimeVersion *string
+	if c.runtimeVersion != "" {
+		runtimeVersion = &c.runtimeVersion
+	}
+
+	component, err := appCtx.Client.GetComponent(c.runtime, model.ComponentKind(c.kind), c.component, runtimeVersion, c.opts.Timeout)
 	if err != nil {
 		color.Red("Could not get component: %s", err)
 		os.Exit(1)
@@ -155,6 +209,7 @@ func (c *libraryCommand) info(pc *fisk.ParseContext) error {
 	w.SetStyle(table.StyleRounded)
 	w.SetTitle("Component Description")
 	w.AppendRow(table.Row{"Runtime", component.RuntimeId})
+	w.AppendRow(table.Row{"Runtime Version", component.RuntimeVersion})
 	w.AppendRow(table.Row{"Name", component.Name})
 	w.AppendRow(table.Row{"Kind", component.Kind})
 	w.AppendRow(table.Row{"Status", component.Status})

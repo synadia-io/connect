@@ -51,6 +51,10 @@ func renderRuntime(rt model.Runtime) string {
 	tbl.SetTitle(rt.Label)
 	tbl.AppendRow(table.Row{"Id", rt.Id})
 
+	if rt.Version != "" {
+		tbl.AppendRow(table.Row{"Version", rt.Version})
+	}
+
 	if rt.Description != nil {
 		tbl.AppendRow(table.Row{"Description", text.WrapSoft(*rt.Description, 50)})
 	}

@@ -74,12 +74,13 @@ func (c *connectorClient) GetConnectorStatus(name string, timeout time.Duration)
 	return &resp.Status, nil
 }
 
-func (c *connectorClient) CreateConnector(id, description, runtimeId string, steps model.Steps, timeout time.Duration) (*model.Connector, error) {
+func (c *connectorClient) CreateConnector(id, description, runtimeId string, runtimeVersion *string, steps model.Steps, timeout time.Duration) (*model.Connector, error) {
 	req := model.ConnectorCreateRequest{
-		Id:          id,
-		Description: description,
-		RuntimeId:   runtimeId,
-		Steps:       steps,
+		Id:             id,
+		Description:    description,
+		RuntimeId:      runtimeId,
+		RuntimeVersion: runtimeVersion,
+		Steps:          steps,
 	}
 
 	var resp model.ConnectorCreateResponse

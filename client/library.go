@@ -37,9 +37,13 @@ func (c *libraryClient) ListRuntimes(timeout time.Duration) ([]model.RuntimeSumm
 	return resp.Runtimes, nil
 }
 
-func (c *libraryClient) GetRuntime(id string, timeout time.Duration) (*model.Runtime, error) {
+func (c *libraryClient) GetRuntime(id string, version *string, timeout time.Duration) (*model.Runtime, error) {
+	if version == nil {
+		return nil, fmt.Errorf("runtime version is required - use --runtime-version flag")
+	}
 	req := model.RuntimeGetRequest{
-		Name: id,
+		Name:    id,
+		Version: *version,
 	}
 	var resp model.RuntimeGetResponse
 	gotResponse, err := c.t.RequestJson(c.subject(runtimes, "GET"), req, &resp, WithTimeout(timeout))
@@ -72,11 +76,12 @@ func (c *libraryClient) SearchComponents(filter *model.ComponentSearchFilter, ti
 	return resp.Components, nil
 }
 
-func (c *libraryClient) GetComponent(runtimeId string, kind model.ComponentKind, id string, timeout time.Duration) (*model.Component, error) {
+func (c *libraryClient) GetComponent(runtimeId string, kind model.ComponentKind, id string, runtimeVersion *string, timeout time.Duration) (*model.Component, error) {
 	req := model.ComponentGetRequest{
-		RuntimeId: runtimeId,
-		Kind:      kind,
-		Name:      id,
+		RuntimeId:      runtimeId,
+		Kind:           kind,
+		Name:           id,
+		RuntimeVersion: runtimeVersion,
 	}
 
 	var resp model.ComponentGetResponse
