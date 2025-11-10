@@ -76,12 +76,12 @@ func (c *libraryClient) SearchComponents(filter *model.ComponentSearchFilter, ti
 	return resp.Components, nil
 }
 
-func (c *libraryClient) GetComponent(runtimeId string, kind model.ComponentKind, id string, runtimeVersion *string, timeout time.Duration) (*model.Component, error) {
+func (c *libraryClient) GetComponent(runtimeId string, kind model.ComponentKind, id string, runtimeVersion string, timeout time.Duration) (*model.Component, error) {
 	req := model.ComponentGetRequest{
 		RuntimeId:      runtimeId,
 		Kind:           kind,
 		Name:           id,
-		RuntimeVersion: runtimeVersion,
+		RuntimeVersion: &runtimeVersion,
 	}
 
 	var resp model.ComponentGetResponse

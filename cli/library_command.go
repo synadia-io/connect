@@ -54,7 +54,7 @@ func ConfigureLibraryCommand(parentCmd commandHost, opts *Options) {
 	infoCmd.Arg("runtime", "The runtime id").StringVar(&c.runtime)
 	infoCmd.Arg("kind", "The kind of component").EnumVar(&c.kind, kindOpts...)
 	infoCmd.Arg("name", "The name of the component").StringVar(&c.component)
-	infoCmd.Flag("runtime-version", "The runtime version").StringVar(&c.runtimeVersion)
+	infoCmd.Flag("runtime-version", "The runtime version").Required().StringVar(&c.runtimeVersion)
 }
 
 func (c *libraryCommand) listRuntimes(pc *fisk.ParseContext) error {
@@ -193,12 +193,7 @@ func (c *libraryCommand) info(pc *fisk.ParseContext) error {
 	fisk.FatalIfError(err, "failed to load options")
 	defer appCtx.Close()
 
-	var runtimeVersion *string
-	if c.runtimeVersion != "" {
-		runtimeVersion = &c.runtimeVersion
-	}
-
-	component, err := appCtx.Client.GetComponent(c.runtime, model.ComponentKind(c.kind), c.component, runtimeVersion, c.opts.Timeout)
+	component, err := appCtx.Client.GetComponent(c.runtime, model.ComponentKind(c.kind), c.component, c.runtimeVersion, c.opts.Timeout)
 	if err != nil {
 		color.Red("Could not get component: %s", err)
 		os.Exit(1)
