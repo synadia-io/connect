@@ -7,6 +7,7 @@ require (
 	github.com/choria-io/fisk v0.7.1
 	github.com/evanphx/json-patch/v5 v5.9.11
 	github.com/fatih/color v1.18.0
+	github.com/google/jsonschema-go v0.3.0
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
 	github.com/jedib0t/go-pretty/v6 v6.6.7
 	github.com/joho/godotenv v1.5.1
