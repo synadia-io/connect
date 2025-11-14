@@ -2,12 +2,10 @@
 
 package model
 
-import (
-	"encoding/json"
-	"fmt"
-	"reflect"
-	"regexp"
-)
+import "encoding/json"
+import "fmt"
+import "reflect"
+import "regexp"
 
 type Component struct {
 	// A description of the component
@@ -31,6 +29,9 @@ type Component struct {
 
 	// The unique identifier of the runtime to which this component belongs
 	RuntimeId string `json:"runtime_id" yaml:"runtime_id" mapstructure:"runtime_id"`
+
+	// The version of the runtime this component belongs to
+	RuntimeVersion string `json:"runtime_version" yaml:"runtime_version" mapstructure:"runtime_version"`
 
 	// Status corresponds to the JSON schema field "status".
 	Status ComponentStatus `json:"status" yaml:"status" mapstructure:"status"`
@@ -220,6 +221,10 @@ type ComponentGetRequest struct {
 
 	// The unique identifier of the runtime to which this component belongs
 	RuntimeId string `json:"runtime_id" yaml:"runtime_id" mapstructure:"runtime_id"`
+
+	// The version of the runtime to query (optional, defaults to most recent runtime
+	// version)
+	RuntimeVersion *string `json:"runtime_version,omitempty" yaml:"runtime_version,omitempty" mapstructure:"runtime_version,omitempty"`
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
@@ -314,6 +319,9 @@ type ComponentSearchFilter struct {
 	// The unique identifier of the runtime
 	RuntimeId *string `json:"runtime_id,omitempty" yaml:"runtime_id,omitempty" mapstructure:"runtime_id,omitempty"`
 
+	// The version of the runtime to filter by (optional, defaults to latest version)
+	RuntimeVersion *string `json:"runtime_version,omitempty" yaml:"runtime_version,omitempty" mapstructure:"runtime_version,omitempty"`
+
 	// Status corresponds to the JSON schema field "status".
 	Status *ComponentStatus `json:"status,omitempty" yaml:"status,omitempty" mapstructure:"status,omitempty"`
 }
@@ -382,6 +390,9 @@ type ComponentSummary struct {
 	// The unique identifier of the runtime to which this component belongs
 	RuntimeId string `json:"runtime_id" yaml:"runtime_id" mapstructure:"runtime_id"`
 
+	// The version of the runtime this component belongs to
+	RuntimeVersion string `json:"runtime_version" yaml:"runtime_version" mapstructure:"runtime_version"`
+
 	// Status corresponds to the JSON schema field "status".
 	Status ComponentStatus `json:"status" yaml:"status" mapstructure:"status"`
 }
@@ -403,6 +414,9 @@ func (j *ComponentSummary) UnmarshalJSON(value []byte) error {
 	}
 	if _, ok := raw["runtime_id"]; raw != nil && !ok {
 		return fmt.Errorf("field runtime_id in ComponentSummary: required")
+	}
+	if _, ok := raw["runtime_version"]; raw != nil && !ok {
+		return fmt.Errorf("field runtime_version in ComponentSummary: required")
 	}
 	if _, ok := raw["status"]; raw != nil && !ok {
 		return fmt.Errorf("field status in ComponentSummary: required")
@@ -437,6 +451,9 @@ func (j *Component) UnmarshalJSON(value []byte) error {
 	if _, ok := raw["runtime_id"]; raw != nil && !ok {
 		return fmt.Errorf("field runtime_id in Component: required")
 	}
+	if _, ok := raw["runtime_version"]; raw != nil && !ok {
+		return fmt.Errorf("field runtime_version in Component: required")
+	}
 	if _, ok := raw["status"]; raw != nil && !ok {
 		return fmt.Errorf("field status in Component: required")
 	}
@@ -456,9 +473,6 @@ type Runtime struct {
 	// The author of the runtime
 	Author RuntimeAuthor `json:"author" yaml:"author" mapstructure:"author"`
 
-	// The default version of the runtime
-	DefaultVersion string `json:"default_version" yaml:"default_version" mapstructure:"default_version"`
-
 	// A description of the runtime
 	Description *string `json:"description,omitempty" yaml:"description,omitempty" mapstructure:"description,omitempty"`
 
@@ -473,6 +487,9 @@ type Runtime struct {
 
 	// The metrics configuration of the runtime, if any
 	Metrics *RuntimeMetrics `json:"metrics,omitempty" yaml:"metrics,omitempty" mapstructure:"metrics,omitempty"`
+
+	// The version of this runtime definition
+	Version string `json:"version" yaml:"version" mapstructure:"version"`
 }
 
 // The author of the runtime
@@ -508,6 +525,9 @@ func (j *RuntimeAuthor) UnmarshalJSON(value []byte) error {
 type RuntimeGetRequest struct {
 	// The name of the runtime
 	Name string `json:"name" yaml:"name" mapstructure:"name"`
+
+	// The version of the runtime to query
+	Version string `json:"version" yaml:"version" mapstructure:"version"`
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
@@ -518,6 +538,9 @@ func (j *RuntimeGetRequest) UnmarshalJSON(value []byte) error {
 	}
 	if _, ok := raw["name"]; raw != nil && !ok {
 		return fmt.Errorf("field name in RuntimeGetRequest: required")
+	}
+	if _, ok := raw["version"]; raw != nil && !ok {
+		return fmt.Errorf("field version in RuntimeGetRequest: required")
 	}
 	type Plain RuntimeGetRequest
 	var plain Plain
@@ -590,10 +613,7 @@ func (j *RuntimeMetrics) UnmarshalJSON(value []byte) error {
 
 type RuntimeSummary struct {
 	// The author of the runtime
-	Author string `json:"author" yaml:"author" mapstructure:"author"`
-
-	// The default version of the runtime
-	DefaultVersion string `json:"default_version" yaml:"default_version" mapstructure:"default_version"`
+	Author RuntimeAuthor `json:"author" yaml:"author" mapstructure:"author"`
 
 	// A description of the runtime
 	Description *string `json:"description,omitempty" yaml:"description,omitempty" mapstructure:"description,omitempty"`
@@ -603,6 +623,9 @@ type RuntimeSummary struct {
 
 	// A human readable label for the runtime
 	Label string `json:"label" yaml:"label" mapstructure:"label"`
+
+	// The version of this runtime definition
+	Version string `json:"version" yaml:"version" mapstructure:"version"`
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
@@ -614,14 +637,14 @@ func (j *RuntimeSummary) UnmarshalJSON(value []byte) error {
 	if _, ok := raw["author"]; raw != nil && !ok {
 		return fmt.Errorf("field author in RuntimeSummary: required")
 	}
-	if _, ok := raw["default_version"]; raw != nil && !ok {
-		return fmt.Errorf("field default_version in RuntimeSummary: required")
-	}
 	if _, ok := raw["id"]; raw != nil && !ok {
 		return fmt.Errorf("field id in RuntimeSummary: required")
 	}
 	if _, ok := raw["label"]; raw != nil && !ok {
 		return fmt.Errorf("field label in RuntimeSummary: required")
+	}
+	if _, ok := raw["version"]; raw != nil && !ok {
+		return fmt.Errorf("field version in RuntimeSummary: required")
 	}
 	type Plain RuntimeSummary
 	var plain Plain
@@ -650,13 +673,13 @@ func (j *Runtime) UnmarshalJSON(value []byte) error {
 	if _, ok := raw["label"]; raw != nil && !ok {
 		return fmt.Errorf("field label in Runtime: required")
 	}
+	if _, ok := raw["version"]; raw != nil && !ok {
+		return fmt.Errorf("field version in Runtime: required")
+	}
 	type Plain Runtime
 	var plain Plain
 	if err := json.Unmarshal(value, &plain); err != nil {
 		return err
-	}
-	if v, ok := raw["default_version"]; !ok || v == nil {
-		plain.DefaultVersion = "latest"
 	}
 	*j = Runtime(plain)
 	return nil

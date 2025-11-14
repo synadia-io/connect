@@ -2,11 +2,9 @@
 
 package model
 
-import (
-	"encoding/json"
-	"fmt"
-	"reflect"
-)
+import "encoding/json"
+import "fmt"
+import "reflect"
 
 // Combine all messages in the batch into a single message
 type CombineTransformerStep struct {
@@ -106,6 +104,9 @@ type Connector struct {
 
 	// The id of the connector's runtime
 	RuntimeId string `json:"runtime_id" yaml:"runtime_id" mapstructure:"runtime_id"`
+
+	// The version of the connector's runtime
+	RuntimeVersion string `json:"runtime_version" yaml:"runtime_version" mapstructure:"runtime_version"`
 
 	// Steps corresponds to the JSON schema field "steps".
 	Steps Steps `json:"steps" yaml:"steps" mapstructure:"steps"`
@@ -313,6 +314,9 @@ func (j *Connector) UnmarshalJSON(value []byte) error {
 	}
 	if _, ok := raw["runtime_id"]; raw != nil && !ok {
 		return fmt.Errorf("field runtime_id in Connector: required")
+	}
+	if _, ok := raw["runtime_version"]; raw != nil && !ok {
+		return fmt.Errorf("field runtime_version in Connector: required")
 	}
 	if _, ok := raw["steps"]; raw != nil && !ok {
 		return fmt.Errorf("field steps in Connector: required")

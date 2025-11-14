@@ -47,6 +47,7 @@ type connectorCommand struct {
 	targetId string
 
 	runtime          string
+	runtimeVersion   string
 	envFileSetByUser bool
 }
 
@@ -67,10 +68,12 @@ func ConfigureConnectorCommand(parentCmd commandHost, opts *Options) {
 	saveCmd.Arg("id", "The id of the connector to create or modify").Required().StringVar(&c.id)
 	saveCmd.Flag("file", "Use the connector definition from the given file").Short('f').IsSetByUser(&c.fileSetByUser).Default("./ConnectFile").StringVar(&c.file)
 	saveCmd.Flag("runtime", "The runtime id").Default("wombat").StringVar(&c.runtime)
+	saveCmd.Flag("runtime-version", "The runtime version").Required().StringVar(&c.runtimeVersion)
 
 	copyCmd := connectorCmd.Command("copy", "Copy a connector").Action(c.copyConnector)
 	copyCmd.Arg("id", "The id of the connector to copy").Required().StringVar(&c.id)
 	copyCmd.Arg("target-id", "The id of the new connector").Required().StringVar(&c.targetId)
+	copyCmd.Flag("runtime-version", "The runtime version for the new connector").Required().StringVar(&c.runtimeVersion)
 
 	deleteCmd := connectorCmd.Command("delete", "Delete a connector").Alias("rm").Action(c.removeConnector)
 	deleteCmd.Arg("connector", "The name of the connector").Required().StringVar(&c.id)
@@ -370,7 +373,7 @@ func (c *connectorCommand) saveConnector(pc *fisk.ParseContext) error {
 
 	var connector *model.Connector
 	if !exists {
-		connector, err = appCtx.Client.CreateConnector(c.id, result.Description, result.RuntimeId, convert.ConvertStepsFromSpec(result.Steps), c.opts.Timeout)
+		connector, err = appCtx.Client.CreateConnector(c.id, result.Description, result.RuntimeId, c.runtimeVersion, convert.ConvertStepsFromSpec(result.Steps), c.opts.Timeout)
 		if err != nil {
 			color.Red("Could not save connector: %s", err)
 			os.Exit(1)
@@ -425,7 +428,7 @@ func (c *connectorCommand) copyConnector(context *fisk.ParseContext) error {
 		return nil
 	}
 
-	_, err = appCtx.Client.CreateConnector(c.targetId, conn.Description, conn.RuntimeId, convert.ConvertStepsFromSpec(convert.ConvertStepsToSpec(conn.Steps)), c.opts.Timeout)
+	_, err = appCtx.Client.CreateConnector(c.targetId, conn.Description, conn.RuntimeId, c.runtimeVersion, convert.ConvertStepsFromSpec(convert.ConvertStepsToSpec(conn.Steps)), c.opts.Timeout)
 	fisk.FatalIfError(err, "failed to create connector %s: %v", c.targetId, err)
 
 	fmt.Printf("Created connector %s\n", color.GreenString(c.targetId))
@@ -510,14 +513,6 @@ func fromEditor(existing *spec.ConnectorSpec) (*spec.ConnectorSpec, bool, error)
 }
 
 func (c *connectorCommand) selectConnectorTemplate(cl client.Client) (*spec.ConnectorSpec, error) {
-	rt, err := cl.GetRuntime(c.runtime, 5*time.Second)
-	if err != nil {
-		return nil, fmt.Errorf("could not get runtime: %s", err)
-	}
-	if rt == nil {
-		return nil, fmt.Errorf("runtime %s not found", c.runtime)
-	}
-
 	var options []string
 	mapping := make(map[string]spec.ConnectorSpec)
 	for _, template := range templates {
@@ -526,7 +521,7 @@ func (c *connectorCommand) selectConnectorTemplate(cl client.Client) (*spec.Conn
 	}
 
 	choice := ""
-	err = survey.AskOne(&survey.Select{
+	err := survey.AskOne(&survey.Select{
 		Message: "Connector Template",
 		Options: options,
 	}, &choice, survey.WithValidator(survey.Required))

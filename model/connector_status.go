@@ -2,10 +2,8 @@
 
 package model
 
-import (
-	"encoding/json"
-	"fmt"
-)
+import "encoding/json"
+import "fmt"
 
 type ConnectorStatusRequest struct {
 	// The id of the connector to get the status for

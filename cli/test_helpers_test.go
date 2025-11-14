@@ -70,7 +70,7 @@ func (m *mockClient) GetConnectorStatus(id string, timeout time.Duration) (*mode
 	return m.connectorStatus, nil
 }
 
-func (m *mockClient) CreateConnector(id, description, runtimeId string, steps model.Steps, timeout time.Duration) (*model.Connector, error) {
+func (m *mockClient) CreateConnector(id, description, runtimeId string, runtimeVersion string, steps model.Steps, timeout time.Duration) (*model.Connector, error) {
 	m.createCalled = true
 	if m.connectorError != nil {
 		return nil, m.connectorError
@@ -120,7 +120,7 @@ func (m *mockClient) ListRuntimes(timeout time.Duration) ([]model.RuntimeSummary
 	return m.runtimes, nil
 }
 
-func (m *mockClient) GetRuntime(id string, timeout time.Duration) (*model.Runtime, error) {
+func (m *mockClient) GetRuntime(id string, version *string, timeout time.Duration) (*model.Runtime, error) {
 	return m.runtime, nil
 }
 
@@ -128,7 +128,7 @@ func (m *mockClient) SearchComponents(filter *model.ComponentSearchFilter, timeo
 	return m.components, nil
 }
 
-func (m *mockClient) GetComponent(runtimeId string, kind model.ComponentKind, id string, timeout time.Duration) (*model.Component, error) {
+func (m *mockClient) GetComponent(runtimeId string, runtimeVersion string, kind model.ComponentKind, id string, timeout time.Duration) (*model.Component, error) {
 	return m.component, nil
 }
 
