@@ -193,7 +193,7 @@ func (c *libraryCommand) info(pc *fisk.ParseContext) error {
 	fisk.FatalIfError(err, "failed to load options")
 	defer appCtx.Close()
 
-	component, err := appCtx.Client.GetComponent(c.runtime, model.ComponentKind(c.kind), c.component, c.runtimeVersion, c.opts.Timeout)
+	component, err := appCtx.Client.GetComponent(c.runtime, c.runtimeVersion, model.ComponentKind(c.kind), c.component, c.opts.Timeout)
 	if err != nil {
 		color.Red("Could not get component: %s", err)
 		os.Exit(1)

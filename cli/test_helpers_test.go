@@ -128,7 +128,7 @@ func (m *mockClient) SearchComponents(filter *model.ComponentSearchFilter, timeo
 	return m.components, nil
 }
 
-func (m *mockClient) GetComponent(runtimeId string, kind model.ComponentKind, id string, runtimeVersion string, timeout time.Duration) (*model.Component, error) {
+func (m *mockClient) GetComponent(runtimeId string, runtimeVersion string, kind model.ComponentKind, id string, timeout time.Duration) (*model.Component, error) {
 	return m.component, nil
 }
 

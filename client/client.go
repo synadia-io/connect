@@ -34,7 +34,7 @@ type LibraryClient interface {
 	GetRuntime(id string, version *string, timeout time.Duration) (*model.Runtime, error)
 
 	SearchComponents(filter *model.ComponentSearchFilter, timeout time.Duration) ([]model.ComponentSummary, error)
-	GetComponent(runtimeId string, kind model.ComponentKind, id string, runtimeVersion string, timeout time.Duration) (*model.Component, error)
+	GetComponent(runtimeId string, runtimeVersion string, kind model.ComponentKind, id string, timeout time.Duration) (*model.Component, error)
 }
 
 func NewClient(nc *nats.Conn, trace bool) (Client, error) {

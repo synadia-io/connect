@@ -90,7 +90,7 @@ func (c *libraryCommand) searchWithClient(appCtx *AppContext) error {
 }
 
 func (c *libraryCommand) infoWithClient(appCtx *AppContext) error {
-	component, err := appCtx.Client.GetComponent(c.runtime, model.ComponentKind(c.kind), c.component, c.runtimeVersion, c.opts.Timeout)
+	component, err := appCtx.Client.GetComponent(c.runtime, c.runtimeVersion, model.ComponentKind(c.kind), c.component, c.opts.Timeout)
 	if err != nil {
 		return fmt.Errorf("could not get component: %w", err)
 	}
