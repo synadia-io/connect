@@ -33,7 +33,11 @@ func renderConnector(c model.Connector) string {
 	tbl.SetTitle(fmt.Sprintf("Connector: %s", c.ConnectorId))
 	tbl.AppendRow(table.Row{"Description", text.WrapSoft(c.Description, 50)})
 
-	tbl.AppendRow(table.Row{"Runtime", c.RuntimeId})
+	runtime := c.RuntimeId
+	if c.RuntimeVersion != "" {
+		runtime = fmt.Sprintf("%s:%s", c.RuntimeId, c.RuntimeVersion)
+	}
+	tbl.AppendRow(table.Row{"Runtime", runtime})
 
 	b, err := yaml.Marshal(c.Steps)
 	fisk.FatalIfError(err, "failed to render steps")
