@@ -20,5 +20,5 @@
       "$ref": "connector-steps-model.schema.json"
     }
   },
-  "required": ["description", "runtime_id", "runtime_version", "steps"]
+  "required": ["description", "runtime_id", "steps"]
 }

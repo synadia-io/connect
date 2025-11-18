@@ -345,7 +345,7 @@ func (c *connectorCommand) saveConnector(pc *fisk.ParseContext) error {
 		sp = spec.ConnectorSpec{
 			Description:    conn.Description,
 			RuntimeId:      conn.RuntimeId,
-			RuntimeVersion: conn.RuntimeVersion,
+			RuntimeVersion: &conn.RuntimeVersion,
 			Steps:          convert.ConvertStepsToSpec(conn.Steps),
 		}
 	} else {
@@ -373,7 +373,11 @@ func (c *connectorCommand) saveConnector(pc *fisk.ParseContext) error {
 
 	var connector *model.Connector
 	if !exists {
-		connector, err = appCtx.Client.CreateConnector(c.id, result.Description, result.RuntimeId, c.runtimeVersion, convert.ConvertStepsFromSpec(result.Steps), c.opts.Timeout)
+		runtimeVersion := ""
+		if result.RuntimeVersion != nil {
+			runtimeVersion = *result.RuntimeVersion
+		}
+		connector, err = appCtx.Client.CreateConnector(c.id, result.Description, result.RuntimeId, runtimeVersion, convert.ConvertStepsFromSpec(result.Steps), c.opts.Timeout)
 		if err != nil {
 			color.Red("Could not save connector: %s", err)
 			os.Exit(1)
