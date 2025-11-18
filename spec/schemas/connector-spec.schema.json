@@ -12,9 +12,13 @@
       "type": "string",
       "description": "The runtime to use for this connector. The runtime can be suffixed with the version, e.g. 'wombat:edge'"
     },
+    "runtime_version": {
+      "type": "string",
+      "description": "The version of the runtime"
+    },
     "steps": {
       "$ref": "connector-steps-model.schema.json"
     }
   },
-  "required": ["description", "runtime_id", "steps"]
+  "required": ["description", "runtime_id", "runtime_version", "steps"]
 }

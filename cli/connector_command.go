@@ -68,7 +68,6 @@ func ConfigureConnectorCommand(parentCmd commandHost, opts *Options) {
 	saveCmd.Arg("id", "The id of the connector to create or modify").Required().StringVar(&c.id)
 	saveCmd.Flag("file", "Use the connector definition from the given file").Short('f').IsSetByUser(&c.fileSetByUser).Default("./ConnectFile").StringVar(&c.file)
 	saveCmd.Flag("runtime", "The runtime id").Default("wombat").StringVar(&c.runtime)
-	saveCmd.Flag("runtime-version", "The runtime version").Required().StringVar(&c.runtimeVersion)
 
 	copyCmd := connectorCmd.Command("copy", "Copy a connector").Action(c.copyConnector)
 	copyCmd.Arg("id", "The id of the connector to copy").Required().StringVar(&c.id)
@@ -344,9 +343,10 @@ func (c *connectorCommand) saveConnector(pc *fisk.ParseContext) error {
 	var sp spec.ConnectorSpec
 	if exists {
 		sp = spec.ConnectorSpec{
-			Description: conn.Description,
-			RuntimeId:   conn.RuntimeId,
-			Steps:       convert.ConvertStepsToSpec(conn.Steps),
+			Description:    conn.Description,
+			RuntimeId:      conn.RuntimeId,
+			RuntimeVersion: conn.RuntimeVersion,
+			Steps:          convert.ConvertStepsToSpec(conn.Steps),
 		}
 	} else {
 		if !c.fileSetByUser {

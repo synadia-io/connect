@@ -577,7 +577,68 @@ func (j *RuntimeGetResponse) UnmarshalJSON(value []byte) error {
 	return nil
 }
 
-type RuntimeListRequest map[string]interface{}
+type RuntimeLatestVersionRequest struct {
+	// The runtime ID to find the latest version for
+	RuntimeId string `json:"runtime_id" yaml:"runtime_id" mapstructure:"runtime_id"`
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (j *RuntimeLatestVersionRequest) UnmarshalJSON(value []byte) error {
+	var raw map[string]interface{}
+	if err := json.Unmarshal(value, &raw); err != nil {
+		return err
+	}
+	if _, ok := raw["runtime_id"]; raw != nil && !ok {
+		return fmt.Errorf("field runtime_id in RuntimeLatestVersionRequest: required")
+	}
+	type Plain RuntimeLatestVersionRequest
+	var plain Plain
+	if err := json.Unmarshal(value, &plain); err != nil {
+		return err
+	}
+	*j = RuntimeLatestVersionRequest(plain)
+	return nil
+}
+
+type RuntimeLatestVersionResponse struct {
+	// True if the runtime was found
+	Found bool `json:"found" yaml:"found" mapstructure:"found"`
+
+	// The runtime ID that was queried
+	RuntimeId string `json:"runtime_id" yaml:"runtime_id" mapstructure:"runtime_id"`
+
+	// The latest version found, empty if none found
+	Version string `json:"version" yaml:"version" mapstructure:"version"`
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (j *RuntimeLatestVersionResponse) UnmarshalJSON(value []byte) error {
+	var raw map[string]interface{}
+	if err := json.Unmarshal(value, &raw); err != nil {
+		return err
+	}
+	if _, ok := raw["found"]; raw != nil && !ok {
+		return fmt.Errorf("field found in RuntimeLatestVersionResponse: required")
+	}
+	if _, ok := raw["runtime_id"]; raw != nil && !ok {
+		return fmt.Errorf("field runtime_id in RuntimeLatestVersionResponse: required")
+	}
+	if _, ok := raw["version"]; raw != nil && !ok {
+		return fmt.Errorf("field version in RuntimeLatestVersionResponse: required")
+	}
+	type Plain RuntimeLatestVersionResponse
+	var plain Plain
+	if err := json.Unmarshal(value, &plain); err != nil {
+		return err
+	}
+	*j = RuntimeLatestVersionResponse(plain)
+	return nil
+}
+
+type RuntimeListRequest struct {
+	// Optional filter to list versions for a specific runtime ID only
+	RuntimeId *string `json:"runtime_id,omitempty" yaml:"runtime_id,omitempty" mapstructure:"runtime_id,omitempty"`
+}
 
 type RuntimeListResponse struct {
 	// Runtimes corresponds to the JSON schema field "runtimes".

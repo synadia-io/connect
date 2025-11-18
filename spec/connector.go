@@ -14,6 +14,9 @@ type ConnectorSpec struct {
 	// version, e.g. 'wombat:edge'
 	RuntimeId string `json:"runtime_id" yaml:"runtime_id" mapstructure:"runtime_id"`
 
+	// The version of the runtime
+	RuntimeVersion string `json:"runtime_version" yaml:"runtime_version" mapstructure:"runtime_version"`
+
 	// Steps corresponds to the JSON schema field "steps".
 	Steps StepsSpec `json:"steps" yaml:"steps" mapstructure:"steps"`
 }
@@ -29,6 +32,9 @@ func (j *ConnectorSpec) UnmarshalJSON(value []byte) error {
 	}
 	if _, ok := raw["runtime_id"]; raw != nil && !ok {
 		return fmt.Errorf("field runtime_id in ConnectorSpec: required")
+	}
+	if _, ok := raw["runtime_version"]; raw != nil && !ok {
+		return fmt.Errorf("field runtime_version in ConnectorSpec: required")
 	}
 	if _, ok := raw["steps"]; raw != nil && !ok {
 		return fmt.Errorf("field steps in ConnectorSpec: required")
