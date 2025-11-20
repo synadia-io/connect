@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/synadia-io/connect/model"
+	"github.com/synadia-io/connect/v2/model"
 )
 
 type connectorClient struct {

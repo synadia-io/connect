@@ -1,6 +1,6 @@
 package builders
 
-import "github.com/synadia-io/connect/model"
+import "github.com/synadia-io/connect/v2/model"
 
 const DefaultNatsUrl = "nats://localhost:4222"
 

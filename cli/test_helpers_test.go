@@ -3,7 +3,7 @@ package cli
 import (
 	"time"
 
-	"github.com/synadia-io/connect/model"
+	"github.com/synadia-io/connect/v2/model"
 )
 
 // mockClient implements the client.Client interface for testing

@@ -7,7 +7,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/jedib0t/go-pretty/v6/text"
-	"github.com/synadia-io/connect/model"
+	"github.com/synadia-io/connect/v2/model"
 
 	"os"
 	"strings"
