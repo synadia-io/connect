@@ -3,7 +3,7 @@ package cli
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/synadia-io/connect/model"
+	"github.com/synadia-io/connect/v2/model"
 )
 
 var _ = Describe("LibraryCommand", func() {

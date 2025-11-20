@@ -9,9 +9,9 @@ import (
 
 	"github.com/jedib0t/go-pretty/v6/text"
 	"github.com/joho/godotenv"
-	"github.com/synadia-io/connect/client"
-	"github.com/synadia-io/connect/convert"
-	"github.com/synadia-io/connect/spec"
+	"github.com/synadia-io/connect/v2/client"
+	"github.com/synadia-io/connect/v2/convert"
+	"github.com/synadia-io/connect/v2/spec"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/choria-io/fisk"
@@ -19,7 +19,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/mitchellh/mapstructure"
-	"github.com/synadia-io/connect/model"
+	"github.com/synadia-io/connect/v2/model"
 	"gopkg.in/yaml.v3"
 )
 

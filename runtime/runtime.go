@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/nats-io/nats.go"
-	"github.com/synadia-io/connect/model"
+	"github.com/synadia-io/connect/v2/model"
 	"gopkg.in/yaml.v3"
 )
 

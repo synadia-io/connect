@@ -1,6 +1,6 @@
 package builders
 
-import "github.com/synadia-io/connect/model"
+import "github.com/synadia-io/connect/v2/model"
 
 type ConsumerStepBuilder struct {
 	res *model.ConsumerStep

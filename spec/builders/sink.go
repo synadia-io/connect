@@ -1,7 +1,7 @@
 package builders
 
 import (
-	"github.com/synadia-io/connect/spec"
+	"github.com/synadia-io/connect/v2/spec"
 )
 
 type SinkStepBuilder struct {
