@@ -14,6 +14,9 @@ type ConnectorSpec struct {
 	// version, e.g. 'wombat:edge'
 	RuntimeId string `json:"runtime_id" yaml:"runtime_id" mapstructure:"runtime_id"`
 
+	// The version of the runtime
+	RuntimeVersion *string `json:"runtime_version,omitempty" yaml:"runtime_version,omitempty" mapstructure:"runtime_version,omitempty"`
+
 	// Steps corresponds to the JSON schema field "steps".
 	Steps StepsSpec `json:"steps" yaml:"steps" mapstructure:"steps"`
 }
