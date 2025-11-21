@@ -264,9 +264,10 @@ var _ = Describe("ConnectorCommand", func() {
 		It("should copy a connector", func() {
 			// First it gets the source connector
 			mockCl.connector = &model.Connector{
-				ConnectorId: "source-connector",
-				Description: "Source Connector",
-				RuntimeId:   "synadia",
+				ConnectorId:    "source-connector",
+				Description:    "Source Connector",
+				RuntimeId:      "synadia",
+				RuntimeVersion: "v1.0.0",
 				Steps: model.Steps{
 					Source: &model.SourceStep{
 						Type: "generate",
