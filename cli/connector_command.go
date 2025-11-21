@@ -47,7 +47,6 @@ type connectorCommand struct {
 	targetId string
 
 	runtime          string
-	runtimeVersion   string
 	envFileSetByUser bool
 }
 
@@ -72,7 +71,6 @@ func ConfigureConnectorCommand(parentCmd commandHost, opts *Options) {
 	copyCmd := connectorCmd.Command("copy", "Copy a connector").Action(c.copyConnector)
 	copyCmd.Arg("id", "The id of the connector to copy").Required().StringVar(&c.id)
 	copyCmd.Arg("target-id", "The id of the new connector").Required().StringVar(&c.targetId)
-	copyCmd.Flag("runtime-version", "The runtime version for the new connector").Required().StringVar(&c.runtimeVersion)
 
 	deleteCmd := connectorCmd.Command("delete", "Delete a connector").Alias("rm").Action(c.removeConnector)
 	deleteCmd.Arg("connector", "The name of the connector").Required().StringVar(&c.id)
@@ -432,7 +430,7 @@ func (c *connectorCommand) copyConnector(context *fisk.ParseContext) error {
 		return nil
 	}
 
-	_, err = appCtx.Client.CreateConnector(c.targetId, conn.Description, conn.RuntimeId, c.runtimeVersion, convert.ConvertStepsFromSpec(convert.ConvertStepsToSpec(conn.Steps)), c.opts.Timeout)
+	_, err = appCtx.Client.CreateConnector(c.targetId, conn.Description, conn.RuntimeId, conn.RuntimeVersion, convert.ConvertStepsFromSpec(convert.ConvertStepsToSpec(conn.Steps)), c.opts.Timeout)
 	fisk.FatalIfError(err, "failed to create connector %s: %v", c.targetId, err)
 
 	fmt.Printf("Created connector %s\n", color.GreenString(c.targetId))
