@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/synadia-io/connect/v2/model"
+	"github.com/synadia-io/connect/model"
 )
 
 type connectorClient struct {
@@ -74,16 +74,12 @@ func (c *connectorClient) GetConnectorStatus(name string, timeout time.Duration)
 	return &resp.Status, nil
 }
 
-func (c *connectorClient) CreateConnector(id, description, runtimeId string, runtimeVersion string, steps model.Steps, timeout time.Duration) (*model.Connector, error) {
+func (c *connectorClient) CreateConnector(id, description, runtimeId string, steps model.Steps, timeout time.Duration) (*model.Connector, error) {
 	req := model.ConnectorCreateRequest{
 		Id:          id,
 		Description: description,
 		RuntimeId:   runtimeId,
 		Steps:       steps,
-	}
-
-	if runtimeVersion != "" {
-		req.RuntimeVersion = &runtimeVersion
 	}
 
 	var resp model.ConnectorCreateResponse

@@ -1,6 +1,6 @@
 package builders
 
-import "github.com/synadia-io/connect/v2/model"
+import "github.com/synadia-io/connect/model"
 
 type ProducerStepBuilder struct {
 	res *model.ProducerStep

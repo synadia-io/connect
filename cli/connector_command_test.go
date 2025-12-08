@@ -6,7 +6,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/synadia-io/connect/v2/model"
+	"github.com/synadia-io/connect/model"
 )
 
 var _ = Describe("ConnectorCommand", func() {
@@ -264,10 +264,9 @@ var _ = Describe("ConnectorCommand", func() {
 		It("should copy a connector", func() {
 			// First it gets the source connector
 			mockCl.connector = &model.Connector{
-				ConnectorId:    "source-connector",
-				Description:    "Source Connector",
-				RuntimeId:      "synadia",
-				RuntimeVersion: "v1.0.0",
+				ConnectorId: "source-connector",
+				Description: "Source Connector",
+				RuntimeId:   "synadia",
 				Steps: model.Steps{
 					Source: &model.SourceStep{
 						Type: "generate",

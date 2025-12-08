@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/synadia-io/connect/v2/model"
+	"github.com/synadia-io/connect/model"
 )
 
 type libraryEntityKind string
@@ -37,13 +37,9 @@ func (c *libraryClient) ListRuntimes(timeout time.Duration) ([]model.RuntimeSumm
 	return resp.Runtimes, nil
 }
 
-func (c *libraryClient) GetRuntime(id string, version *string, timeout time.Duration) (*model.Runtime, error) {
-	if version == nil {
-		return nil, fmt.Errorf("runtime version is required - use --runtime-version flag")
-	}
+func (c *libraryClient) GetRuntime(id string, timeout time.Duration) (*model.Runtime, error) {
 	req := model.RuntimeGetRequest{
-		Name:    id,
-		Version: *version,
+		Name: id,
 	}
 	var resp model.RuntimeGetResponse
 	gotResponse, err := c.t.RequestJson(c.subject(runtimes, "GET"), req, &resp, WithTimeout(timeout))
@@ -76,12 +72,11 @@ func (c *libraryClient) SearchComponents(filter *model.ComponentSearchFilter, ti
 	return resp.Components, nil
 }
 
-func (c *libraryClient) GetComponent(runtimeId string, runtimeVersion string, kind model.ComponentKind, id string, timeout time.Duration) (*model.Component, error) {
+func (c *libraryClient) GetComponent(runtimeId string, kind model.ComponentKind, id string, timeout time.Duration) (*model.Component, error) {
 	req := model.ComponentGetRequest{
-		RuntimeId:      runtimeId,
-		Kind:           kind,
-		Name:           id,
-		RuntimeVersion: &runtimeVersion,
+		RuntimeId: runtimeId,
+		Kind:      kind,
+		Name:      id,
 	}
 
 	var resp model.ComponentGetResponse

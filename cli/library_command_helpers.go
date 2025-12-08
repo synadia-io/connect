@@ -5,7 +5,7 @@ import (
 
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/jedib0t/go-pretty/v6/text"
-	"github.com/synadia-io/connect/v2/model"
+	"github.com/synadia-io/connect/model"
 )
 
 // These are testable helper functions that can be called with a provided AppContext
@@ -17,7 +17,7 @@ func (c *libraryCommand) listRuntimesWithClient(appCtx *AppContext) error {
 	}
 
 	w := table.NewWriter()
-	w.AppendHeader(table.Row{"Id", "Version", "Name", "Description", "Author"})
+	w.AppendHeader(table.Row{"Id", "Name", "Description", "Author"})
 	w.SetStyle(table.StyleRounded)
 
 	for _, runtime := range runtimes {
@@ -25,8 +25,7 @@ func (c *libraryCommand) listRuntimesWithClient(appCtx *AppContext) error {
 		if runtime.Description != nil {
 			desc = *runtime.Description
 		}
-		version := runtime.Version
-		w.AppendRow(table.Row{runtime.Id, version, runtime.Label, desc, runtime.Author.Name})
+		w.AppendRow(table.Row{runtime.Id, runtime.Label, desc, runtime.Author})
 	}
 
 	result := w.Render()
@@ -35,7 +34,7 @@ func (c *libraryCommand) listRuntimesWithClient(appCtx *AppContext) error {
 }
 
 func (c *libraryCommand) getRuntimeWithClient(appCtx *AppContext) error {
-	rt, err := appCtx.Client.GetRuntime(c.runtime, &c.runtimeVersion, c.opts.Timeout)
+	rt, err := appCtx.Client.GetRuntime(c.runtime, c.opts.Timeout)
 	if err != nil {
 		return fmt.Errorf("could not get runtime: %w", err)
 	}
@@ -67,21 +66,17 @@ func (c *libraryCommand) searchWithClient(appCtx *AppContext) error {
 		filter.Kind = &k
 	}
 
-	if c.runtimeVersion != "" {
-		filter.RuntimeVersion = &c.runtimeVersion
-	}
-
 	components, err := appCtx.Client.SearchComponents(filter, c.opts.Timeout)
 	if err != nil {
 		return fmt.Errorf("could not list components: %w", err)
 	}
 
 	w := table.NewWriter()
-	w.AppendHeader(table.Row{"Name", "Kind", "Runtime", "Version", "Status"})
+	w.AppendHeader(table.Row{"Name", "Kind", "Runtime", "Status"})
 	w.SetStyle(table.StyleRounded)
 
 	for _, component := range components {
-		w.AppendRow(table.Row{component.Name, component.Kind, component.RuntimeId, component.RuntimeVersion, component.Status})
+		w.AppendRow(table.Row{component.Name, component.Kind, component.RuntimeId, component.Status})
 	}
 
 	result := w.Render()
@@ -90,7 +85,7 @@ func (c *libraryCommand) searchWithClient(appCtx *AppContext) error {
 }
 
 func (c *libraryCommand) infoWithClient(appCtx *AppContext) error {
-	component, err := appCtx.Client.GetComponent(c.runtime, c.runtimeVersion, model.ComponentKind(c.kind), c.component, c.opts.Timeout)
+	component, err := appCtx.Client.GetComponent(c.runtime, model.ComponentKind(c.kind), c.component, c.opts.Timeout)
 	if err != nil {
 		return fmt.Errorf("could not get component: %w", err)
 	}
@@ -106,7 +101,6 @@ func (c *libraryCommand) infoWithClient(appCtx *AppContext) error {
 	w.SetStyle(table.StyleRounded)
 	w.SetTitle("Component Description")
 	w.AppendRow(table.Row{"Runtime", component.RuntimeId})
-	w.AppendRow(table.Row{"Runtime Version", component.RuntimeVersion})
 	w.AppendRow(table.Row{"Name", component.Name})
 	w.AppendRow(table.Row{"Kind", component.Kind})
 	w.AppendRow(table.Row{"Status", component.Status})

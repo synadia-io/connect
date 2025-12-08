@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	"github.com/mitchellh/mapstructure"
-	"github.com/synadia-io/connect/v2/spec"
-	"github.com/synadia-io/connect/v2/spec/builders"
+	"github.com/synadia-io/connect/spec"
+	"github.com/synadia-io/connect/spec/builders"
 	"gopkg.in/yaml.v3"
 )
 

@@ -2,10 +2,12 @@
 
 package model
 
-import "encoding/json"
-import "fmt"
-import "reflect"
-import "regexp"
+import (
+	"encoding/json"
+	"fmt"
+	"reflect"
+	"regexp"
+)
 
 type AuthorSpec struct {
 	// The email address of the author
@@ -357,6 +359,9 @@ type RuntimeSpec struct {
 	// Author corresponds to the JSON schema field "author".
 	Author AuthorSpec `json:"author" yaml:"author" mapstructure:"author"`
 
+	// The default version of the runtime
+	DefaultVersion string `json:"default_version" yaml:"default_version" mapstructure:"default_version"`
+
 	// A description of the runtime
 	Description string `json:"description" yaml:"description" mapstructure:"description"`
 
@@ -371,9 +376,6 @@ type RuntimeSpec struct {
 
 	// The unique identifier of the runtime
 	Name string `json:"name" yaml:"name" mapstructure:"name"`
-
-	// The version of this runtime definition
-	Version string `json:"version" yaml:"version" mapstructure:"version"`
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
@@ -397,13 +399,13 @@ func (j *RuntimeSpec) UnmarshalJSON(value []byte) error {
 	if _, ok := raw["name"]; raw != nil && !ok {
 		return fmt.Errorf("field name in RuntimeSpec: required")
 	}
-	if _, ok := raw["version"]; raw != nil && !ok {
-		return fmt.Errorf("field version in RuntimeSpec: required")
-	}
 	type Plain RuntimeSpec
 	var plain Plain
 	if err := json.Unmarshal(value, &plain); err != nil {
 		return err
+	}
+	if v, ok := raw["default_version"]; !ok || v == nil {
+		plain.DefaultVersion = "latest"
 	}
 	*j = RuntimeSpec(plain)
 	return nil

@@ -5,7 +5,7 @@ import (
 
 	"github.com/choria-io/fisk"
 	"github.com/jedib0t/go-pretty/v6/text"
-	"github.com/synadia-io/connect/v2/model"
+	"github.com/synadia-io/connect/model"
 
 	"github.com/fatih/color"
 	"github.com/jedib0t/go-pretty/v6/table"
@@ -33,11 +33,7 @@ func renderConnector(c model.Connector) string {
 	tbl.SetTitle(fmt.Sprintf("Connector: %s", c.ConnectorId))
 	tbl.AppendRow(table.Row{"Description", text.WrapSoft(c.Description, 50)})
 
-	runtime := c.RuntimeId
-	if c.RuntimeVersion != "" {
-		runtime = fmt.Sprintf("%s:%s", c.RuntimeId, c.RuntimeVersion)
-	}
-	tbl.AppendRow(table.Row{"Runtime", runtime})
+	tbl.AppendRow(table.Row{"Runtime", c.RuntimeId})
 
 	b, err := yaml.Marshal(c.Steps)
 	fisk.FatalIfError(err, "failed to render steps")
@@ -54,10 +50,6 @@ func renderRuntime(rt model.Runtime) string {
 	})
 	tbl.SetTitle(rt.Label)
 	tbl.AppendRow(table.Row{"Id", rt.Id})
-
-	if rt.Version != "" {
-		tbl.AppendRow(table.Row{"Version", rt.Version})
-	}
 
 	if rt.Description != nil {
 		tbl.AppendRow(table.Row{"Description", text.WrapSoft(*rt.Description, 50)})

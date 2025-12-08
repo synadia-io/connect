@@ -1,8 +1,8 @@
 package cli
 
 import (
-	"github.com/synadia-io/connect/v2/spec"
-	"github.com/synadia-io/connect/v2/spec/builders"
+	"github.com/synadia-io/connect/spec"
+	"github.com/synadia-io/connect/spec/builders"
 )
 
 var templates = []spec.ConnectorSpec{

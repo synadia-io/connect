@@ -9,9 +9,9 @@ import (
 
 	"github.com/jedib0t/go-pretty/v6/text"
 	"github.com/joho/godotenv"
-	"github.com/synadia-io/connect/v2/client"
-	"github.com/synadia-io/connect/v2/convert"
-	"github.com/synadia-io/connect/v2/spec"
+	"github.com/synadia-io/connect/client"
+	"github.com/synadia-io/connect/convert"
+	"github.com/synadia-io/connect/spec"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/choria-io/fisk"
@@ -19,7 +19,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/mitchellh/mapstructure"
-	"github.com/synadia-io/connect/v2/model"
+	"github.com/synadia-io/connect/model"
 	"gopkg.in/yaml.v3"
 )
 
@@ -341,10 +341,9 @@ func (c *connectorCommand) saveConnector(pc *fisk.ParseContext) error {
 	var sp spec.ConnectorSpec
 	if exists {
 		sp = spec.ConnectorSpec{
-			Description:    conn.Description,
-			RuntimeId:      conn.RuntimeId,
-			RuntimeVersion: &conn.RuntimeVersion,
-			Steps:          convert.ConvertStepsToSpec(conn.Steps),
+			Description: conn.Description,
+			RuntimeId:   conn.RuntimeId,
+			Steps:       convert.ConvertStepsToSpec(conn.Steps),
 		}
 	} else {
 		if !c.fileSetByUser {
@@ -371,11 +370,7 @@ func (c *connectorCommand) saveConnector(pc *fisk.ParseContext) error {
 
 	var connector *model.Connector
 	if !exists {
-		runtimeVersion := ""
-		if result.RuntimeVersion != nil {
-			runtimeVersion = *result.RuntimeVersion
-		}
-		connector, err = appCtx.Client.CreateConnector(c.id, result.Description, result.RuntimeId, runtimeVersion, convert.ConvertStepsFromSpec(result.Steps), c.opts.Timeout)
+		connector, err = appCtx.Client.CreateConnector(c.id, result.Description, result.RuntimeId, convert.ConvertStepsFromSpec(result.Steps), c.opts.Timeout)
 		if err != nil {
 			color.Red("Could not save connector: %s", err)
 			os.Exit(1)
@@ -430,7 +425,7 @@ func (c *connectorCommand) copyConnector(context *fisk.ParseContext) error {
 		return nil
 	}
 
-	_, err = appCtx.Client.CreateConnector(c.targetId, conn.Description, conn.RuntimeId, conn.RuntimeVersion, convert.ConvertStepsFromSpec(convert.ConvertStepsToSpec(conn.Steps)), c.opts.Timeout)
+	_, err = appCtx.Client.CreateConnector(c.targetId, conn.Description, conn.RuntimeId, convert.ConvertStepsFromSpec(convert.ConvertStepsToSpec(conn.Steps)), c.opts.Timeout)
 	fisk.FatalIfError(err, "failed to create connector %s: %v", c.targetId, err)
 
 	fmt.Printf("Created connector %s\n", color.GreenString(c.targetId))
@@ -515,6 +510,14 @@ func fromEditor(existing *spec.ConnectorSpec) (*spec.ConnectorSpec, bool, error)
 }
 
 func (c *connectorCommand) selectConnectorTemplate(cl client.Client) (*spec.ConnectorSpec, error) {
+	rt, err := cl.GetRuntime(c.runtime, 5*time.Second)
+	if err != nil {
+		return nil, fmt.Errorf("could not get runtime: %s", err)
+	}
+	if rt == nil {
+		return nil, fmt.Errorf("runtime %s not found", c.runtime)
+	}
+
 	var options []string
 	mapping := make(map[string]spec.ConnectorSpec)
 	for _, template := range templates {
@@ -523,7 +526,7 @@ func (c *connectorCommand) selectConnectorTemplate(cl client.Client) (*spec.Conn
 	}
 
 	choice := ""
-	err := survey.AskOne(&survey.Select{
+	err = survey.AskOne(&survey.Select{
 		Message: "Connector Template",
 		Options: options,
 	}, &choice, survey.WithValidator(survey.Required))
