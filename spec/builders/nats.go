@@ -1,7 +1,7 @@
 package builders
 
 import (
-	"github.com/synadia-io/connect/v2/spec"
+	"github.com/synadia-io/connect/spec"
 )
 
 const DefaultNatsUrl = "nats://localhost:4222"

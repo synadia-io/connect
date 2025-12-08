@@ -7,7 +7,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/jedib0t/go-pretty/v6/text"
-	"github.com/synadia-io/connect/v2/model"
+	"github.com/synadia-io/connect/model"
 )
 
 // These are testable helper functions that can be called with a provided AppContext
@@ -142,7 +142,7 @@ func (c *connectorCommand) copyConnectorWithClient(appCtx *AppContext) error {
 	}
 
 	// Create the copy
-	copied, err := appCtx.Client.CreateConnector(c.targetId, connector.Description, connector.RuntimeId, connector.RuntimeVersion, connector.Steps, c.opts.Timeout)
+	copied, err := appCtx.Client.CreateConnector(c.targetId, connector.Description, connector.RuntimeId, connector.Steps, c.opts.Timeout)
 	if err != nil {
 		return fmt.Errorf("failed to create connector copy: %w", err)
 	}

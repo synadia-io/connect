@@ -6,8 +6,8 @@ import (
 	"log/slog"
 	"strings"
 
-	"github.com/synadia-io/connect/v2/model"
-	"github.com/synadia-io/connect/v2/runtime"
+	"github.com/synadia-io/connect/model"
+	"github.com/synadia-io/connect/runtime"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"

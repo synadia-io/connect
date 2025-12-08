@@ -2,8 +2,10 @@
 
 package model
 
-import "encoding/json"
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
+)
 
 type ConnectorGetRequest struct {
 	// The id of the connector to get

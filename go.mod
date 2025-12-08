@@ -1,4 +1,4 @@
-module github.com/synadia-io/connect/v2
+module github.com/synadia-io/connect
 
 go 1.24
 
@@ -48,3 +48,5 @@ require (
 	golang.org/x/time v0.12.0 // indirect
 	golang.org/x/tools v0.34.0 // indirect
 )
+
+retract [v1.0.3, v1.0.6] // Checksum poisoned

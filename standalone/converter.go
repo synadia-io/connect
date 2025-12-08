@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/synadia-io/connect/v2/model"
+	"github.com/synadia-io/connect/model"
 )
 
 // ConfigConverter converts Synadia Connect steps to runtime-specific configuration

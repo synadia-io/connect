@@ -1,6 +1,6 @@
 package builders
 
-import "github.com/synadia-io/connect/v2/spec"
+import "github.com/synadia-io/connect/spec"
 
 type ConnectorBuilder struct {
 	s *spec.ConnectorSpec

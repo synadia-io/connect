@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/synadia-io/connect/v2/spec"
+	"github.com/synadia-io/connect/spec"
 	"gopkg.in/yaml.v3"
 )
 

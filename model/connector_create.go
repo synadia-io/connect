@@ -2,8 +2,10 @@
 
 package model
 
-import "encoding/json"
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
+)
 
 type ConnectorCreateRequest struct {
 	// A description of the connector
@@ -14,9 +16,6 @@ type ConnectorCreateRequest struct {
 
 	// The connector runtime
 	RuntimeId string `json:"runtime_id" yaml:"runtime_id" mapstructure:"runtime_id"`
-
-	// The version of the runtime (optional, for backwards compatibility)
-	RuntimeVersion *string `json:"runtime_version,omitempty" yaml:"runtime_version,omitempty" mapstructure:"runtime_version,omitempty"`
 
 	// Steps corresponds to the JSON schema field "steps".
 	Steps Steps `json:"steps" yaml:"steps" mapstructure:"steps"`

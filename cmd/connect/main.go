@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/choria-io/fisk"
-	"github.com/synadia-io/connect/v2/cli"
+	"github.com/synadia-io/connect/cli"
 )
 
 var opts *cli.Options

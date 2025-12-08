@@ -1,6 +1,6 @@
 package builders
 
-import "github.com/synadia-io/connect/v2/model"
+import "github.com/synadia-io/connect/model"
 
 type SourceStepBuilder struct {
 	res *model.SourceStep

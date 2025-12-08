@@ -34,10 +34,6 @@
           "type": "string",
           "description": "The unique identifier of the runtime to which this component belongs"
         },
-        "runtime_version": {
-          "type": "string",
-          "description": "The version of the runtime to query (optional, defaults to most recent runtime version)"
-        },
         "kind": {
           "description": "The kind of the component",
           "$ref": "#/$defs/ComponentKind"
@@ -97,13 +93,9 @@
         "name": {
           "type": "string",
           "description": "The name of the runtime"
-        },
-        "version": {
-          "type": "string",
-          "description": "The version of the runtime to query"
         }
       },
-      "required": ["name", "version"]
+      "required": ["name"]
     },
     "RuntimeGetResponse": {
       "$id": "io.synadia.connect.v1.library.control.runtime.get.response",
@@ -274,10 +266,6 @@
           "type": "string",
           "description": "The unique identifier of the runtime to which this component belongs"
         },
-        "runtime_version": {
-          "type": "string",
-          "description": "The version of the runtime this component belongs to"
-        },
         "name": {
           "type": "string",
           "description": "The name of the component. This field can only contain alphanumeric characters and underscores",
@@ -297,10 +285,6 @@
           "type": "string",
           "description": "A description of the component"
         },
-        "icon": {
-          "type": "string",
-          "description": "The URL path to the icon. Can be a data: URL."
-        },
         "fields": {
           "type": "array",
           "items": {
@@ -310,7 +294,6 @@
       },
       "required": [
         "runtime_id",
-        "runtime_version",
         "name",
         "label",
         "kind",
@@ -326,10 +309,6 @@
           "type": "string",
           "description": "The unique identifier of the runtime to which this component belongs"
         },
-        "runtime_version": {
-          "type": "string",
-          "description": "The version of the runtime this component belongs to"
-        },
         "name": {
           "type": "string",
           "description": "The name of the component. This field can only contain alphanumeric characters and underscores",
@@ -348,15 +327,10 @@
         "description": {
           "type": "string",
           "description": "A description of the component"
-        },
-        "icon": {
-          "type": "string",
-          "description": "The URL path to the icon. Can be a data: URL."
         }
       },
       "required": [
         "runtime_id",
-        "runtime_version",
         "name",
         "label",
         "kind",
@@ -371,10 +345,6 @@
         "runtime_id": {
           "type": "string",
           "description": "The unique identifier of the runtime"
-        },
-        "runtime_version": {
-          "type": "string",
-          "description": "The version of the runtime to filter by (optional)"
         },
         "status": {
           "$ref": "#/$defs/ComponentStatus"
@@ -403,15 +373,28 @@
         },
         "author": {
           "description": "The author of the runtime",
-          "$ref": "#/$defs/RuntimeAuthor"
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "The name of the author"
+            },
+            "email": {
+              "type": "string",
+              "description": "The email address of the author"
+            },
+            "url": {
+              "type": "string",
+              "description": "The url to a website related to the author"
+            }
+          },
+          "required": [
+            "name"
+          ]
         },
         "image": {
           "type": "string",
           "description": "The location of the image to execute"
-        },
-        "version": {
-          "type": "string",
-          "description": "The version of this runtime definition"
         },
         "metrics": {
           "description": "The metrics configuration of the runtime, if any",
@@ -435,8 +418,7 @@
         "id",
         "label",
         "author",
-        "image",
-        "version"
+        "image"
       ]
     },
     "RuntimeSummary": {
@@ -458,40 +440,13 @@
         },
         "author": {
           "description": "The author of the runtime",
-          "$ref": "#/$defs/RuntimeAuthor"
-        },
-        "version": {
-          "type": "string",
-          "description": "The version of this runtime definition"
+          "type": "string"
         }
       },
       "required": [
         "id",
         "label",
         "author"
-      ]
-    },
-    "RuntimeAuthor": {
-      "$id": "io.synadia.connect.v1.library.model.runtime.author",
-      "title": "RuntimeAuthor",
-      "description": "The author of the runtime",
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": "string",
-          "description": "The name of the author"
-        },
-        "email": {
-          "type": "string",
-          "description": "The email address of the author"
-        },
-        "url": {
-          "type": "string",
-          "description": "The url to a website related to the author"
-        }
-      },
-      "required": [
-        "name"
       ]
     }
   }
