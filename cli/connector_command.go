@@ -372,7 +372,7 @@ func (c *connectorCommand) saveConnector(pc *fisk.ParseContext) error {
 	if !exists {
 		connector, err = appCtx.Client.CreateConnector(c.id, result.Description, result.RuntimeId, convert.ConvertStepsFromSpec(result.Steps), c.opts.Timeout)
 		if err != nil {
-			color.Red("Could not save connector: %s", err)
+			color.Red("Could not save connector: %s", client.ErrorMessage(err))
 			os.Exit(1)
 		}
 
@@ -386,7 +386,7 @@ func (c *connectorCommand) saveConnector(pc *fisk.ParseContext) error {
 
 		connector, err = appCtx.Client.PatchConnector(c.id, string(b), c.opts.Timeout)
 		if err != nil {
-			color.Red("Could not save connector: %s", err)
+			color.Red("Could not save connector: %s", client.ErrorMessage(err))
 			os.Exit(1)
 		}
 

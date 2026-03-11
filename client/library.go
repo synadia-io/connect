@@ -27,7 +27,7 @@ func (c *libraryClient) ListRuntimes(timeout time.Duration) ([]model.RuntimeSumm
 	var resp model.RuntimeListResponse
 	gotResponse, err := c.t.RequestJson(c.subject(runtimes, "LIST"), req, &resp, WithTimeout(timeout))
 	if err != nil {
-		return nil, fmt.Errorf("unable to list runtimes: %v", err)
+		return nil, fmt.Errorf("unable to list runtimes: %w", err)
 	}
 
 	if !gotResponse {
@@ -44,7 +44,7 @@ func (c *libraryClient) GetRuntime(id string, timeout time.Duration) (*model.Run
 	var resp model.RuntimeGetResponse
 	gotResponse, err := c.t.RequestJson(c.subject(runtimes, "GET"), req, &resp, WithTimeout(timeout))
 	if err != nil {
-		return nil, fmt.Errorf("unable to get runtime: %v", err)
+		return nil, fmt.Errorf("unable to get runtime: %w", err)
 	}
 
 	if !gotResponse {
@@ -62,7 +62,7 @@ func (c *libraryClient) SearchComponents(filter *model.ComponentSearchFilter, ti
 	var resp model.ComponentSearchResponse
 	gotResponse, err := c.t.RequestJson(c.subject(components, "LIST"), req, &resp, WithTimeout(timeout))
 	if err != nil {
-		return nil, fmt.Errorf("unable to search components: %v", err)
+		return nil, fmt.Errorf("unable to search components: %w", err)
 	}
 
 	if !gotResponse {
@@ -82,7 +82,7 @@ func (c *libraryClient) GetComponent(runtimeId string, kind model.ComponentKind,
 	var resp model.ComponentGetResponse
 	gotResponse, err := c.t.RequestJson(c.subject(components, "GET"), req, &resp, WithTimeout(timeout))
 	if err != nil {
-		return nil, fmt.Errorf("unable to get component: %v", err)
+		return nil, fmt.Errorf("unable to get component: %w", err)
 	}
 
 	if !gotResponse {

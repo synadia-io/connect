@@ -3,7 +3,10 @@ package client
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/nats-io/nats-server/v2/server"
@@ -59,7 +62,7 @@ func (t *Transport) Account() string {
 	return t.account
 }
 
-func (t *Transport) Request(subject string, payload any, opts ...Opt) ([]byte, error) {
+func (t *Transport) Request(subject string, payload any, opts ...Opt) ([]byte, *ConnectServiceError) {
 	options := DefaultRequestOpts()
 	for _, opt := range opts {
 		opt(options)
@@ -68,7 +71,7 @@ func (t *Transport) Request(subject string, payload any, opts ...Opt) ([]byte, e
 	// -- encode the Request
 	req, err := json.Marshal(payload)
 	if err != nil {
-		return nil, fmt.Errorf("unable to marshal Request: %v", err)
+		return nil, &ConnectServiceError{Code: http.StatusBadRequest, Description: fmt.Sprintf("unable to marshal Request: %v", err), internalError: fmt.Errorf("unable to marshal Request: %v", err)}
 	}
 
 	if t.trace {
@@ -77,13 +80,16 @@ func (t *Transport) Request(subject string, payload any, opts ...Opt) ([]byte, e
 
 	resp, err := t.nc.Request(subject, req, options.Timeout)
 	if err != nil {
-		return nil, fmt.Errorf("unable to get response: %v", err)
+		return nil, &ConnectServiceError{Code: http.StatusBadRequest, Description: "unable to get response", internalError: fmt.Errorf("unable to get response: %v", err)}
 	}
 
 	serviceErr := resp.Header.Get("Nats-Service-Error")
-	serviceErrCode := resp.Header.Get("Nats-Service-Error-Code")
 	if serviceErr != "" {
-		return nil, fmt.Errorf("%s (%s)", serviceErr, serviceErrCode)
+		serviceErrCode, err := strconv.Atoi(resp.Header.Get("Nats-Service-Error-Code"))
+		if err != nil {
+			return nil, &ConnectServiceError{Code: http.StatusBadRequest, Description: "unable to get response", internalError: fmt.Errorf("unable to get response: %v", err)}
+		}
+		return nil, &ConnectServiceError{Code: serviceErrCode, Description: serviceErr, internalError: errors.New(string(resp.Data))}
 	}
 
 	return resp.Data, nil
@@ -106,7 +112,7 @@ func (t *Transport) RequestJson(subject string, payload any, target any, opts ..
 	return true, nil
 }
 
-func (t *Transport) RequestList(subject string, payload any, h ResponseHandler, opts ...Opt) error {
+func (t *Transport) RequestList(subject string, payload any, h ResponseHandler, opts ...Opt) *ConnectServiceError {
 	options := DefaultRequestOpts()
 	for _, opt := range opts {
 		opt(options)
@@ -119,13 +125,13 @@ func (t *Transport) RequestList(subject string, payload any, h ResponseHandler, 
 
 	sub, err := t.nc.SubscribeSync(inb)
 	if err != nil {
-		return err
+		return &ConnectServiceError{Code: http.StatusInternalServerError, Description: "could not subscribe to inbox", internalError: err}
 	}
 
 	// -- encode the Request
 	req, err := json.Marshal(payload)
 	if err != nil {
-		return fmt.Errorf("unable to marshal Request: %v", err)
+		return &ConnectServiceError{Code: http.StatusBadRequest, Description: "json parsing error", internalError: fmt.Errorf("unable to marshal Request: %v", err)}
 	}
 
 	if t.trace {
@@ -133,22 +139,25 @@ func (t *Transport) RequestList(subject string, payload any, h ResponseHandler, 
 	}
 
 	if err := t.nc.PublishRequest(subject, inb, req); err != nil {
-		return fmt.Errorf("unable to publish Request: %v", err)
+		return &ConnectServiceError{Code: http.StatusInternalServerError, Description: GenericErrMsg, internalError: fmt.Errorf("unable to publish Request: %v", err)}
 	}
 	if err := t.nc.Flush(); err != nil {
-		return fmt.Errorf("unable to flush: %v", err)
+		return &ConnectServiceError{Code: http.StatusInternalServerError, Description: GenericErrMsg, internalError: fmt.Errorf("unable to flush: %v", err)}
 	}
 
 	for {
 		msg, err := sub.NextMsg(options.Timeout)
 		if err != nil {
-			return fmt.Errorf("unable to get response: %v", err)
+			return &ConnectServiceError{Code: http.StatusInternalServerError, Description: GenericErrMsg, internalError: fmt.Errorf("unable to get response: %v", err)}
 		}
 
 		serviceErr := msg.Header.Get("Nats-Service-Error")
-		serviceErrCode := msg.Header.Get("Nats-Service-Error-Code")
 		if serviceErr != "" {
-			return fmt.Errorf("%s (%s)", serviceErr, serviceErrCode)
+			serviceErrCode, err := strconv.Atoi(msg.Header.Get("Nats-Service-Error-Code"))
+			if err != nil {
+				return &ConnectServiceError{Code: http.StatusBadRequest, Description: GenericErrMsg, internalError: err}
+			}
+			return &ConnectServiceError{Code: serviceErrCode, Description: serviceErr, internalError: errors.New(string(msg.Data))}
 		}
 
 		hasMore := msg.Header.Get(HasMoreHeader) == "true"
@@ -157,7 +166,7 @@ func (t *Transport) RequestList(subject string, payload any, h ResponseHandler, 
 			data = nil
 		}
 		if err := h(data, hasMore); err != nil {
-			return err
+			return &ConnectServiceError{Code: http.StatusInternalServerError, Description: GenericErrMsg, internalError: err}
 		}
 
 		if !hasMore {

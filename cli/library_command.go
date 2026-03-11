@@ -7,6 +7,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/jedib0t/go-pretty/v6/text"
+	"github.com/synadia-io/connect/client"
 	"github.com/synadia-io/connect/model"
 
 	"os"
@@ -61,7 +62,7 @@ func (c *libraryCommand) listRuntimes(pc *fisk.ParseContext) error {
 
 	runtimes, err := appCtx.Client.ListRuntimes(c.opts.Timeout)
 	if err != nil {
-		color.Red("Could not list runtimes: %s", err)
+		color.Red("Could not list runtimes: %s", client.ErrorMessage(err))
 		os.Exit(1)
 	}
 
@@ -85,7 +86,7 @@ func (c *libraryCommand) getRuntime(pc *fisk.ParseContext) error {
 
 	rt, err := appCtx.Client.GetRuntime(c.runtime, c.opts.Timeout)
 	if err != nil {
-		color.Red("Could not get runtime: %s", err)
+		color.Red("Could not get runtime: %s", client.ErrorMessage(err))
 		os.Exit(1)
 	}
 
@@ -126,7 +127,7 @@ func (c *libraryCommand) search(pc *fisk.ParseContext) error {
 
 	components, err := appCtx.Client.SearchComponents(filter, c.opts.Timeout)
 	if err != nil {
-		color.Red("Could not list components: %s", err)
+		color.Red("Could not list components: %s", client.ErrorMessage(err))
 		os.Exit(1)
 	}
 
@@ -146,7 +147,7 @@ func (c *libraryCommand) info(pc *fisk.ParseContext) error {
 
 	component, err := appCtx.Client.GetComponent(c.runtime, model.ComponentKind(c.kind), c.component, c.opts.Timeout)
 	if err != nil {
-		color.Red("Could not get component: %s", err)
+		color.Red("Could not get component: %s", client.ErrorMessage(err))
 		os.Exit(1)
 	}
 

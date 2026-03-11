@@ -23,7 +23,7 @@ func (c *connectorClient) ListConnectors(timeout time.Duration) ([]model.Connect
 	var resp model.ConnectorListResponse
 	gotResponse, err := c.t.RequestJson(c.subject("LIST"), req, &resp, WithTimeout(timeout))
 	if err != nil {
-		return nil, fmt.Errorf("unable to list connectors: %v", err)
+		return nil, fmt.Errorf("unable to list connectors: %w", err)
 	}
 
 	if !gotResponse {
@@ -46,7 +46,7 @@ func (c *connectorClient) GetConnector(name string, timeout time.Duration) (*mod
 	var resp model.ConnectorGetResponse
 	gotResponse, err := c.t.RequestJson(c.subject("GET"), req, &resp, WithTimeout(timeout))
 	if err != nil {
-		return nil, fmt.Errorf("unable to get connector: %v", err)
+		return nil, fmt.Errorf("unable to get connector: %w", err)
 	}
 
 	if !gotResponse {
@@ -64,7 +64,7 @@ func (c *connectorClient) GetConnectorStatus(name string, timeout time.Duration)
 	var resp model.ConnectorStatusResponse
 	gotResponse, err := c.t.RequestJson(c.subject("STATUS"), req, &resp, WithTimeout(timeout))
 	if err != nil {
-		return nil, fmt.Errorf("unable to get connector status: %v", err)
+		return nil, fmt.Errorf("unable to get connector status: %w", err)
 	}
 
 	if !gotResponse {
@@ -85,7 +85,7 @@ func (c *connectorClient) CreateConnector(id, description, runtimeId string, ste
 	var resp model.ConnectorCreateResponse
 	gotResponse, err := c.t.RequestJson(c.subject("CREATE"), req, &resp, WithTimeout(timeout))
 	if err != nil {
-		return nil, fmt.Errorf("unable to create connector: %v", err)
+		return nil, fmt.Errorf("unable to create connector: %w", err)
 	}
 
 	if !gotResponse {
@@ -104,7 +104,7 @@ func (c *connectorClient) PatchConnector(id string, patch string, timeout time.D
 	var resp model.ConnectorPatchResponse
 	gotResponse, err := c.t.RequestJson(c.subject("PATCH"), req, &resp, WithTimeout(timeout))
 	if err != nil {
-		return nil, fmt.Errorf("unable to patch connector: %v", err)
+		return nil, fmt.Errorf("unable to patch connector: %w", err)
 	}
 
 	if !gotResponse {
@@ -122,7 +122,7 @@ func (c *connectorClient) DeleteConnector(id string, timeout time.Duration) erro
 	var resp model.ConnectorDeleteResponse
 	_, err := c.t.RequestJson(c.subject("DELETE"), req, &resp, WithTimeout(timeout))
 	if err != nil {
-		return fmt.Errorf("unable to delete connector: %v", err)
+		return fmt.Errorf("unable to delete connector: %w", err)
 	}
 
 	return nil
@@ -136,7 +136,7 @@ func (c *connectorClient) ListConnectorInstances(id string, timeout time.Duratio
 	var resp model.ConnectorInstancesResponse
 	gotResponse, err := c.t.RequestJson(c.subject("INSTANCES"), req, &resp, WithTimeout(timeout))
 	if err != nil {
-		return nil, fmt.Errorf("unable to list connector instances: %v", err)
+		return nil, fmt.Errorf("unable to list connector instances: %w", err)
 	}
 
 	if !gotResponse {
@@ -173,7 +173,7 @@ func (c *connectorClient) StopConnector(id string, timeout time.Duration) ([]mod
 	var resp model.ConnectorStopResponse
 	hasResponded, err := c.t.RequestJson(c.subject("STOP"), req, &resp, WithTimeout(timeout))
 	if err != nil {
-		return nil, fmt.Errorf("unable to stop connector: %v", err)
+		return nil, fmt.Errorf("unable to stop connector: %w", err)
 	}
 
 	if !hasResponded {
