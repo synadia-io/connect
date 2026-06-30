@@ -3,43 +3,15 @@ package runtime
 import (
 	"context"
 	"encoding/base64"
-	"errors"
 	"fmt"
 	"log/slog"
-	"math/rand/v2"
 	"os"
 	"strings"
-	"sync"
-	"time"
 
 	"github.com/nats-io/nats.go"
-	"github.com/nats-io/nkeys"
 	"github.com/synadia-io/connect/model"
 	"gopkg.in/yaml.v3"
 )
-
-const (
-	// reconnectBaseDelay is the first backoff interval; subsequent attempts
-	// double up to reconnectMaxDelay.
-	reconnectBaseDelay = 1 * time.Second
-	reconnectMaxDelay  = 30 * time.Second
-)
-
-// reconnectDelay implements capped exponential backoff with jitter. nats.go
-// calls this after exhausting the server list, passing the attempt count; the
-// returned value is the total sleep, so jitter is added here to de-synchronise
-// many connectors reconnecting at once.
-func reconnectDelay(attempts int) time.Duration {
-	d := reconnectBaseDelay
-	for i := 1; i < attempts && d < reconnectMaxDelay; i++ {
-		d *= 2
-	}
-	if d > reconnectMaxDelay {
-		d = reconnectMaxDelay
-	}
-	jitter := time.Duration(rand.Int64N(int64(reconnectBaseDelay / 4)))
-	return d + jitter
-}
 
 type Opt func(*Runtime)
 
@@ -159,10 +131,6 @@ type Runtime struct {
 	// loggerSet records whether a logger was supplied via WithLogger, so Launch
 	// does not clobber an injected logger.
 	loggerSet bool
-
-	// credMu guards NatsJwt/NatsSeed against a concurrent credential refresh
-	// (SetCredentials) racing the NATS reconnect goroutine.
-	credMu sync.RWMutex
 }
 
 // logger returns the runtime's logger, falling back to the default if one has
@@ -174,33 +142,19 @@ func (r *Runtime) logger() *slog.Logger {
 	return slog.Default()
 }
 
-// SetCredentials replaces the NATS credentials at runtime. Because NatsOptions'
-// JWT/signature callbacks read these fields on every (re)connect handshake, the
-// refreshed credentials are used on the next reconnect — the seam a credential
-// refresher (e.g. a creds-file watcher) drives.
-func (r *Runtime) SetCredentials(jwt, seed string) {
-	r.credMu.Lock()
-	defer r.credMu.Unlock()
-	r.NatsJwt = jwt
-	r.NatsSeed = seed
-}
-
-func (r *Runtime) currentCredentials() (jwt, seed string) {
-	r.credMu.RLock()
-	defer r.credMu.RUnlock()
-	return r.NatsJwt, r.NatsSeed
-}
-
-// NatsOptions builds the NATS connection options from the runtime's (decoded)
-// credentials. Credentials are read from the Runtime fields rather than the raw
-// environment, and the connection is configured to survive credential and
-// connectivity loss instead of permanently aborting:
+// NatsOptions builds the NATS connection options. The connection is configured
+// to survive credential and connectivity loss rather than permanently aborting:
 //
 //   - IgnoreAuthErrorAbort keeps the client reconnecting through auth errors, so
-//     a rotated/expired credential can be picked up on a later attempt rather
-//     than closing the connection for good (which today forces a manual restart).
-//   - The JWT/signature callbacks re-read the runtime's credential fields on
-//     every (re)connect — the seam a future credential refresh hangs off.
+//     a rotated/expired credential is not treated as a permanent failure (which
+//     today forces a manual restart).
+//   - MaxReconnects(-1) overrides the default 60-attempt cap so a long outage
+//     does not close the connection for good. Reconnect backoff is the client
+//     default (fixed wait + jitter).
+//   - Credentials prefer a creds file: nats.UserCredentials re-reads it on every
+//     (re)connect handshake, so a re-minted credential is picked up on the next
+//     reconnect automatically. Otherwise the decoded JWT+seed from the
+//     environment is used (static, no refresh).
 //   - Lifecycle handlers surface disconnects/reconnects/closure that are silent
 //     today.
 func (r *Runtime) NatsOptions() ([]nats.Option, error) {
@@ -208,27 +162,7 @@ func (r *Runtime) NatsOptions() ([]nats.Option, error) {
 
 	opts := []nats.Option{
 		nats.MaxReconnects(-1),
-		nats.CustomReconnectDelay(reconnectDelay),
 		nats.IgnoreAuthErrorAbort(),
-		// Read credentials live on every (re)connect handshake so a refresh via
-		// SetCredentials is observed on the next reconnect. An empty JWT yields
-		// an anonymous connection (the signature callback is only invoked when a
-		// JWT is present).
-		nats.UserJWT(
-			func() (string, error) {
-				jwt, _ := r.currentCredentials()
-				return jwt, nil
-			},
-			func(nonce []byte) ([]byte, error) {
-				_, seed := r.currentCredentials()
-				kp, err := nkeys.FromSeed([]byte(seed))
-				if err != nil {
-					return nil, fmt.Errorf("failed to load nats seed: %w", err)
-				}
-				defer kp.Wipe()
-				return kp.Sign(nonce)
-			},
-		),
 		nats.DisconnectErrHandler(func(_ *nats.Conn, err error) {
 			log.Warn("nats disconnected", slog.Any("err", err))
 		}),
@@ -241,6 +175,12 @@ func (r *Runtime) NatsOptions() ([]nats.Option, error) {
 		nats.ErrorHandler(func(_ *nats.Conn, _ *nats.Subscription, err error) {
 			log.Error("nats async error", slog.Any("err", err))
 		}),
+	}
+
+	if path := os.Getenv(NatsCredsFileVar); path != "" {
+		opts = append(opts, nats.UserCredentials(path))
+	} else if r.NatsJwt != "" {
+		opts = append(opts, nats.UserJWTAndSeed(r.NatsJwt, r.NatsSeed))
 	}
 
 	return opts, nil
@@ -270,21 +210,6 @@ func (r *Runtime) Launch(ctx context.Context, workload Workload, cfg string) err
 	// via WithLogger (which must be preserved).
 	if !r.loggerSet {
 		r.Logger = slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: r.LogLevel}))
-	}
-
-	// If a credentials file is configured, adopt it now (so the first connect
-	// uses it) and keep watching it for refreshes for the workload's lifetime.
-	if path := os.Getenv(NatsCredsFileVar); path != "" {
-		if jwt, seed, err := LoadCredentialsFile(path); err != nil {
-			r.logger().Warn("failed to load initial credentials file", slog.String("path", path), slog.Any("err", err))
-		} else {
-			r.SetCredentials(jwt, seed)
-		}
-		go func() {
-			if err := r.WatchCredentialsFile(ctx, path, defaultCredsWatchInterval); err != nil && !errors.Is(err, context.Canceled) {
-				r.logger().Error("credentials watcher stopped", slog.Any("err", err))
-			}
-		}()
 	}
 
 	return workload(ctx, r, steps)
