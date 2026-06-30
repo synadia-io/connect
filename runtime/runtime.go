@@ -3,6 +3,7 @@ package runtime
 import (
 	"context"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"log/slog"
 	"math/rand/v2"
@@ -269,6 +270,21 @@ func (r *Runtime) Launch(ctx context.Context, workload Workload, cfg string) err
 	// via WithLogger (which must be preserved).
 	if !r.loggerSet {
 		r.Logger = slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: r.LogLevel}))
+	}
+
+	// If a credentials file is configured, adopt it now (so the first connect
+	// uses it) and keep watching it for refreshes for the workload's lifetime.
+	if path := os.Getenv(NatsCredsFileVar); path != "" {
+		if jwt, seed, err := LoadCredentialsFile(path); err != nil {
+			r.logger().Warn("failed to load initial credentials file", slog.String("path", path), slog.Any("err", err))
+		} else {
+			r.SetCredentials(jwt, seed)
+		}
+		go func() {
+			if err := r.WatchCredentialsFile(ctx, path, defaultCredsWatchInterval); err != nil && !errors.Is(err, context.Canceled) {
+				r.logger().Error("credentials watcher stopped", slog.Any("err", err))
+			}
+		}()
 	}
 
 	return workload(ctx, r, steps)
