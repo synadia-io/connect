@@ -111,3 +111,27 @@ func TestLaunchHonorsConfiguredLogLevelWhenNoLoggerInjected(t *testing.T) {
 	g.Expect(seen.Enabled(ctx, slog.LevelWarn)).To(BeTrue(), "warn must be enabled at LevelWarn")
 	g.Expect(seen.Enabled(ctx, slog.LevelInfo)).To(BeFalse(), "info must be suppressed at LevelWarn")
 }
+
+// With CONNECT_LOG_LEVEL unset, the effective log level must default to Info, not
+// Debug: Launch now builds its handler at r.LogLevel, so a Debug default would
+// silently flip every connector into debug logging. This exercises the real
+// deploy path (FromEnv -> NewRuntime -> Launch).
+func TestDefaultLogLevelIsInfoWhenEnvUnset(t *testing.T) {
+	g := NewWithT(t)
+	t.Setenv(runtime.LogLevelEnvVar, "") // env unset -> default level
+
+	rt, err := runtime.FromEnv()
+	g.Expect(err).ToNot(HaveOccurred())
+
+	var seen *slog.Logger
+	err = rt.Launch(context.Background(), func(_ context.Context, r *runtime.Runtime, _ model.Steps) error {
+		seen = r.Logger
+		return nil
+	}, minimalCfg())
+	g.Expect(err).ToNot(HaveOccurred())
+	g.Expect(seen).ToNot(BeNil())
+
+	ctx := context.Background()
+	g.Expect(seen.Enabled(ctx, slog.LevelInfo)).To(BeTrue(), "info must be enabled by default")
+	g.Expect(seen.Enabled(ctx, slog.LevelDebug)).To(BeFalse(), "debug must be suppressed by default (no CONNECT_LOG_LEVEL)")
+}

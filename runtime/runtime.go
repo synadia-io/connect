@@ -100,7 +100,7 @@ func FromEnv() (*Runtime, error) {
 
 func NewRuntime(opts ...Opt) *Runtime {
 	result := &Runtime{
-		LogLevel: slog.LevelDebug,
+		LogLevel: slog.LevelInfo,
 		Logger:   slog.Default(),
 	}
 
@@ -157,12 +157,16 @@ func (r *Runtime) logger() *slog.Logger {
 //     environment is used (static, no refresh).
 //   - Lifecycle handlers surface disconnects/reconnects/closure that are silent
 //     today.
+//   - NoCallbacksAfterClientClose suppresses the lifecycle handlers once we
+//     intentionally Close()/Drain() the connection, so an orderly shutdown does
+//     not emit a misleading disconnect Warn.
 func (r *Runtime) NatsOptions() ([]nats.Option, error) {
 	log := r.logger()
 
 	opts := []nats.Option{
 		nats.MaxReconnects(-1),
 		nats.IgnoreAuthErrorAbort(),
+		nats.NoCallbacksAfterClientClose(),
 		nats.DisconnectErrHandler(func(_ *nats.Conn, err error) {
 			log.Warn("nats disconnected", slog.Any("err", err))
 		}),
