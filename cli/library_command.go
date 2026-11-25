@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/choria-io/fisk"
@@ -8,6 +9,7 @@ import (
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/jedib0t/go-pretty/v6/text"
 	"github.com/synadia-io/connect/model"
+	"github.com/synadia-io/connect/schema"
 
 	"os"
 	"strings"
@@ -22,6 +24,8 @@ type libraryCommand struct {
 	kind      string
 	status    string
 	component string
+
+	formatJsonSchema bool
 }
 
 func ConfigureLibraryCommand(parentCmd commandHost, opts *Options) {
@@ -48,6 +52,7 @@ func ConfigureLibraryCommand(parentCmd commandHost, opts *Options) {
 	infoCmd.Arg("runtime", "The runtime id").StringVar(&c.runtime)
 	infoCmd.Arg("kind", "The kind of component").EnumVar(&c.kind, kindOpts...)
 	infoCmd.Arg("name", "The name of the component").StringVar(&c.component)
+	infoCmd.Flag("jsonschema", "Output the component schema in JSON Schema format").UnNegatableBoolVar(&c.formatJsonSchema)
 }
 
 func (c *libraryCommand) listRuntimes(pc *fisk.ParseContext) error {
@@ -150,24 +155,45 @@ func (c *libraryCommand) info(pc *fisk.ParseContext) error {
 		os.Exit(1)
 	}
 
-	// Component info.
-	w := table.NewWriter()
-	w.SetStyle(table.StyleRounded)
-	w.SetTitle("Component Description")
-	w.AppendRow(table.Row{"Runtime", component.RuntimeId})
-	w.AppendRow(table.Row{"Name", component.Name})
-	w.AppendRow(table.Row{"Kind", component.Kind})
-	w.AppendRow(table.Row{"Status", component.Status})
-
-	if component.Description != nil {
-		w.AppendRow(table.Row{"Description", text.WrapSoft(*component.Description, 75)})
+	if component == nil {
+		color.Red("Component not found")
+		os.Exit(1)
 	}
 
-	result := w.Render()
-	fmt.Println(result)
+	if c.formatJsonSchema {
+		jsch, err := schema.ToJsonSchema(c.runtime, "", c.kind, *component)
+		if err != nil {
+			color.Red("Could not convert to JSON Schema: %s", err)
+			os.Exit(1)
+		}
 
-	for _, field := range component.Fields {
-		printField(field, "")
+		jout, err := json.MarshalIndent(jsch, "", "  ")
+		if err != nil {
+			color.Red("Could not marshal JSON Schema: %s", err)
+			os.Exit(1)
+		}
+
+		fmt.Println(string(jout))
+	} else {
+		// Component info.
+		w := table.NewWriter()
+		w.SetStyle(table.StyleRounded)
+		w.SetTitle("Component Description")
+		w.AppendRow(table.Row{"Runtime", component.RuntimeId})
+		w.AppendRow(table.Row{"Name", component.Name})
+		w.AppendRow(table.Row{"Kind", component.Kind})
+		w.AppendRow(table.Row{"Status", component.Status})
+
+		if component.Description != nil {
+			w.AppendRow(table.Row{"Description", text.WrapSoft(*component.Description, 75)})
+		}
+
+		result := w.Render()
+		fmt.Println(result)
+
+		for _, field := range component.Fields {
+			printField(field, "")
+		}
 	}
 
 	return nil
